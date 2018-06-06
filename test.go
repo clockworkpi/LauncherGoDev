@@ -24,11 +24,11 @@ func run() int {
 	
 	surface.Fill(screen, color.Color{0,0,0,0} ) 
 
-	rect := rect.Rect(0,10, 12, 10)
+	rect1 := rect.Rect(0,10, 12, 10)
 	
 	//surface.FillRect(screen,&rect, 0xffff0000)
-	rect.X = 12
-	draw.Rect(screen,color.Color{129,235,234,0},&rect,1)
+	rect1.X = 12
+	draw.Rect(screen,color.Color{129,235,234,0},&rect1,1)
 
 	fmt.Println(screen.Pitch)
 	fmt.Println( screen.BytesPerPixel() )
@@ -41,6 +41,9 @@ func run() int {
 	
 //	draw.Line(screen,color.Color{255,44,255,0}, 0,100, 320,100,3)
 //	draw.Line(screen,color.Color{255,44,255,0}, 10, 0, 10,250,4)
+
+	rect2 := rect.Rect(3,120,200,30)
+	draw.AARoundRect(screen,&rect2,color.Color{0,213,222,255},10,0, color.Color{0,213,222,255})
 	
 	display.Flip()
 
