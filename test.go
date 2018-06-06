@@ -22,14 +22,12 @@ func run() int {
 	
 	screen := display.SetMode(320,240,0,32)
 	
-	surface.FillRect(screen,nil, 0)
+	surface.Fill(screen, color.Color{0,0,0,0} ) 
 
-	rect := rect.Rect(0, 0, 200, 200)
+	rect := rect.Rect(0,10, 12, 10)
 	
 	//surface.FillRect(screen,&rect, 0xffff0000)
-
 	rect.X = 12
-	
 	draw.Rect(screen,color.Color{129,235,234,0},&rect,1)
 
 	fmt.Println(screen.Pitch)
@@ -41,9 +39,9 @@ func run() int {
 	}
   */
 	
-	draw.Line(screen,color.Color{255,44,255,0}, 0,100, 320,100,3)
-
-	draw.Line(screen,color.Color{255,44,255,0}, 10, 0, 10,250,4)
+//	draw.Line(screen,color.Color{255,44,255,0}, 0,100, 320,100,3)
+//	draw.Line(screen,color.Color{255,44,255,0}, 10, 0, 10,250,4)
+	
 	display.Flip()
 
 	

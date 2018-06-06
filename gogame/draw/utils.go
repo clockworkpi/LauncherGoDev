@@ -1,18 +1,31 @@
 package draw
 
 import (
-//	"fmt"
-//	"math"
+	"math"
+
 	"github.com/veandco/go-sdl2/sdl"
 	"../color"
-	
 )
 
-func AARoundRect() {
+func max(a, b int) int {
+    if a > b {
+        return a
+    }
+    return b
+}
 	
+func min(a, b int) int {
+    if a < b {
+        return a
+    }
+    return b
+}
+	
+func abs(n int) int {
+	return int(math.Abs(float64(n)))
 }
 
-func Point(surf *sdl.Surface, c color.Color, x,y int) {
+func pixel(surf *sdl.Surface, c color.Color, x,y int) int {
 	pixels := surf.Pixels()
 	bytes_per_pixel := surf.BytesPerPixel()
 	
@@ -20,7 +33,10 @@ func Point(surf *sdl.Surface, c color.Color, x,y int) {
 
 	color_bytes := c.ToBytes()
 
-	surf.Lock()
+	if x < int(surf.ClipRect.X) || x >= int(surf.ClipRect.X + surf.ClipRect.W) ||
+		y < int(surf.ClipRect.Y) || y >= int(surf.ClipRect.Y + surf.ClipRect.H) {
+		return 0
+	}
 	
 	if bytes_per_pixel == 1 {
 		pixels[addr] = color_bytes[0]
@@ -43,6 +59,6 @@ func Point(surf *sdl.Surface, c color.Color, x,y int) {
 			pixels[addr+i] = color_bytes[i]
 		}
 	}
-	
-	surf.Unlock()
+
+	return 1
 }
