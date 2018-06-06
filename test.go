@@ -44,6 +44,9 @@ func run() int {
 
 	rect2 := rect.Rect(3,120,200,30)
 	draw.AARoundRect(screen,&rect2,color.Color{0,213,222,255},10,0, color.Color{0,213,222,255})
+
+
+	// image and ttf fonts
 	
 	display.Flip()
 

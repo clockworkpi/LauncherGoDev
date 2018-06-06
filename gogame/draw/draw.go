@@ -1,7 +1,7 @@
 package draw
 
 import (
-	"fmt"
+//	"fmt"
 //	"math"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/gfx"
@@ -13,7 +13,6 @@ import (
 
 func _aa_render_region(image *sdl.Renderer, _rect *sdl.Rect, col color.Color, rad int) {
 	corners := rect.Inflate(_rect,-2*rad-1, -2*rad-1)
-	fmt.Println(_rect, corners)
 	topleft := []int{ int(corners.X),int(corners.Y)}
 	topright := []int{int(corners.X+corners.W-1), int(corners.Y)}
 	bottomleft := []int{int(corners.X),  int(corners.Y+corners.H-1)}
