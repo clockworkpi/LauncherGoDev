@@ -35,9 +35,15 @@ func run() int {
 	fmt.Println(screen.Pitch)
 	fmt.Println( screen.BytesPerPixel() )
 
+	/*
 	for i:=1; i<319;i++ {
 		draw.Point(screen, color.Color{255,44,255,0}, i,20)
 	}
+  */
+	
+	draw.Line(screen,color.Color{255,44,255,0}, 0,100, 320,100,3)
+
+	draw.Line(screen,color.Color{255,44,255,0}, 10, 0, 10,250,4)
 	display.Flip()
 
 	

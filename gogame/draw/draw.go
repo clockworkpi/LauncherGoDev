@@ -5,7 +5,7 @@ import (
 	"math"
 	"github.com/veandco/go-sdl2/sdl"
 	"../color"
-	
+	"../rect"
 )
 
 const (
@@ -15,8 +15,55 @@ const (
 	TOP_EDGE=0x8
 )
 
-func Line(surf *sdl.Surface, col color.Color,x1,y1,x2,y2 ,width int) {
+func Line(surf *sdl.Surface, col color.Color,x1,y1,x2,y2 ,width int) sdl.Rect {
+	pts := make([]int,4)
+	pts[0] = x1
+	pts[1] = y1
+	pts[2] = x2
+	pts[3] = y2
 
+	if width < 1 {
+		return rect.Rect(x1,y1,0,0)
+	}
+
+	err := surf.Lock()
+	if err != nil {
+		return rect.Rect(0,0,0,0)
+	}
+	anydraw := clip_and_draw_line_width(surf,&surf.ClipRect, col, width,pts)
+	surf.Unlock()
+	if anydraw == 0 {
+		return rect.Rect(x1,y1,0,0)
+	}
+	rleft := 0
+	rtop := 0
+
+	if x1 < x2 {
+		rleft = x1
+	}else {
+		rleft = x2
+	}
+
+	if y1 < y2 {
+		rtop = y1
+	}else {
+		rtop = y2
+	}
+
+	dx := abs(x1-x2)
+	dy := abs(y1-y2)
+
+	rwidth := 0
+	rheight := 0
+	if dx > dy {
+		rwidth = dx +1
+		rheight = dy + width
+	}else {
+		rwidth = dx + width
+		rheight = dy + 1
+	}
+
+	return rect.Rect(rleft,rtop,rwidth,rheight)	
 }
 
 func Rect(surf *sdl.Surface,color color.Color, _rect *sdl.Rect, border_width uint32) {
@@ -26,6 +73,7 @@ func Rect(surf *sdl.Surface,color color.Color, _rect *sdl.Rect, border_width uin
 }
 
 func clip_and_draw_line(surf *sdl.Surface, rect *sdl.Rect, col color.Color, pts []int)  int {
+	
 	if clipline(pts, int(rect.X),int(rect.Y),int(rect.X+ rect.W-1), int(rect.Y+rect.H-1) ) == 0 {
 		return 0
 	}
@@ -33,7 +81,7 @@ func clip_and_draw_line(surf *sdl.Surface, rect *sdl.Rect, col color.Color, pts 
 	if pts[1] == pts[3] {
 		drawhorzline(surf, col, pts[0],pts[1],pts[2])
 	}else if pts[0] == pts[2] {
-		drawvertline(surf,col, pts[0],pts[1],pts[2])
+		drawvertline(surf,col, pts[0],pts[1],pts[3])
 	}else {
 		drawline(surf, col, pts[0],pts[1],pts[2],pts[3])
 	}
@@ -251,7 +299,7 @@ func drawline(surf *sdl.Surface, col color.Color, x1,y1,x2,y2 int) {
 	pixx := int(bytes_per_pixel)
 	pixy := int(surf.Pitch)
 
-	addr := int(pixy) * y1 + x1 * bytes_per_pixel
+	addr := pixy* y1 + x1 * bytes_per_pixel
 
 	pixx *= int(signx)
 	pixy *= int(signy)
@@ -275,18 +323,17 @@ func drawline(surf *sdl.Surface, col color.Color, x1,y1,x2,y2 int) {
 	switch bytes_per_pixel {
 	case 1:
 		for ; x < deltax; x++ {
-			addr += pixx
 			pixels[addr] = color_bytes[0]
 			y += deltay
 			if y >= deltax {
 				y -= deltax
 				addr += pixy
 			}
+			addr +=pixx
 		}
 		break
 	case 2:
 		for ; x < deltax;x++  {
-			addr += pixx
 			pixels[addr] = color_bytes[0]
 			pixels[addr+1] = color_bytes[1]
 			y+= deltay
@@ -294,11 +341,12 @@ func drawline(surf *sdl.Surface, col color.Color, x1,y1,x2,y2 int) {
 				y -= deltax
 				addr += pixy
 			}
+
+			addr+=pixx
 		}
 		break
 	case 3:
 		for ; x < deltax; x++ {
-			addr+= pixx
 			pixels[addr] = color_bytes[0]
 			pixels[addr+1] = color_bytes[1]
 			pixels[addr+2] = color_bytes[2]
@@ -307,11 +355,11 @@ func drawline(surf *sdl.Surface, col color.Color, x1,y1,x2,y2 int) {
 				y-=deltax
 				addr += pixy
 			}
+			addr+=pixx
 		}
 		break
 	case 4:
 		for ; x < deltax; x++ {
-			addr+= pixx
 			pixels[addr] = color_bytes[0]
 			pixels[addr+1] = color_bytes[1]
 			pixels[addr+2] = color_bytes[2]
@@ -321,6 +369,7 @@ func drawline(surf *sdl.Surface, col color.Color, x1,y1,x2,y2 int) {
 				y-=deltax
 				addr += pixy
 			}
+			addr+=pixx
 		}
 		break		
 	}
@@ -342,10 +391,10 @@ func drawhorzline(surf *sdl.Surface, col color.Color, x1,y1,x2 int) {
 	start := 0
 	if x1 < x2 {
 		end   = addr + x2*bytes_per_pixel
-		start = x1 *bytes_per_pixel
+		start = addr+x1 *bytes_per_pixel
 	}else {
 		end  = addr + x1 *bytes_per_pixel
-		start = x2 * bytes_per_pixel
+		start = addr + x2 * bytes_per_pixel
 	}
 
 	switch bytes_per_pixel {
@@ -376,10 +425,53 @@ func drawhorzline(surf *sdl.Surface, col color.Color, x1,y1,x2 int) {
 }
 
 func drawvertline(surf *sdl.Surface, col color.Color, x1,y1,y2 int) {
+	if y1 == y2 {
+		pixel(surf,col, x1,y1)
+	}
+	bytes_per_pixel := surf.BytesPerPixel()	
+	color_bytes := col.ToBytes()
+	pixels := surf.Pixels()
+	pitch  := int(surf.Pitch)
+	
+	addr := x1 * bytes_per_pixel
+	end := 0
+	start := 0
+	if y1 < y2 {
+		end = addr + y2* pitch
+		start = addr + y1*pitch
+	}else {
+		end = addr + y1*pitch
+		start = addr + y2*pitch
+	}
+
+	switch bytes_per_pixel {
+	case 1:
+		for ; start <=end; start+=pitch {
+			pixels[start] = color_bytes[0]
+		}
+	case 2:
+		for ; start <= end; start+=pitch {
+			pixels[start] = color_bytes[0]
+			pixels[start+1] = color_bytes[1]
+		}
+	case 3:
+		for ; start <= end; start+=pitch {
+			pixels[start] = color_bytes[0]
+			pixels[start+1] = color_bytes[1]
+			pixels[start+2] = color_bytes[2]
+		}
+	case 4:
+		for ; start <= end; start +=pitch {
+			pixels[start] = color_bytes[0]
+			pixels[start+1] = color_bytes[1]
+			pixels[start+2] = color_bytes[2]
+			pixels[start+3] = color_bytes[3]
+		}
+	}
 	
 }
 
-func pixel(surf *sdl.Surface, c color.Color, x,y int) {
+func pixel(surf *sdl.Surface, c color.Color, x,y int) int {
 	pixels := surf.Pixels()
 	bytes_per_pixel := surf.BytesPerPixel()
 	
@@ -387,7 +479,10 @@ func pixel(surf *sdl.Surface, c color.Color, x,y int) {
 
 	color_bytes := c.ToBytes()
 
-	surf.Lock()
+	if x < int(surf.ClipRect.X) || x >= int(surf.ClipRect.X + surf.ClipRect.W) ||
+		y < int(surf.ClipRect.Y) || y >= int(surf.ClipRect.Y + surf.ClipRect.H) {
+		return 0
+	}
 	
 	if bytes_per_pixel == 1 {
 		pixels[addr] = color_bytes[0]
@@ -410,8 +505,8 @@ func pixel(surf *sdl.Surface, c color.Color, x,y int) {
 			pixels[addr+i] = color_bytes[i]
 		}
 	}
-	
-	surf.Unlock()	
+
+	return 1
 }
 
 func Point(surf *sdl.Surface, c color.Color, x,y int) {
