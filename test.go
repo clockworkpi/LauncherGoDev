@@ -6,33 +6,52 @@ import (
 	
 	"github.com/veandco/go-sdl2/sdl"
 
-	//"./gogame"
-	"./gogame/color"
-	"./gogame/display"
-	"./gogame/surface"
-	"./gogame/event"
-	"./gogame/rect"
-	"./gogame/draw"
+	//"github.com/cuu/gogame"
+	"github.com/cuu/gogame/color"
+	"github.com/cuu/gogame/display"
+	"github.com/cuu/gogame/surface"
+	"github.com/cuu/gogame/event"
+	"github.com/cuu/gogame/rect"
+	"github.com/cuu/gogame/draw"
+	"github.com/cuu/gogame/image"
 	
 )
 
 func run() int {
+
+	width := 320
+	height := 240
 	
 	display.Init()
 	
-	screen := display.SetMode(320,240,0,32)
+	screen := display.SetMode(int32(width),int32(height),0,32)
 	
-	surface.Fill(screen, color.Color{0,0,0,0} ) 
+	surface.Fill(screen, color.Color{255,255,255,255} ) 
 
 	rect1 := rect.Rect(0,10, 12, 10)
 	
 	//surface.FillRect(screen,&rect, 0xffff0000)
 	rect1.X = 12
-	draw.Rect(screen,color.Color{129,235,234,0},&rect1,1)
+	draw.Rect(screen,color.Color{129,235,234,255},&rect1,1)
 
 	fmt.Println(screen.Pitch)
 	fmt.Println( screen.BytesPerPixel() )
 
+	img_surf := image.Load("skin/default/sys.go/gameshell/icons/roundcorners.png")
+
+	
+	fmt.Println("WxH: ", img_surf.W,img_surf.H)
+
+	portion := rect.Rect(0,0,10,10)
+	surface.Blit(screen,img_surf, draw.MidRect(5,5,10,10,width,height), &portion)
+	portion.Y = 10
+	surface.Blit(screen,img_surf, draw.MidRect(315,5,10,10,width,height), &portion)	
+	portion.Y = 20
+	surface.Blit(screen,img_surf, draw.MidRect(5,235,10,10,width,height), &portion)
+	portion.Y = 30
+	surface.Blit(screen,img_surf, draw.MidRect(315,235,10,10,width,height), &portion)	
+
+	
 	/*
 	for i:=1; i<319;i++ {
 		draw.Point(screen, color.Color{255,44,255,0}, i,20)
