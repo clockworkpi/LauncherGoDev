@@ -14,7 +14,7 @@ import (
 	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/draw"
 	"github.com/cuu/gogame/image"
-	
+	"github.com/cuu/gogame/font"	
 )
 
 func run() int {
@@ -64,8 +64,21 @@ func run() int {
 	rect2 := rect.Rect(3,120,200,30)
 	draw.AARoundRect(screen,&rect2,color.Color{0,213,222,255},10,0, color.Color{0,213,222,255})
 
+	font.Init()
+	
+	font_path := "skin/default/truetype/NotoSansCJK-Regular.ttf"
 
-	// image and ttf fonts
+	
+	notocjk15 := font.Font(font_path,15)
+
+	fmt.Println( font.LineSize( notocjk15 ))
+
+ 	my_text := font.Render(notocjk15,"Test ㆑ ㆒ ㆓ ㆔ ㆕ ㆖ 豈 更 車 賈 滑 串 句 龜 龜 契 金 ",true, color.Color{234,123,12,255},nil)
+
+	surface.Blit(screen,my_text,draw.MidRect(width/2,100,surface.GetWidth(my_text),surface.GetHeight(my_text),width,height),nil)
+
+ 	my_text2 := font.Render(notocjk15,"Test ㆑ ㆒ ㆓ ㆔ ㆕ ㆖ 豈 更 車 賈 滑 串 句 龜 龜 契 金 ",true, color.Color{234,123,12,255},&color.Color{0,0,111,255})	
+	surface.Blit(screen,my_text2,draw.MidRect(width/2,100+font.LineSize(notocjk15),surface.GetWidth(my_text),surface.GetHeight(my_text),width,height),nil)	
 	
 	display.Flip()
 
