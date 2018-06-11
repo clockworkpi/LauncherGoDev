@@ -96,6 +96,9 @@ func run() int {
 			if ev.Data["Key"] == "Q" {
 				return 0
 			}
+			if ev.Data["Key"] == "Escape" {
+				return 0
+			}
 		}
 	}
 
