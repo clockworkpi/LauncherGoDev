@@ -108,6 +108,8 @@ func run() int {
 func main() {
 	var exitcode int
 
+	os.Setenv("SDL_VIDEO_CENTERED","1")
+	
 	sdl.Main(func() {
 		exitcode = run()
 	})
