@@ -9,6 +9,23 @@ import (
 	"github.com/cuu/gogame/utils"
 )
 
+type IconItemInterface interface {
+	Init(x,y,w,h,at int)
+	SetIndex(i int)
+	SetParent( p interface{} )
+	SetLabelColor(col *color.Color)
+	Coord() (int,int)
+	NewCoord(x,y int)
+	Size() (int,int)
+	AddLabel(text string, fontobj *ttf.Font)
+	AdjustLinkPage()
+	GetImageSurf() *sdl.Surface
+	SetImageSurf(newsurf *sdl.Surface)
+	CreateImageSurf()
+	ChangeImgSurfColor(col *color.Color)
+	Draw() 
+}
+
 type IconItem struct {
 	PosX int
 	PosY int
@@ -41,7 +58,7 @@ func NewIconItem() *IconItem {
 }
 
 
-func (self *IconItem) Init(x,y,w,h,at) {
+func (self *IconItem) Init(x,y,w,h,at int) {
 	self.PosX = x
 	self.PosY = y
 	self.Width = w
@@ -49,13 +66,29 @@ func (self *IconItem) Init(x,y,w,h,at) {
 	self.AnimationTime = at
 }
 
+func (self *IconItem) SetIndex(i int) {
+	self.Index = i
+}
+
+func (self *IconItem) SetParent(p interface{} ) {
+	self.Parent = p
+}
+
 func (self *IconItem) SetLabelColor(col *color.Color) {
 	self.Label.SetColor(col)
+}
+
+func (self *IconItem) Coord() (int,int) {
+	return self.PosX,self.PosY
 }
 
 func (self *IconItem) NewCoord(x,y int) {
 	self.PosX = x
 	self.PosY = y
+}
+
+func (self *IconItem) NewCoord(x,y int) {
+	return self.Width,self.Height
 }
 
 func (self *IconItem) AddLabel(text string, fontobj *ttf.Font) {
@@ -86,6 +119,16 @@ func (self *IconItem) AdjustLinkPage() {
 		}
 	}
 }
+
+
+func (self *IconItem) GetImageSurf() *sdl.Surface {
+	return self.ImgSurf
+}
+
+func (self *IconItem) SetImageSurf(newsurf *sdl.Surface) {
+	self.ImgSurf = newsurf
+}
+
 
 func (self *IconItem) CreateImageSurf() {
 	if self.ImgSurf == nil && self.ImageName != "" {
