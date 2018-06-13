@@ -11,13 +11,27 @@ import (
 
 type IconItemInterface interface {
 	Init(x,y,w,h,at int)
+	
+	GetCmdPath() string
+	SetCmdPath( path string)
+	
+	SetMyType( thetype int )
+	GetMyType() int
+
+	GetIndex() int
 	SetIndex(i int)
+	
 	SetParent( p interface{} )
+	
 	SetLabelColor(col *color.Color)
+	
 	Coord() (int,int)
 	NewCoord(x,y int)
+	
 	Size() (int,int)
+	
 	AddLabel(text string, fontobj *ttf.Font)
+	GetLinkPage() PageInterface
 	AdjustLinkPage()
 	GetImageSurf() *sdl.Surface
 	SetImageSurf(newsurf *sdl.Surface)
@@ -36,7 +50,8 @@ type IconItem struct {
 	Parent  PageInterface
 	Index   int
 	MyType int
-	CmdPath  interface{}
+	CmdPath  string
+	CmdInvoke PluginInterface
 	LinkPage PageInterface
 	Label  LabelInterface
 	Align  int
@@ -64,6 +79,26 @@ func (self *IconItem) Init(x,y,w,h,at int) {
 	self.Width = w
 	self.Height = h
 	self.AnimationTime = at
+}
+
+func (self *IconItem) GetCmdPath() string {
+	return self.CmdPath
+}
+
+func (self *IconItem) SetCmdPath( path string) {
+	self.CmdPath = path
+}
+
+func (self *IconItem) SetMyType( thetype int ) {
+	self.MyType = thetype
+}
+
+func (self *IconItem) GetMyType() int {
+	return self.MyType
+}
+
+func (self *IconItem) GetIndex() int {
+	return self.Index
 }
 
 func (self *IconItem) SetIndex(i int) {
@@ -98,6 +133,10 @@ func (self *IconItem) AddLabel(text string, fontobj *ttf.Font) {
 	}else {
 		self.Label.Init(text,fontobj)
 	}	
+}
+
+func (self *IconItem) GetLinkPage() PageInterface {
+	return self.LinkPage
 }
 
 func (self *IconItem) AdjustLinkPage() {
