@@ -155,6 +155,10 @@ type PageInterface interface {
 	// GetIconIndex
 	// Coord
 	// Size
+	// UpdateIconNumbers
+	// GetIconNumbers
+	// SetOnShow
+	
 
 	
 }
@@ -445,6 +449,19 @@ func (self *Page) Adjust() { // default init way,
 	
 }
 
+func (self *Page) SetOnShow( on_show bool) {
+	self.OnShow = on_show
+}
+
+func (self *Page) UpdateIconNumbers() {
+
+	self.IconNumbers = len(self.Icons)
+	
+}
+
+func (self *Page) GetIconNumbers() int {
+	return self.IconNumbers
+}
 
 func (self *Page) Init() {
 
@@ -760,6 +777,7 @@ func (self *Page) DrawIcons() {
 }
 
 
+
 func (self *Page) KeyDown( ev *event.Event) {
 	if ev.Data["Key"] == CurKeys["A"] {
 
@@ -809,6 +827,14 @@ func (self *Page) KeyDown( ev *event.Event) {
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
 	}
+	
+}
+
+func (self *Page) OnLoadCb() {
+	
+}
+
+func (self *Page) OnReturnBackCb() {
 	
 }
 

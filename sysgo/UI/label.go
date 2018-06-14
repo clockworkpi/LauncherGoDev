@@ -41,6 +41,7 @@ func (self *Label) Init(text string, font_obj *ttf.Font,col *color.Color ) {
 	if col != nil {
 		self.Color = col
 	}
+		
 
 	self.Text = text
 
