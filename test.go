@@ -14,7 +14,8 @@ import (
 	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/draw"
 	"github.com/cuu/gogame/image"
-	"github.com/cuu/gogame/font"	
+	"github.com/cuu/gogame/font"
+	"github.com/cuu/gogame/time"	
 )
 
 func run() int {
@@ -90,7 +91,10 @@ func run() int {
 			running = false
 			break
 		}
-
+		if ev.Type == event.USEREVENT {
+			
+			fmt.Println(ev.Data["Msg"])
+		}
 		if ev.Type == event.KEYDOWN {
 			fmt.Println(ev)
 			if ev.Data["Key"] == "Q" {
@@ -98,6 +102,12 @@ func run() int {
 			}
 			if ev.Data["Key"] == "Escape" {
 				return 0
+			}
+			if ev.Data["Key"] == "T" {
+				time.Delay(1000)
+			}
+			if ev.Data["Key"] == "P" {				
+				event.Post(event.RUNEVT,"GODEBUG=cgocheck=0 sucks") // just id and string, simpify the stuff
 			}
 		}
 	}
@@ -109,6 +119,7 @@ func main() {
 	var exitcode int
 
 	os.Setenv("SDL_VIDEO_CENTERED","1")
+	os.Setenv("GODEBUG", "cgocheck=0")
 	
 	sdl.Main(func() {
 		exitcode = run()

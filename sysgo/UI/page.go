@@ -158,8 +158,9 @@ type PageInterface interface {
 	// UpdateIconNumbers
 	// GetIconNumbers
 	// SetOnShow
-	
-
+	// AppendIcon
+	// GetName()
+	// GetFootMsg
 	
 }
 
@@ -764,6 +765,10 @@ func (self *Page) ClearCanvas() {
 	surface.Fill(self.CanvasHWND, self.Screen.SkinManager.GiveColor("White"))
 }
 
+func (self *Page) AppendIcon( it interface{} ) {
+	self.Icons = append(self.Icons, it)
+}
+
 func (self *Page) ClearIcons() {
 	for i:=0;i<self.IconNumbers; i++ {
 		self.Icons[i].Clear()
@@ -830,11 +835,16 @@ func (self *Page) KeyDown( ev *event.Event) {
 	
 }
 
+
 func (self *Page) OnLoadCb() {
 	
 }
 
 func (self *Page) OnReturnBackCb() {
+	
+}
+
+func (self *Page) OnExitCb() {
 	
 }
 

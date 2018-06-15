@@ -12,7 +12,7 @@ import (
 	
 	"github.com/itchyny/volume-go"
 
-	"../sysgo"
+	"../../sysgo"
 )
 
 

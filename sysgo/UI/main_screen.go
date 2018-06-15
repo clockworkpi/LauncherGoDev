@@ -9,6 +9,8 @@ import (
 	"github.com/cuu/gogame/display"	
 	"github.com/cuu/gogame/surface"
 	"github.com/cuu/gogame/color"
+	"github.com/cuu/gogame/time"
+	"github.com/cuu/gogame/event"
 )
 
 var (
@@ -146,6 +148,8 @@ func NewMainScreen() *MainScreen {
 	m.Height = Height - FootBar_BarHeight - TitleBar_BarHeight - 1
 	m.MyPageStack = NewPageStack()
 
+	m.MsgBoxFont = Fonts["veramono20"]
+	m.IconFont   = Fonts["varela15"]
 }
 
 func (self *MainScreen) Init() {
@@ -157,6 +161,8 @@ func (self *MainScreen) Init() {
 
 	self.SkinManager = NewSkinManager()
 	self.SkinManager.Init()
+
+	
 }
 
 func (self *MainScreen) FartherPages() { // right after ReadTheDirIntoPages
@@ -271,4 +277,138 @@ func (self *MainScreen) IsEmulatorPackage(dirname string ) bool {
 
 func (self *MainScreen) ReadTheDirIntoPages(_dir string, pglevel int, cur_page PageInterface) {
 	
+	if FileExists(_dir) == false && IsDirectory(_dir) == false {
+		return
+	}
+
+	files,err := ioutil.ReadDir(_dir)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	for _,f := range files { // already sorted
+		if IsDirectory( _dir +"/"+f.Name()) {
+			if pglevel == 0 {
+				page := NewPage()
+				page.Name = self.ExtraName(f.Name())
+				self.Pages = append(self.Pages, page)
+				self.ReadTheDirIntoPages(_dir+"/"+f.Name(),pglevel+1, self.Pages[ len(self.Pages) - 1] )
+			}else{ // on cur_page now
+				i2:= self.ExtraName(f.Name())
+				iconitem := NewIconItem()
+				iconitem.AddLabel(i2,self.IconFont)
+				if FileExists( SkinMap(_dir+"/"+i2+".png")) {
+					iconitem.ImageName = SkinMap(_dir+"/"+i2+".png")
+				}else {
+					untitled := NewUntitledIcon()
+					untitled.Init()
+					if len(i2) > 1 {
+						untitled.SetWords(i2[0],i2[1])
+					}else if len(i2) == 1 {
+						untitled.SetWords(i2[0],i2[0])
+					}else {
+						untitled.SetWords("G","s")
+					}
+					iconitem.ImgSurf = untitled.Surface()
+					iconitem.ImageName = ""
+				}
+
+				if self.IsPluginPackage(_dir+"/"+f.Name()) {
+					iconitem.MyType = ICON_TYPES["FUNC"]
+					iconitem.CmdPath = f.Name()
+					cur_page.AppendIcon(iconitem)
+					//Init it 
+				}else {
+					iconitem.MyType = ICON_TYPES["DIR"]
+					linkpage := NewPage()
+					linkpage.Name = i2					
+					iconitem.LinkPage = linkpage
+					cur_page.AppendIcon(iconitem)
+					self.ReadTheDirIntoPages(_dir+"/"+f.Name(),pglevel+1, iconitem.LinkPage)
+				}
+				
+			}
+		} else if IsAFile(_dir+"/"+f.Name()) && (pglevel > 0) {
+			if strings.HasSuffix(strings.ToLower(f.Name()),IconExt) {
+				i2 := self.ExtraName(f.Name())
+				iconitem = NewIconItem()
+				iconitem.CmdPath = _dir+"/"+f.Name()
+				MakeExecutable( iconitem.CmdPath )
+				iconitem.MyType = ICON_TYPES["EXE"]
+				if FileExists( SkinMap( _dir+"/"+ ReplaceSuffix(i2,"png"))) {
+					iconitem.ImageName = SkinMap( _dir+"/"+ ReplaceSuffix(i2,"png"))
+				}else {
+					untitled:= NewUntitledIcon()
+					untitled.Init()
+					if len(i2) > 1 {
+						untitled.SetWords(i2[0],i2[1])
+					}else if len(i2) == 1 {
+						untitled.SetWords(i2[0],i2[0])
+					}else {
+						untitled.SetWords("G","s")
+					}
+					iconitem.ImgSurf = untitled.Surface()
+					iconitem.ImageName = ""
+				}
+
+				iconitem.AddLabel(strings.Split(i2,".")[0], self.IconFont)
+				iconfont.LinkPage = nil
+				cur_page.AppendIcon(iconitem)
+			}
+		}
+	}
+}
+
+
+func (self *MainScreen) RunEXE( cmdpath string) {
+	self.DrawRun()
+	self.SwapAndShow()
+
+	time.Delay(1000)
+
+	cmdpath = strings.Trim(cmdpath," ")
+
+	cmdpath = CmdClean(cmdpath)
+	
+	event.Post(event.RUNEVT,cmdpath)
+	
+}
+
+func (self *MainScreen) OnExitCb() {
+	self.CurrentPage.OnExitCb()
+}
+
+func (self *MainScreen) KeyDown(ev *event.Event) {
+
+	if ev.Data["Key"] == "T" {
+		self.DrawRun()
+		self.SwapAndShow()
+		return
+	}
+
+	if ev.Data["Key"] == "Space" {
+		self.Draw()
+		self.SwapAndShow()
+	}
+
+	self.CurrentPage.KeyDown(ev)
+}
+
+
+func (self *MainScreen) DrawRun() {
+	self.MsgBox.SetText("Launching....")
+	self.MsgBox.Draw()
+}
+
+func (self *MainScreen) Draw() {
+	self.CurrentPage.Draw()
+	if self.TitleBar != nil {
+		self.TitleBar.Draw( self.CurrentPage.GetName())
+	}
+
+	if self.FootBar != nil {
+		self.FootBar.SetLabelTexts( self.CurrentPage.GetFootMsg())
+		self.FootBar.Draw()
+	}
 }
