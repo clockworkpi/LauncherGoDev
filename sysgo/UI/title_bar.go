@@ -74,6 +74,7 @@ type TitleBar struct {
 	Title string
 	InLowBackLight int
 	SkinManager *SkinManager //set by MainScreen
+	DBusManager *DBusInterface
 	
 	icon_base_path string /// SkinMap("gameshell/titlebar_icons/")
 }
@@ -221,7 +222,7 @@ func (self *TitleBar) Init(main_screen *MainScreen) {
 	self.CanvasHWND = surface.Surface(self.Width,self.Height)
 	self.HWND = main_screen.HWND
 	self.SkinManager = main_screen.SkinManager
-
+	self.DBusManager = main_screen.DBusManager
 	
 	icon_wifi_status := NewTitleBarIconItem()
 

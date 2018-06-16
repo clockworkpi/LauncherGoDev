@@ -11,6 +11,8 @@ import (
 	"github.com/cuu/gogame/color"
 	"github.com/cuu/gogame/time"
 	"github.com/cuu/gogame/event"
+
+	"../DBUS"
 )
 
 var (
@@ -137,6 +139,7 @@ type MainScreen struct {
 	MsgBoxFont  *ttf.Font
 	IconFont    *ttf.Font
 	SkinManager *SkinManager
+	DBusManager *DBUS.DBus
 }
 
 
@@ -147,7 +150,7 @@ func NewMainScreen() *MainScreen {
 	m.Width = Width
 	m.Height = Height - FootBar_BarHeight - TitleBar_BarHeight - 1
 	m.MyPageStack = NewPageStack()
-
+	
 	m.MsgBoxFont = Fonts["veramono20"]
 	m.IconFont   = Fonts["varela15"]
 }
@@ -162,7 +165,8 @@ func (self *MainScreen) Init() {
 	self.SkinManager = NewSkinManager()
 	self.SkinManager.Init()
 
-	
+	self.DBusManager = NewDBus()
+	self.DBusManager.Init()
 }
 
 func (self *MainScreen) FartherPages() { // right after ReadTheDirIntoPages

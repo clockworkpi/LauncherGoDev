@@ -61,12 +61,15 @@ type DBus struct {
   Wifi    *DbusInterface
 }
 
+func NewDBus() *DBus {
+	d := &DBus{}
+	return d
+}
 
 func (self *DBus) Init() {
 	conn, err := dbus.SystemBus()
   if err != nil {
-    fmt.Fprintln(os.Stderr, "Failed to connect to session bus:", err)
-    os.Exit(1)
+    panic(fmt.Sprintf("Failed to connect to system bus:", err))
   }
 
 	self.Conn = conn
