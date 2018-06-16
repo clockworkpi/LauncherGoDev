@@ -10,7 +10,7 @@ type MultiIconItem struct {
 	
 	IconWidth int
 	IconHeight int
-	IconIndex int
+	
 }
 
 func NewMultiIconItem() *MultiIconItem {

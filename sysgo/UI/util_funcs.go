@@ -7,8 +7,31 @@ import (
 	"strings"
 	
 	"github.com/cuu/gogame/display"
-	
+
+	"../../sysgo"
 )
+
+func SkinMap(orig_file_or_dir string) string {
+	DefaultSkin := "default"
+	ret := ""
+	if strings.HasPrefix(orig_file_or_dir, "..") {
+		ret = strings.Replace(orig_file_or_dir,"..","../skin/"+sysgo.SKIN,-1)
+		if FileExists(ret) == false {
+			ret = strings.Replace(orig_file_or_dir,"..", "../skin/"+DefaultSkin)
+		}
+	}else {
+		ret = "../skin/"+sysgo.SKIN+"/sysgo/"+orig_file_or_dir
+		if FileExists(ret) == false {
+			ret = "../skin/"+DefaultSkin+"/sysgo/"+orig_file_or_dir
+		}
+	}
+
+	if FileExists(ret) {
+		return ret
+	}else { // if not existed both in default or custom skin ,return where it is
+		return orig_file_or_dir
+	}
+}
 
 func CmdClean(cmdpath string) string {
 	spchars := "\\`$();|{}&'\"*?<>[]!^~-#\n\r "

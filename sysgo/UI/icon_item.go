@@ -11,13 +11,16 @@ import (
 
 type IconItemInterface interface {
 	Init(x,y,w,h,at int)
-	
+	Adjust(x,y,w,h,at int)
 	GetCmdPath() string
 	SetCmdPath( path string)
 	
 	SetMyType( thetype int )
 	GetMyType() int
 
+	GetIconIndex() int
+	SetIconIndex(idx int)
+	
 	GetIndex() int
 	SetIndex(i int)
 	
@@ -49,6 +52,7 @@ type IconItem struct {
 	ImgSurf *sdl.Surface
 	Parent  PageInterface
 	Index   int
+	IconIndex int
 	MyType int
 	CmdPath  string
 	CmdInvoke PluginInterface
@@ -81,6 +85,23 @@ func (self *IconItem) Init(x,y,w,h,at int) {
 	self.AnimationTime = at
 }
 
+func (self *IconItem) Init(x,y,w,h,at int) {
+	self.PosX = x
+	self.PosY = y
+	self.Width = w
+	self.Height = h
+	self.AnimationTime = at
+
+	if self.Label != nil {
+		self.Label.SetCanvasHWND(self.Parent.GetCanvasHWND())
+	}
+
+	self.CreateImageSurf()
+	self.AdjustLinkPage()
+	
+}
+
+
 func (self *IconItem) GetCmdPath() string {
 	return self.CmdPath
 }
@@ -95,6 +116,14 @@ func (self *IconItem) SetMyType( thetype int ) {
 
 func (self *IconItem) GetMyType() int {
 	return self.MyType
+}
+
+func (self *IconItem) GetIconIndex() int {
+	return self.IconIndex
+}
+
+func (self *IconItem) SetIconIndex( idx int) {
+	self.IconIndex = idx
 }
 
 func (self *IconItem) GetIndex() int {

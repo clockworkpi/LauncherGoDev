@@ -18,6 +18,44 @@ import (
 
 var TitleBar_BarHeight = 24
 
+type TitleBarIconItem struct {
+	MultiIconItem
+	Parent *TitleBar
+}
+
+func NewTitleBarIconItem() *TitleBarIconItem {
+	m := &TitleBarIconItem{}
+
+	return m
+
+}
+
+func (self *TitleBarIconItem) Draw() {
+	parent_x,parent_y := self.Parent.PosX,self.Parent.PosY
+	
+	if self.Label != nil {
+//		lab_x,lab_y := self.Label.Coord()
+		lab_w,lab_h:= self.Label.Size()
+		if self.Align == ALIGN["VCenter"] {
+			self.Label.NewCoord( self.PosX - lab_w/2 + parent_x,        self.PosY + self.Height/2+6 + parent_y)
+		}else if self.Align == ALIGN["HLeft"] {
+			self.Label.NewCoord( self.PosX + self.Width/2+3 + parent_x, self.PosY - lab_h/2 + parent_y )
+		}
+
+		self.Label.Draw()
+	}
+
+	if self.ImgSurf != nil {
+		
+		portion := rect.Rect(0,self.IconIndex*self.IconHeight,self.IconWidth,self.IconHeight)
+		
+		surface.Blit(self.Parent.GetCanvasHWND(),
+			self.ImgSurf,draw.MidRect(self.PosX + parent_x, self.PosY + parent_y,
+			self.Width,self.Height, Width, Height),&portion)
+	}
+}
+
+
 type TitleBar struct {
 
 	PosX int
@@ -27,16 +65,16 @@ type TitleBar struct {
 	BarHeight int
 	LOffset int
 	ROffset int
-	Icons map[string]interface{}
+	Icons map[string]IconItemInterface
 	IconWidth
 	IconHeight
 	BorderWidth
 	CanvasHWND *sdl.Surface
-	HWND       interface{}
+	HWND       *sdl.Surface
 	Title string
 	InLowBackLight int
-	SkinManager interface{}
-
+	SkinManager *SkinManager //set by MainScreen
+	
 	icon_base_path string /// SkinMap("gameshell/titlebar_icons/")
 }
 
@@ -51,10 +89,16 @@ func NewTitleBar() *TitleBar {
 	t.Height = t.BarHeight + t.BorderWidth
 
 	t.Width = Width
+
+	t.IconWidth = 18
+	t.IconHeight = 18
+
+	t.LOffset = 3
+	t.ROffset = 3
 	
-	t.Icons = make(map[string]interface{})
+	t.Icons = make(map[string]IconItemInterface)
 	
-	//t.icon_base_path  = SkinMap("gameshell/titlebar_icons/")
+	t.icon_base_path  = SkinMap("gameshell/titlebar_icons/")
 }
 
 func (t *TitleBar) RoundRobinCheck {
@@ -83,7 +127,7 @@ func (t *TitleBar) GetWifiStrength(stren string) int {
 	return ge	
 }
 
-func (t *TitleBar) SyncSoundVolume() {
+func (self *TitleBar) SyncSoundVolume() {
 	
   vol, err := volume.GetVolume()
   if err != nil {
@@ -102,6 +146,8 @@ func (t *TitleBar) SyncSoundVolume() {
 		}
 	}
 
+	self.Icons["soundvolume"].SetIconIndex(ge)
+	self.Icons["sound"] = self.Icons["soundvolume"]
 	// 
 }
 
@@ -109,13 +155,13 @@ func (t *TitleBar) SetSoundVolume(vol int) {
 	//pass
 }
 
-func (t *TitleBar) CheckBatteryStat() {
+func (self *TitleBar) CheckBatteryStat() {
 	bat_segs:= [][]int{[]int{0,6},[]int{7,15},[]int{16,20},[]int{21,30},[]int{31,50},[]int{51,60},[]int{61,80},[]int{81,90},[]int{91,100}}
 	
 	file, err := os.Open( sysgo.Battery )
 	if err != nil {
 		fmt.Println("Could not open file ", sysgo.Battery)
-		t.Icons["battery"] = t.Icons["battery_unknown"]
+		self.Icons["battery"] = self.Icons["battery_unknown"]
 		return
 	}
 
@@ -154,27 +200,88 @@ func (t *TitleBar) CheckBatteryStat() {
 
 	if val, ok := bat_uevent["POWER_SUPPLY_STATUS"]; ok {
 		if val == "Charging" {
-			t.Icons["battery_charging"].IconIndex = cap_ge
-			t.Icons["battery"] = t.Icons["battery_charging"]
+			self.Icons["battery_charging"].SetIconIndex(cap_ge)
+			self.Icons["battery"] = self.Icons["battery_charging"]
 		}else {
-			t.Icons["battery_charging"].IconIndex = cap_ge
-			t.Icons["battery"] = t.Icons["battery_discharging"]			
+			self.Icons["battery_charging"].SetIconIndex(cap_ge)
+			self.Icons["battery"] = self.Icons["battery_discharging"]	
 		}
 	}
 	
 }
 
-func (t *TitleBar) SetBatteryStat( bat int) {
+func (self *TitleBar) SetBatteryStat( bat int) {
 	
 }
 
-func (t *TitleBar) Init(screen *MainScreen) {
+func (self *TitleBar) Init(main_screen *MainScreen) {
 
 	start_x := 0
 
-	t.CanvasHWND = surface.Surface(t.Width,t.Height)
-	t.HWND = screen
+	self.CanvasHWND = surface.Surface(self.Width,self.Height)
+	self.HWND = main_screen.HWND
+	self.SkinManager = main_screen.SkinManager
 
-	icon_wifi_statu := NewMultiIconItem()
 	
+	icon_wifi_status := NewTitleBarIconItem()
+
+	icon_wifi_status.MyType = ICON_TYPES["STAT"]
+	icon_wifi_status.ImageName = self.icon_base_path+"wifi.png"
+	icon_wifi_status.Parent = self
+
+	icon_wifi_status.Adjust(start_x+self.IconWidth+5,self.IconHeight/2+(self.BarHeight-self.IconHeight)/2,self.IconWidth,self.IconHeight,0)
+
+	self.Icons["wifistatus"] = icon_wifi_status
+
+	battery_charging := NewTitleBarIconItem()
+	battery_charging.MyType = ICON_TYPES["STAT"]
+	battery_charging.Parent = self
+	battery_charging.ImageName = self.icon_base_path+"withcharging.png"
+	battery_charging.Adjust(start_x+self.IconWidth+self.IconWidth+8,self.IconHeight/2+(self.BarHeight-self.IconHeight)/2,self.IconWidth,self.IconHeight,0)
+
+	self.Icons["battery_charging"] = battery_charging
+
+	battery_discharging := NewTitleBarIconItem()
+	battery_discharging.MyType = ICON_TYPES["STAT"]
+	battery_discharging.Parent = self
+	battery_discharging.ImageName = self.icon_base_path+"without_charging.png"
+	battery_discharging.Adjust(start_x+self.IconWidth+self.IconWidth+8,self.IconHeight/2+(self.BarHeight-self.IconHeight)/2,self.IconWidth,self.IconHeight,0)
+
+	self.Icons["battery_discharging"] = battery_discharging
+
+	battery_unknown  := NewTitleBarIconItem()
+	battery_unknown.MyType = ICON_TYPES["STAT"]
+	battery_unknown.Parent = self
+	battery_unknown.ImageName = self.icon_base_path+"battery_unknown.png"
+	battery_unknown.Adjust(start_x+self.IconWidth+self.IconWidth+8,self.IconHeight/2+(self.BarHeight-self.IconHeight)/2,self.IconWidth,self.IconHeight,0)
+	
+	self.Icons["battery_unknown"] = battery_unknown
+
+	self.CheckBatteryStat()
+
+	sound_volume := NewTitleBarIconItem()
+	sound_volume.MyType = ICON_TYPES["STAT"]
+	sound_volume.Parent = self
+	sound_volume.ImageName = self.icon_base_path+"soundvolume.png"
+	sound_volume.Adjust(start_x+self.IconWidth+self.IconWidth+8,self.IconHeight/2+(self.BarHeight-self.IconHeight)/2,self.IconWidth,self.IconHeight,0)
+
+	self.Icons["soundvolume"] = sound_volume
+
+	self.SyncSoundVolume()
+
+	round_corners := NewTitleBarIconItem()
+	round_corners.IconWidth = 10
+	round_corners.IconHeight = 10
+	
+	round_corners.MyType = ICON_TYPES["STAT"]
+	round_corners.Parent = self
+	round_corners.ImgSurf = MyIconPool.GetImageSurf["roundcorners"]
+	round_corners.Adjust(0,0,10,10,0)
+	
+	self.Icons["round_corners"] = round_corners
+
+	if is_wifi_connected_now() {
+		print("wifi is connected")
+		print( wifi_strength())
+	}
 }
