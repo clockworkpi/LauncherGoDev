@@ -27,7 +27,7 @@ func run() int {
 	
 	screen := display.SetMode(int32(width),int32(height),0,32)
 	
-	surface.Fill(screen, color.Color{255,255,255,255} ) 
+	surface.Fill(screen, &color.Color{255,255,255,255} ) 
 
 	rect1 := rect.Rect(0,10, 12, 10)
 	
@@ -59,8 +59,8 @@ func run() int {
 	}
   */
 	
-//	draw.Line(screen,color.Color{255,44,255,0}, 0,100, 320,100,3)
-//	draw.Line(screen,color.Color{255,44,255,0}, 10, 0, 10,250,4)
+	draw.Line(screen,&color.Color{255,44,255,255}, 0,100, 320,100,3)
+	draw.Line(screen,&color.Color{255,44,255,255}, 10, 0, 10,250,4)
 
 	rect2 := rect.Rect(3,120,200,30)
 	draw.AARoundRect(screen,&rect2,&color.Color{0,213,222,255},10,0, &color.Color{0,213,222,255})
@@ -68,7 +68,6 @@ func run() int {
 	font.Init()
 	
 	font_path := "skin/default/truetype/NotoSansCJK-Regular.ttf"
-
 	
 	notocjk15 := font.Font(font_path,15)
 

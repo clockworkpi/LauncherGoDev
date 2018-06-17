@@ -30,7 +30,8 @@ type IconItemInterface interface {
 	
 	Coord() (int,int)
 	NewCoord(x,y int)
-	
+
+	TotalWidth() int
 	Size() (int,int)
 	
 	AddLabel(text string, fontobj *ttf.Font)
@@ -151,7 +152,11 @@ func (self *IconItem) NewCoord(x,y int) {
 	self.PosY = y
 }
 
-func (self *IconItem) NewCoord(x,y int) {
+func (self *IconItem) TotalWidth() int {
+	
+}
+
+func (self *IconItem) Size() (int,int) {
 	return self.Width,self.Height
 }
 

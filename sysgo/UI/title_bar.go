@@ -7,11 +7,15 @@ import (
 	"strings"
 	
 	"github.com/veandco/go-sdl2/sdl"
+//	"github.com/veandco/go-sdl2/ttf"
 	
 	"github.com/cuu/gogame/surface"
+	"github.com/cuu/gogame/font"
 	
 	"github.com/itchyny/volume-go"
-
+	
+	"github.com/vjeantet/jodaTime"
+	
 	"../../sysgo"
 )
 
@@ -77,6 +81,9 @@ type TitleBar struct {
 	DBusManager *DBusInterface
 	
 	icon_base_path string /// SkinMap("gameshell/titlebar_icons/")
+
+	TitleFont *ttf.Font
+	TimeFont  *ttf.Font
 }
 
 
@@ -100,6 +107,9 @@ func NewTitleBar() *TitleBar {
 	t.Icons = make(map[string]IconItemInterface)
 	
 	t.icon_base_path  = SkinMap("gameshell/titlebar_icons/")
+
+	t.TitleFont = Fonts["varela12"]
+	t.TimeFont  = Fonts["varela16"]
 }
 
 func (t *TitleBar) RoundRobinCheck {
@@ -110,9 +120,9 @@ func (t *TitleBar) UpdateWifiStrength() {
 	
 }
 
-func (t *TitleBar) GetWifiStrength(stren string) int {
+func (t *TitleBar) GetWifiStrength(stren int) int {
 	segs := [][]int{ []int{-2,-1}, []int{0,25}, []int{25,50}, []int{50,75},int{75,100}}
-	stren_number,_ :=  strconv.Atoi( stren )
+	stren_number :=  stren 
 	ge := 0
 	if stren_number == 0 {
 		return ge
@@ -281,8 +291,74 @@ func (self *TitleBar) Init(main_screen *MainScreen) {
 	
 	self.Icons["round_corners"] = round_corners
 
-	if is_wifi_connected_now() {
+	if self.DBusManager.IsWifiConnectedNow() {
 		print("wifi is connected")
-		print( wifi_strength())
+		print( self.DBusManager.WifiStrength())
 	}
 }
+
+func (self *TitleBar) ClearCanvas() {
+	surface.Fill(self.CanvasHWND, self.SkinManager.GiveColor("TitleBg"))
+
+	self.Icons["round_corners"].NewCoord(5,5)
+	self.Icons["round_corners"].SetIconIndex(0)
+	self.Icons["round_corners"].Draw()
+
+	self.Icons["round_corners"].NewCoord(self.Width-5, 5)
+	self.Icons["round_corners"].SetIconIndex(1)
+	self.Icons["round_corners"].Draw()
+	
+}
+
+
+func (self *TitleBar) Draw(title string) {
+	self.ClearCanvas()
+	self.Title = title
+
+	cur_time := jodaTime.Format("HH:mm", time.Now())
+	
+	time_text_w,  time_text_h  := font.Size(self.TimeFont, cur_time)
+	title_text_w, title_text_h := font.Size(self.TitleFont, self.Title)
+
+	title_text_surf := font.Render(self.TitleFont, self.Title, true, self.SkinManager.GiveColor("Text"))
+	
+	surface.Blit(self.CanvasHWND,title_text_surf, draw.MidRect(title_text_w/2+self.LOffset,title_text_h/2+(self.BarHeight-title_text_h)/2,title_text_w,title_text_h,Width,Height),nil)
+
+
+	time_text_surf := font.Render(self.TimeFont, cur_time,true,self.SkinManager.GiveColor("Text"))
+	surface.Blit(self.CanvasHWND, time_text_surf, draw.MidRect(Width-time_text_w/2-self.ROffset, time_text_h/2+(self.BarHeight-time_text_h)/2, time_text_w,time_text_h,Width,Height),nil)
+
+	start_x := Width - time_text_w - self.ROffset - self.IconWidth*3 // close to the time_text
+	self.Icons["sound"].NewCoord( start_x, self.IconHeight/2+ (self.BarHeight-self.IconHeight)/2)
+	self.Icons["battery"].NewCoord(start_x+self.IconWidth+self.IconWidth+8, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2)
+
+	if self.DBusManager.IsWifiConnectedNow() == true {
+		ge := self.GetWifiStrength( self.DBusManager.WifiStrength() )
+		if ge > 0 {
+			self.Icons["wifistatus"].SetIconIndex(ge)
+			self.Icons["wifistatus"].NewCoord(start_x+self.IconWidth+5, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2 )
+			self.Icons["wifistatus"].Draw()
+		}else {
+			self.Icons["wifistatus"].SetIconIndex(0)
+			self.Icons["wifistatus"].Draw()
+		}
+	}else {
+		self.Icons["wifistatus"].SetIconIndex(0)
+		self.Icons["wifistatus"].NewCoord(start_x+self.IconWidth+5, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2)
+		self.Icons["wifistatus"].Draw()
+	}
+
+	self.Icons["sound"].Draw()
+	self.Icons["battery"].Draw()
+
+	
+	draw.Line(self.CanvasHWND,self.SkinManager.GiveColor("Line"), 0,self.BarHeight,self.Width,self.BarHeight, self.BorderWidth)
+
+	if self.HWND != nil {
+		rect_ := rect.Rect(self.PosX,self.PosY, self.Width,self.Height)
+		surface.Blit(self.HWND, self.CanvasHWND, &rect_, nil)
+	}
+}
+
+	
+	

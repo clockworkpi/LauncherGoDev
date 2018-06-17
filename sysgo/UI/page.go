@@ -138,29 +138,60 @@ func (self *PageSelector) Draw() {
 
 
 type PageInterface interface {
-	// shared functions
-	// GetScreen
-	// GetIcons
-	// SetScreen
-	// SetFootMsg
-	// SetCanvasHWND
-	// GetCanvasHWND
-	// GetHWND
-	// SetHWND
-	// AdjustHLeftAlign
-	// AdjustSAutoLeftAlign
-	// SetPsIndex
-	// SetIconIndex
-	// GetPsIndex
-	// GetIconIndex
-	// Coord
-	// Size
-	// UpdateIconNumbers
-	// GetIconNumbers
-	// SetOnShow
-	// AppendIcon
-	// GetName()
-	// GetFootMsg
+	// ## shared functions ##
+	Adjust()
+	Init()
+	
+	GetScreen() *MainScreen
+	GetIcons() []IconItemInterface
+	SetScreen( main_screen *MainScreen)
+	SetFootMsg(footmsg [5]string)
+	GetCanvasHWND() *sdl.Surface
+	SetCanvasHWND( canvas *sdl.Surface)
+
+	GetHWND() *sdl.Surface
+	SetHWND(h *sdl.Surface)
+	
+	AdjustHLeftAlign()
+	AdjustSAutoLeftAlign()
+
+	SetPsIndex( idx int)
+	GetPsIndex() int
+
+	SetIconIndex(idx int)
+	GetIconIndex() int
+
+	Coord() (int, int)
+	Size() (int,int)
+
+	UpdateIconNumbers()
+	GetIconNumbers() int
+
+	SetOnShow(on_show bool)
+	GetOnShow() bool
+	
+	AppendIcon( it interface{} )
+	ClearIcons()
+	DrawIcons()
+	
+	GetName() string
+	GetFootMsg() [5]string
+
+	KeyDown( ev *event.Event)
+
+	ReturnToUpLevelPage()
+	
+	OnLoadCb()
+	OnReturnBackCb()
+	OnExitCb()
+
+//	IconClick()
+	ResetPageSelector()
+	DrawPageSelector()
+
+	ClearCanvas()
+	Draw()
+
 	
 }
 
@@ -207,6 +238,15 @@ func NewPage() *Page {
 	
 	return p
 }
+
+func (self *Page) GetScreen() *MainScreen {
+	return self.Screen
+}
+
+func (self *Page) SetScreen(main_screen *MainScreen) {
+	self.Screen = main_screen
+}
+
 
 func (self *Page) AdjustHLeftAlign() {
 	self.PosX = self.Index*self.Screen.Width
@@ -448,6 +488,10 @@ func (self *Page) Adjust() { // default init way,
 		}
 	}
 	
+}
+
+func (self *Page) GetOnShow() bool {
+	return self.OnShow
 }
 
 func (self *Page) SetOnShow( on_show bool) {
@@ -769,6 +813,10 @@ func (self *Page) AppendIcon( it interface{} ) {
 	self.Icons = append(self.Icons, it)
 }
 
+func (self *Page) GetIcons() []IconItemInterface {
+	return self.Icons
+}
+
 func (self *Page) ClearIcons() {
 	for i:=0;i<self.IconNumbers; i++ {
 		self.Icons[i].Clear()
@@ -854,9 +902,58 @@ func (self *Page) Draw() {
 	self.DrawPageSelector()
 }
 
+func (self *Page) GetFootMsg() [5]string {
+	return self.FootMsg
+}
+
+func (self *Page) SetFootMsg(footmsg [5]string) {
+	self.FootMsg = footmsg
+}
 
 
+func (self *Page) GetCanvasHWND() *sdl.Surface {
+	return self.CanvasHWND
+}
+
+func (self *Page)	SetCanvasHWND( canvas *sdl.Surface) {
+	self.CanvasHWND = canvas
+}
 
 
+func (self *Page)	GetHWND() *sdl.Surface {
+	return self.HWND
+}
+
+func (self *Page)	SetHWND(h *sdl.Surface) {
+	self.HWND = h
+}
+
+func (self *Page) SetPsIndex( idx int) {
+	self.PsIndex = idx
+}
+
+func (self *Page) GetPsIndex() int {
+	return self.PsIndex
+}
+
+func (self *Page) SetIconIndex( idx int) {
+	self.IconIndex = idx
+}
+
+func (self *Page) GetIconIndex() int {
+	return self.IconIndex
+}
 
 
+func (self *Page) Coord() (int,int) {
+	return self.PosX,self.PosY
+}
+
+func (self *Page) Size() (int,int) {
+	return self.Width,self.Height
+}
+
+
+func (self *Page) GetName() string {
+	return self.Name
+}
