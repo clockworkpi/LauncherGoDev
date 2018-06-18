@@ -134,8 +134,8 @@ func NewTitleBar() *TitleBar {
 	
 	t.icon_base_path  = SkinMap("sysgo/gameshell/titlebar_icons/")
 
-	t.TitleFont = Fonts["varela12"]
-	t.TimeFont  = Fonts["varela16"]
+	t.TitleFont = Fonts["varela16"]
+	t.TimeFont  = Fonts["varela12"]
 	return t
 	
 }
