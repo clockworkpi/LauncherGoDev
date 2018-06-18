@@ -1,14 +1,20 @@
 package UI
 
 import (
+	"fmt"
+	
 	"math"
 	"sync"
 	
 	"github.com/veandco/go-sdl2/sdl"
-	
-	"github.com/cuu/gogame/font"
+
+	"github.com/cuu/gogame/surface"
+	"github.com/cuu/gogame/draw"
+//	"github.com/cuu/gogame/rect"
+//	"github.com/cuu/gogame/font"
 	"github.com/cuu/gogame/event"
-	
+
+	"github.com/cuu/gogame/transform"
 	"../easings"
 	
 )
@@ -101,11 +107,11 @@ func (self *PageSelector) Adjust(x,y,w,h,alpha int) {
 }
 
 func (self *PageSelector) GetOnShow() bool {
-	return self.Onshow
+	return self.OnShow
 }
 
 func (self *PageSelector) SetOnShow( onshow bool ) {
-	self.Onshow = onshow
+	self.OnShow = onshow
 }
 
 func (self *PageSelector) Draw() {
@@ -118,13 +124,13 @@ func (self *PageSelector) Draw() {
 		icon_x ,_ := icons[idx].Coord()
 		_,icon_y  := icons[iconidx].Coord()
 		
-		parent_x,parent_y := self.Parent.Coord()
+		parent_x,_ := self.Parent.Coord()
 		parent_w,parent_h := self.Parent.Size()
 		
 		x := icon_x + parent_x
 		y := icon_y // only use current icon's PosY
 		
-		rect_ = draw.MidRect(x,y, self.Width, self.Height, parent_w,parent_h)
+		rect_ := draw.MidRect(x,y, self.Width, self.Height, parent_w,parent_h)
 		if rect_.W <=0 || rect_.H <= 0 {
 			return
 		}
@@ -158,6 +164,12 @@ type PageInterface interface {
 	SetPsIndex( idx int)
 	GetPsIndex() int
 
+	SetIndex(idx int)
+
+	GetAlign() int
+	SetAlign(al int)
+	
+	
 	SetIconIndex(idx int)
 	GetIconIndex() int
 
@@ -167,6 +179,7 @@ type PageInterface interface {
 	UpdateIconNumbers()
 	GetIconNumbers() int
 
+	
 	SetOnShow(on_show bool)
 	GetOnShow() bool
 	
@@ -210,7 +223,7 @@ type Page struct {
 
 	Index int
 
-	Align string
+	Align int
 	
 	CanvasHWND *sdl.Surface
 	HWND       *sdl.Surface
@@ -301,14 +314,14 @@ func (self *Page) AdjustSLeftAlign() { // ## adjust coordinator and append the P
 		it.SetIndex(i)
 		it.Adjust(start_x+i*self.PageIconMargin+i*IconWidth, start_y, IconWidth-6,IconHeight-6,0)
 
-		old_surf := it.GetImageSurf()
+		old_surf := it.GetImgSurf()
 		
 		it_w,it_h := it.Size() //width height changed by Adjust above
-		it.SetImageSurf( transform.SmoothScale(old_surf,it_w,it_h) )
+		it.SetImgSurf( transform.SmoothScale(old_surf,it_w,it_h) )
 	}
 
 	ps := NewPageSelector()
-	ps.IconSurf = MyIconPool.GetImageSurf("blueselector")
+	ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 	ps.Parent = self
 	ps.Init(start_x,start_y,92,92,128)
 
@@ -341,9 +354,9 @@ func (self *Page) AdjustSAutoLeftAlign() { //  ## adjust coordinator and append 
 		it.SetParent(self)
 		it.SetIndex(0)
 		it.Adjust(start_x,start_y, IconWidth-6,IconHeight-6,0)
-		old_surf := it.GetImageSurf()
+		old_surf := it.GetImgSurf()
 		it_w,it_h := it.Size()
-		it.SetImageSurf( transform.SmoothScale(old_surf, it_w,it_h))
+		it.SetImgSurf( transform.SmoothScale(old_surf, it_w,it_h))
 		
 	}else if self.IconNumbers == 2 {
 		start_x = (self.Width - self.PageIconMargin - self.IconNumbers*IconWidth) / 2 + IconWidth/2
@@ -354,9 +367,9 @@ func (self *Page) AdjustSAutoLeftAlign() { //  ## adjust coordinator and append 
 			it.SetParent(self)
 			it.SetIndex(i)
 			it.Adjust( start_x+ i*self.PageIconMargin+i*IconWidth, start_y, IconWidth-6, IconHeight-6,0)
-			old_surf := it.GetImageSurf()
+			old_surf := it.GetImgSurf()
 			it_w,it_h := it.Size()
-			it.SetImageSurf( transform.SmoothScale( old_surf, it_w,it_h))
+			it.SetImgSurf( transform.SmoothScale( old_surf, it_w,it_h))
 			
 		}
 		
@@ -366,14 +379,14 @@ func (self *Page) AdjustSAutoLeftAlign() { //  ## adjust coordinator and append 
 			it.SetParent(self)
 			it.SetIndex(i)
 			it.Adjust(start_x+i*self.PageIconMargin + i*IconWidth, start_y, IconWidth-6, IconHeight-6, 0)
-			old_surf := it.GetImageSurf()
+			old_surf := it.GetImgSurf()
 			it_w,it_h := it.Size()
-			it.SetImageSurf( transform.SmoothScale( old_surf, it_w,it_h))			
+			it.SetImgSurf( transform.SmoothScale( old_surf, it_w,it_h))			
 		}
 	}
 
 	ps := NewPageSelector()
-	ps.IconSurf = MyIconPool.GetImageSurf("blueselector")
+	ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 	ps.Parent = self
 	ps.Init(start_x,start_y,92,92,128)
 
@@ -425,7 +438,7 @@ func (self *Page) InitLeftAlign() {
 	}
 
 	ps := NewPageSelector()
-	ps.IconSurf = MyIconPool.GetImageSurf("blueselector")
+	ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 	ps.Parent = self
 	ps.Init(IconWidth/2,IconHeight/2,92,92,128)
 
@@ -448,14 +461,13 @@ func (self *Page) Adjust() { // default init way,
 		start_y = self.Height/2
 
 		for i:=0;i< self.IconNumbers; i++ {
-			it:=self.Icons[i]
-			it.SetParent(self)
-			it.SetIndex(i)
-			it.Adjust(start_x + i*IconWidth, start_y, IconWidth, IconHeight,0)
+			self.Icons[i].SetParent(self)
+			self.Icons[i].SetIndex(i)
+			self.Icons[i].Adjust(start_x + i*IconWidth, start_y, IconWidth, IconHeight,0)
 		}
 
 		ps := NewPageSelector()
-		ps.IconSurf = MyIconPool.GetImageSurf("blueselector")
+		ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 		ps.Parent = self
 		ps.Init(start_x,start_y, 92,92,128)
 		self.Ps = ps
@@ -472,7 +484,7 @@ func (self *Page) Adjust() { // default init way,
 			it.Adjust(start_x + i*self.PageIconMargin+i*IconWidth, start_y, IconWidth, IconHeight,0)
 		}
 		ps := NewPageSelector()
-		ps.IconSurf = MyIconPool.GetImageSurf("blueselector")
+		ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 		ps.Parent = self
 		ps.Init(start_x,start_y-self.SelectedIconTopOffset, 92,92,128)
 		self.Ps = ps
@@ -533,7 +545,7 @@ func (self *Page) Init() {
 
 	if self.IconNumbers > 0 {
 		ps := NewPageSelector()
-		ps.IconSurf = MyIconPool.GetImageSurf("blueselector")
+		ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 		ps.Parent = self
 		ps.Init(start_x,start_y, IconWidth+4, IconHeight+4, 128)
 		self.Ps = ps
@@ -578,7 +590,7 @@ func (self *Page) IconStepMoveData(icon_eh ,cuts int)  []int {  //  no Sine,No c
 		dff := cuts - len(all_pieces)
 		var diffa []int
 		for i:=0;i<dff;i++ {
-			diffa= diffa.append(0)
+			diffa= append(diffa,0)
 		}
 		
 		all_pieces = append(all_pieces, diffa...)
@@ -591,8 +603,8 @@ func (self *Page) EasingData(start,distance int) []int {
 	current_time := 0.0
 	start_posx   := 0.0
 	current_posx := start_posx
-	final_posx   := float(distance)
-	posx_init    := start
+	final_posx   := float64(distance)
+//	posx_init    := start
 	dur          := self.EasingDur
 	last_posx    := 0.0
 
@@ -617,7 +629,7 @@ func (self *Page) EasingData(start,distance int) []int {
 		c+=v
 	}
 	if c < int(final_posx - start_posx) {
-		all_last_posx = append(all_last_posx, int( final_posx - c ))
+		all_last_posx = append(all_last_posx, int( int(final_posx) - c ))
 	}
 
 	return all_last_posx	
@@ -628,7 +640,7 @@ func (self *Page) IconSmoothUp(icon_ew int) {
 	data := self.EasingData(self.PosX,icon_ew)
 	data2 := self.IconStepMoveData(self.SelectedIconTopOffset, len(data))
 
-	for i,v := range data {
+	for i,_ := range data {
 		self.ClearCanvas()
 		cur_icon_x,cur_icon_y := self.Icons[self.IconIndex].Coord()
 		self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y - data2[i] )
@@ -790,8 +802,9 @@ func (self *Page) IconClick() {
 func (self *Page) ReturnToUpLevelPage() {
 	pop_page := self.Screen.MyPageStack.Pop()
 	if pop_page != nil {
-		pop_page.Draw()
-		self.Screen.SetCurPage(pop_page)
+		page_ := pop_page.(PageInterface)
+		page_.Draw()
+		self.Screen.SetCurPage(page_)
 	}else {
 		if self.Screen.MyPageStack.Length() == 0 {
 			if len(self.Screen.Pages) > 0 {
@@ -810,7 +823,7 @@ func (self *Page) ClearCanvas() {
 }
 
 func (self *Page) AppendIcon( it interface{} ) {
-	self.Icons = append(self.Icons, it)
+	self.Icons = append(self.Icons, it.(IconItemInterface))
 }
 
 func (self *Page) GetIcons() []IconItemInterface {
@@ -957,3 +970,26 @@ func (self *Page) Size() (int,int) {
 func (self *Page) GetName() string {
 	return self.Name
 }
+
+func (self *Page) SetIndex(idx int) {
+	self.Index = idx
+}
+
+func (self *Page) SetAlign(al int) {
+	inthere := false
+	for _,v := range ALIGN {
+		if v == al {
+			inthere = true
+			break
+		}
+	}
+
+	if inthere {
+		self.Align = al
+	}
+}
+
+func (self *Page) GetAlign() int {
+	return self.Align
+}
+

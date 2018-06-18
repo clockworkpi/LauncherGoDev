@@ -46,7 +46,7 @@ func (self *IconPool) Init() {
 }
 
 func (self *IconPool) GetImgSurf(keyname string) *sdl.Surface {
-	if val,ok := self.Icons[keyname]; ok {
+	if _,ok := self.Icons[keyname]; ok {
 		return self.Icons[keyname]
 	} else {
 		return nil

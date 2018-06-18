@@ -14,15 +14,16 @@ import (
 func SkinMap(orig_file_or_dir string) string {
 	DefaultSkin := "default"
 	ret := ""
+	skin_dir_prefix:= "skin/"
 	if strings.HasPrefix(orig_file_or_dir, "..") {
-		ret = strings.Replace(orig_file_or_dir,"..","../skin/"+sysgo.SKIN,-1)
+		ret = strings.Replace(orig_file_or_dir,"..",skin_dir_prefix + sysgo.SKIN,-1)
 		if FileExists(ret) == false {
-			ret = strings.Replace(orig_file_or_dir,"..", "../skin/"+DefaultSkin)
+			ret = strings.Replace(orig_file_or_dir,"..", skin_dir_prefix + DefaultSkin,-1)
 		}
 	}else {
-		ret = "../skin/"+sysgo.SKIN+"/sysgo/"+orig_file_or_dir
+		ret = skin_dir_prefix+sysgo.SKIN+"/sysgo/"+orig_file_or_dir
 		if FileExists(ret) == false {
-			ret = "../skin/"+DefaultSkin+"/sysgo/"+orig_file_or_dir
+			ret = skin_dir_prefix+DefaultSkin+"/sysgo/"+orig_file_or_dir
 		}
 	}
 

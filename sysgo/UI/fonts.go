@@ -15,7 +15,7 @@ var Fonts map[string]*ttf.Font
 func init() {
 	font.Init()
 
-	skinpath := "../skin/"+sysgo.SKIN+"/truetype"
+	skinpath := "skin/"+sysgo.SKIN+"/truetype"
 
 	Fonts = make(map[string]*ttf.Font)
 

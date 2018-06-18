@@ -6,8 +6,11 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 
+	"github.com/cuu/gogame/surface"
 	"github.com/cuu/gogame/draw"	
 	"github.com/cuu/gogame/color"
+	"github.com/cuu/gogame/image"
+	"github.com/cuu/gogame/font"
 )
 
 
@@ -17,7 +20,7 @@ type UntitledIcon struct {
 	PosY int
 	Width int
 	Height int
-	Words [2]string
+	Words []string
 	FontObj *ttf.Font
 	BG *sdl.Surface
 	Color *color.Color
@@ -29,18 +32,19 @@ func NewUntitledIcon() *UntitledIcon {
 	u := &UntitledIcon{}
 	u.Width = 80
 	u.Height = 80
-	u.Words = [2]string{"G","s"}
+	u.Words = []string{"G","s"}
 
 	u.FontObj = Fonts["varela40"]
 
 	u.Color = &color.Color{83,83,83,255}
 
 	u.BlankPng = SkinMap("gameshell/blank.png")
+	return u
 }
 
 func (self *UntitledIcon) Init() {
 	self.BG = image.Load(self.BlankPng)
-)
+}
 
 func (self *UntitledIcon) SetWords( TwoWords ...string) {
 	if len(TwoWords) == 1 {
@@ -59,7 +63,7 @@ func (self *UntitledIcon) Draw() {
 		w_ := self.Text.W
 		h_ := self.Text.H
 		
-		surface.Blit(self.BG,self.Text,draw.MidRect(self.Width/2, self.Height/2,w_,h_, self.Width, self.Height),nil)
+		surface.Blit(self.BG,self.Text,draw.MidRect(self.Width/2, self.Height/2, int(w_),int(h_), self.Width, self.Height),nil)
 	}
 }
 

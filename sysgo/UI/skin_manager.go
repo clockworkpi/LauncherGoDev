@@ -2,7 +2,11 @@ package UI
 
 
 import (
+	"fmt"
+	
+	"log"
 	"strings"
+	"strconv"
 	
 	"github.com/go-ini/ini"
 	
@@ -24,19 +28,24 @@ func NewSkinManager() *SkinManager {
 
 
 func (self *SkinManager) ConvertToRGB(hexstr string) *color.Color {
-	if len(hexstr) < 7 || hexstr[0] != '#' { // # 00 00 00 
+	if len(hexstr) < 7 || string(hexstr[0]) != "#" { // # 00 00 00
 		log.Fatalf("ConvertToRGB hex string format error %s", hexstr)
+		//fmt.Printf("ConvertToRGB hex string format error %s", hexstr)
 		return nil
 	}
 	
 	h := strings.TrimLeft(hexstr,"#")
 
-	r := strconv.ParseInt(hexstr[0:2], 16,0)
-	g := strconv.ParseInt(hexstr[2:4], 16,0)
-	b := strconv.ParseInt(hexstr[4:6], 16,0)
+	r,_ := strconv.ParseInt(h[0:2], 16,0)
+	g,_ := strconv.ParseInt(h[2:4], 16,0)
+	b,_ := strconv.ParseInt(h[4:6], 16,0)
 	
-	col := &color.Color{ r,g,b,255 }
+	col := &color.Color{ uint32(r),uint32(g),uint32(b),255 }
 	return col
+}
+
+func (self *SkinManager) ChangeSkin( skin_name string ) {
+	
 }
 
 func (self *SkinManager) Init() {
@@ -52,11 +61,14 @@ func (self *SkinManager) Init() {
 	self.Colors["White"]  = &color.Color{255,255,255,255}
 
 
-	fname := "../skin/"+sysgo.SKIN+"/config.cfg"
-	
-	cfg, err := ini.Load( fname )
+	fname := "skin/"+sysgo.SKIN+"/config.cfg"
+
+	load_opts := ini.LoadOptions{
+		IgnoreInlineComment:true,
+	}
+	cfg, err := ini.LoadSources(load_opts, fname )
 	if err != nil {
-		fmt.Printf("Fail to read file: %v", err)
+		fmt.Printf("Fail to read file: %v\n", err)
 		return
 	}
 	

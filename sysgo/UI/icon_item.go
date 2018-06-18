@@ -5,6 +5,10 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 
+	"github.com/cuu/gogame/surface"
+	"github.com/cuu/gogame/draw"
+	"github.com/cuu/gogame/color"
+	"github.com/cuu/gogame/image"
 	"github.com/cuu/gogame/transform"
 	"github.com/cuu/gogame/utils"
 )
@@ -27,20 +31,29 @@ type IconItemInterface interface {
 	SetParent( p interface{} )
 	
 	SetLabelColor(col *color.Color)
+	SetLabelText(text string)
+	GetLabelText() string
 	
 	Coord() (int,int)
 	NewCoord(x,y int)
 
 	TotalWidth() int
 	Size() (int,int)
+
 	
 	AddLabel(text string, fontobj *ttf.Font)
 	GetLinkPage() PageInterface
 	AdjustLinkPage()
-	GetImageSurf() *sdl.Surface
-	SetImageSurf(newsurf *sdl.Surface)
-	CreateImageSurf()
+	GetImgSurf() *sdl.Surface
+	SetImgSurf(newsurf *sdl.Surface)
+	CreateImgSurf()
 	ChangeImgSurfColor(col *color.Color)
+	
+	Clear()
+
+	GetCmdInvoke() PluginInterface
+
+	
 	Draw() 
 }
 
@@ -86,7 +99,7 @@ func (self *IconItem) Init(x,y,w,h,at int) {
 	self.AnimationTime = at
 }
 
-func (self *IconItem) Init(x,y,w,h,at int) {
+func (self *IconItem) Adjust(x,y,w,h,at int) {
 	self.PosX = x
 	self.PosY = y
 	self.Width = w
@@ -97,7 +110,7 @@ func (self *IconItem) Init(x,y,w,h,at int) {
 		self.Label.SetCanvasHWND(self.Parent.GetCanvasHWND())
 	}
 
-	self.CreateImageSurf()
+	self.CreateImgSurf()
 	self.AdjustLinkPage()
 	
 }
@@ -136,11 +149,19 @@ func (self *IconItem) SetIndex(i int) {
 }
 
 func (self *IconItem) SetParent(p interface{} ) {
-	self.Parent = p
+	self.Parent = p.(PageInterface)
 }
 
 func (self *IconItem) SetLabelColor(col *color.Color) {
 	self.Label.SetColor(col)
+}
+
+func (self *IconItem) GetLabelText() string {
+	return self.Label.GetText()
+}
+
+func (self *IconItem) SetLabelText(text string) {
+	self.Label.SetText(text)
 }
 
 func (self *IconItem) Coord() (int,int) {
@@ -153,7 +174,7 @@ func (self *IconItem) NewCoord(x,y int) {
 }
 
 func (self *IconItem) TotalWidth() int {
-	
+	return 0
 }
 
 func (self *IconItem) Size() (int,int) {
@@ -165,7 +186,7 @@ func (self *IconItem) AddLabel(text string, fontobj *ttf.Font) {
 		l:= NewLabel()
 		self.Label = l
 	}else {
-		self.Label.Init(text,fontobj)
+		self.Label.Init(text,fontobj,nil)
 	}	
 }
 
@@ -177,7 +198,7 @@ func (self *IconItem) AdjustLinkPage() {
 	if self.MyType == ICON_TYPES["DIR"] && self.LinkPage != nil {
 		self.LinkPage.SetIndex(0)
 		self.LinkPage.SetAlign(ALIGN["SLeft"])
-		self.LinkPage.SetIconNumbers( len(self.LinkPage.GetIcons()) )
+		self.LinkPage.UpdateIconNumbers()
 		self.LinkPage.SetScreen(self.Parent.GetScreen())
 		self.LinkPage.SetCanvasHWND( (self.Parent.GetScreen()).CanvasHWND )
 		self.LinkPage.SetFootMsg([5]string{ "Nav.","","","Back","Enter" } )
@@ -194,19 +215,19 @@ func (self *IconItem) AdjustLinkPage() {
 }
 
 
-func (self *IconItem) GetImageSurf() *sdl.Surface {
+func (self *IconItem) GetImgSurf() *sdl.Surface {
 	return self.ImgSurf
 }
 
-func (self *IconItem) SetImageSurf(newsurf *sdl.Surface) {
+func (self *IconItem) SetImgSurf(newsurf *sdl.Surface) {
 	self.ImgSurf = newsurf
 }
 
 
-func (self *IconItem) CreateImageSurf() {
+func (self *IconItem) CreateImgSurf() {
 	if self.ImgSurf == nil && self.ImageName != "" {
 		self.ImgSurf = image.Load(self.ImageName)
-		if self.ImgSurf.W  > IconWidth  || self.ImgSurf.H > IconHeight {
+		if int(self.ImgSurf.W)  > IconWidth  || int(self.ImgSurf.H) > IconHeight {
 			self.ImgSurf = transform.Scale(self.ImgSurf,IconWidth,IconHeight)
 		}
 	}
@@ -216,12 +237,20 @@ func (self *IconItem) ChangeImgSurfColor(col *color.Color) {
 	utils.ColorSurface(self.ImgSurf,col)
 }
 
+func (self *IconItem) Clear() {
+	
+}
+
+func (self *IconItem) GetCmdInvoke() PluginInterface {
+	return self.CmdInvoke
+}
+
 func (self *IconItem) Draw() {
 	
 	parent_x,parent_y := self.Parent.Coord()
 	
 	if self.Label != nil {
-		lab_x,lab_y := self.Label.Coord()
+//		lab_x,lab_y := self.Label.Coord()
 		lab_w,lab_h:= self.Label.Size()
 		
 		if self.Align == ALIGN["VCenter"] {

@@ -1,11 +1,18 @@
 package UI
 
 import (
+	"fmt"
+//	"io/ioutil"
+	"log"
+	
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 	
 	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/surface"
+	"github.com/cuu/gogame/draw"
+	"github.com/cuu/gogame/image"
+	"github.com/cuu/gogame/font"
 	
 )
 
@@ -62,6 +69,7 @@ type FootBar struct {
 	LabelFont *ttf.Font
 	State   string
 	SkinManager *SkinManager
+	
 	icon_base_path string
 	
 }
@@ -93,13 +101,7 @@ func (self *FootBar) ReadFootBarIcons( icondir string) {
 	}
 	keynames := [5]string{"nav","x","y","a","b"}
 
-	share_surf := image.Load(icon_base_path+"footbar.png")
-
-	files,err := ioutil.ReadDir(icondir)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	share_surf := image.Load(self.icon_base_path+"footbar.png")
 
 	for i,v := range keynames { // share_surf contains same number of image pieces of keynames
 		it := NewFootBarIconItem()
@@ -119,8 +121,6 @@ func (self *FootBar) Init(main_screen *MainScreen) {
 	self.CanvasHWND = surface.Surface(self.Width,self.Height)
 	self.HWND = main_screen.HWND
 	self.SkinManager = main_screen.SkinManager
-	self.DBusManager = main_screen.DBusManager
-
 
 	round_corners := NewFootBarIconItem()
 	round_corners.IconWidth = 10
@@ -128,7 +128,7 @@ func (self *FootBar) Init(main_screen *MainScreen) {
 	
 	round_corners.MyType = ICON_TYPES["STAT"]
 	round_corners.Parent = self
-	round_corners.ImgSurf = MyIconPool.GetImageSurf["roundcorners"]
+	round_corners.ImgSurf = MyIconPool.GetImgSurf("roundcorners")
 	round_corners.Adjust(0,0,10,10,0)
 	
 	self.Icons["round_corners"] = round_corners
@@ -136,14 +136,15 @@ func (self *FootBar) Init(main_screen *MainScreen) {
 }
 
 func (self *FootBar) ResetNavText() {
-	self.Icons["nav"].Label.SetText("Nav.")
+	self.Icons["nav"].SetLabelText("Nav.")
 	self.State = "normal"
 	self.Draw()
 }
 
 func (self *FootBar) UpdateNavText(texts string) {
 	self.State = "tips"
-	my_text := font.Render(self.LabelFont, texts, true,self.SkinManager.GiveColor("Text"))
+	
+//	my_text := font.Render(self.LabelFont, texts, true,self.SkinManager.GiveColor("Text"),nil)
 
 	left_width := self.Width - 18
 
@@ -151,21 +152,21 @@ func (self *FootBar) UpdateNavText(texts string) {
 
 	for i,_ := range texts {
 		text_ := texts[:i+1]
-		my_text := font.Render(self.LabelFont, text_, true, self.SkinManager.GiveColor("Text"))
+		my_text := font.Render(self.LabelFont, text_, true, self.SkinManager.GiveColor("Text"),nil)
 		final_piece  = text_
-		if my_text.W >= left_width {
+		if int(my_text.W) >= left_width {
 			break
 		}
 	}
 	
 	fmt.Printf("finalpiece %s\n", final_piece)
 
-	self.Icons["nav"].Label.SetText(final_piece)
+	self.Icons["nav"].SetLabelText(final_piece)
 	self.Draw()
 	
 }
 
-func (self *FootBar) SetLabelTexts( texts []string) {
+func (self *FootBar) SetLabelTexts( texts [5]string) {
 	keynames := [5]string{"nav","x","y","a","b"}
 	if len(texts) < 5 {
 		log.Fatal("SetLabelTexts texts length error")
@@ -173,7 +174,7 @@ func (self *FootBar) SetLabelTexts( texts []string) {
 	}
 
 	for idx,x := range keynames {
-		self.Icons[x].Label.SetText(texts[idx])
+		self.Icons[x].SetLabelText(texts[idx])
 	}
 	
 }
@@ -202,7 +203,7 @@ func (self *FootBar) Draw() {
 		_w := 0
 
 		for i,x := range []string{"b","a","y","x"} {
-			if self.Icons[x].Label.GetText() != "" {
+			if self.Icons[x].GetLabelText() != "" {
 				if i== 0 {
 					_w += self.Icons[x].TotalWidth()
 				}else {
@@ -215,11 +216,12 @@ func (self *FootBar) Draw() {
 				self.Icons[x].Draw()
 			}
 		}
-
-		draw.Line(self.CanvasHWND, self.SkinManager.GiveColor("Line"),0,0,Width,0,self.BorderWidth)
-
-		if self.HWND != nil {
-			rect_ := rect.Rect(self.PosX, Height - self.Height, Width, self.BarHeight)
-			surface.Blit(self.HWND,self.CanvasHWND, &rect_,nil)
-		}
+	}
+	
+	draw.Line(self.CanvasHWND, self.SkinManager.GiveColor("Line"),0,0,Width,0,self.BorderWidth)
+	
+	if self.HWND != nil {
+		rect_ := rect.Rect(self.PosX, Height - self.Height, Width, self.BarHeight)
+		surface.Blit(self.HWND,self.CanvasHWND, &rect_,nil)
+	}
 }

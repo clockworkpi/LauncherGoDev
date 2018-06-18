@@ -1,7 +1,10 @@
 package UI
 
 import (
+	"github.com/cuu/gogame/surface"
 	"github.com/cuu/gogame/image"
+	"github.com/cuu/gogame/draw"
+	"github.com/cuu/gogame/rect"
 )
 
 

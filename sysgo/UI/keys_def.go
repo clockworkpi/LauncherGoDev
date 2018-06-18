@@ -1,7 +1,7 @@
 package UI
 
 import (
-	"../sysgo"
+	"../../sysgo"
 )
 
 

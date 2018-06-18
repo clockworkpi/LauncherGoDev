@@ -1,22 +1,31 @@
 package UI
 
 import (
+	"fmt"
+	"os"
 	"log"
 	"strconv"
 	"bufio"
 	"strings"
+	"time"
 	
 	"github.com/veandco/go-sdl2/sdl"
-//	"github.com/veandco/go-sdl2/ttf"
+	"github.com/veandco/go-sdl2/ttf"
 	
 	"github.com/cuu/gogame/surface"
+	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/font"
+	"github.com/cuu/gogame/draw"
 	
 	"github.com/itchyny/volume-go"
 	
 	"github.com/vjeantet/jodaTime"
+
+	"../DBUS"
 	
 	"../../sysgo"
+
+	
 )
 
 
@@ -53,7 +62,7 @@ func (self *TitleBarIconItem) Draw() {
 		
 		portion := rect.Rect(0,self.IconIndex*self.IconHeight,self.IconWidth,self.IconHeight)
 		
-		surface.Blit(self.Parent.GetCanvasHWND(),
+		surface.Blit(self.Parent.CanvasHWND,
 			self.ImgSurf,draw.MidRect(self.PosX + parent_x, self.PosY + parent_y,
 			self.Width,self.Height, Width, Height),&portion)
 	}
@@ -70,15 +79,15 @@ type TitleBar struct {
 	LOffset int
 	ROffset int
 	Icons map[string]IconItemInterface
-	IconWidth
-	IconHeight
-	BorderWidth
+	IconWidth int
+	IconHeight int 
+	BorderWidth int
 	CanvasHWND *sdl.Surface
 	HWND       *sdl.Surface
 	Title string
 	InLowBackLight int
 	SkinManager *SkinManager //set by MainScreen
-	DBusManager *DBusInterface
+	DBusManager DBUS.DBusInterface
 	
 	icon_base_path string /// SkinMap("gameshell/titlebar_icons/")
 
@@ -90,7 +99,6 @@ type TitleBar struct {
 func NewTitleBar() *TitleBar {
 	t := &TitleBar{}
 
-	
 	t.BorderWidth = 1
 
 	t.BarHeight = TitleBar_BarHeight
@@ -110,9 +118,11 @@ func NewTitleBar() *TitleBar {
 
 	t.TitleFont = Fonts["varela12"]
 	t.TimeFont  = Fonts["varela16"]
+	return t
+	
 }
 
-func (t *TitleBar) RoundRobinCheck {
+func (t *TitleBar) RoundRobinCheck() {
 	
 }
 
@@ -121,14 +131,14 @@ func (t *TitleBar) UpdateWifiStrength() {
 }
 
 func (t *TitleBar) GetWifiStrength(stren int) int {
-	segs := [][]int{ []int{-2,-1}, []int{0,25}, []int{25,50}, []int{50,75},int{75,100}}
+	segs := [][]int{ []int{-2,-1}, []int{0,25}, []int{25,50}, []int{50,75},[]int{75,100}}
 	stren_number :=  stren 
 	ge := 0
 	if stren_number == 0 {
 		return ge
 	}
 	
-	for i,v in range segs {
+	for i,v := range segs {
 		if stren_number >= v[0] && stren_number <= v[1] {
 			ge = i
 			break
@@ -150,7 +160,7 @@ func (self *TitleBar) SyncSoundVolume() {
 	snd_segs := [][]int{ []int{0,10}, []int{10,30}, []int{30,70},[]int{70,100} }
 	ge := 0
 
-	for i,v in range snd_segs {
+	for i,v := range snd_segs {
 		if vol >= v[0] && vol <= v[1] {
 			ge = i
 			break
@@ -178,7 +188,7 @@ func (self *TitleBar) CheckBatteryStat() {
 
 	defer file.Close()
 
-	bat_uevent := make([string]string)
+	bat_uevent := make(map[string]string)
 	
   scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines) 
@@ -195,14 +205,14 @@ func (self *TitleBar) CheckBatteryStat() {
 	cur_cap := 0
 	
 	if val, ok := bat_uevent["POWER_SUPPLY_CAPACITY"]; ok {
-		cur_cap = strings.Atoi(val)
+		cur_cap,_ = strconv.Atoi(val)
 	}else {
 		cur_cap = 0
 	}
 
 	cap_ge := 0
 
-	for i,v in range bat_segs {
+	for i,v := range bat_segs {
 		if cur_cap >= v[0] && cur_cap <= v[1] {
 			cap_ge = i
 			break
@@ -286,7 +296,7 @@ func (self *TitleBar) Init(main_screen *MainScreen) {
 	
 	round_corners.MyType = ICON_TYPES["STAT"]
 	round_corners.Parent = self
-	round_corners.ImgSurf = MyIconPool.GetImageSurf["roundcorners"]
+	round_corners.ImgSurf = MyIconPool.GetImgSurf("roundcorners")
 	round_corners.Adjust(0,0,10,10,0)
 	
 	self.Icons["round_corners"] = round_corners
@@ -320,12 +330,12 @@ func (self *TitleBar) Draw(title string) {
 	time_text_w,  time_text_h  := font.Size(self.TimeFont, cur_time)
 	title_text_w, title_text_h := font.Size(self.TitleFont, self.Title)
 
-	title_text_surf := font.Render(self.TitleFont, self.Title, true, self.SkinManager.GiveColor("Text"))
+	title_text_surf := font.Render(self.TitleFont, self.Title, true, self.SkinManager.GiveColor("Text"),nil)
 	
 	surface.Blit(self.CanvasHWND,title_text_surf, draw.MidRect(title_text_w/2+self.LOffset,title_text_h/2+(self.BarHeight-title_text_h)/2,title_text_w,title_text_h,Width,Height),nil)
 
 
-	time_text_surf := font.Render(self.TimeFont, cur_time,true,self.SkinManager.GiveColor("Text"))
+	time_text_surf := font.Render(self.TimeFont, cur_time,true,self.SkinManager.GiveColor("Text"),nil)
 	surface.Blit(self.CanvasHWND, time_text_surf, draw.MidRect(Width-time_text_w/2-self.ROffset, time_text_h/2+(self.BarHeight-time_text_h)/2, time_text_w,time_text_h,Width,Height),nil)
 
 	start_x := Width - time_text_w - self.ROffset - self.IconWidth*3 // close to the time_text

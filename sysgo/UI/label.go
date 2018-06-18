@@ -1,15 +1,18 @@
 package UI
 
 import (
-	
+	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
-
+	
+	"github.com/cuu/gogame/surface"
+	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/color"
 	"github.com/cuu/gogame/font"
 )
 
 type LabelInterface interface {
 	Init( text string, font_obj *ttf.Font,col *color.Color )
+	SetCanvasHWND( canvas *sdl.Surface)
 	Coord() (int,int)
 	Size() (int,int)
 	NewCoord(x,y int)
@@ -31,7 +34,7 @@ type Label struct {
 //	TextSurf *sdl.Surface
 }
 
-func NewLabel() *Label() {
+func NewLabel() *Label {
 	l := &Label{}
 	l.Color = &color.Color{83,83,83,255}
 	return l
@@ -49,6 +52,10 @@ func (self *Label) Init(text string, font_obj *ttf.Font,col *color.Color ) {
 
 	self.Width,self.Height = font.Size(self.FontObj, self.Text)
 	
+}
+
+func (self *Label) SetCanvasHWND( canvas *sdl.Surface) {
+	self.CanvasHWND = canvas
 }
 
 func (self *Label) Coord() (int,int) {
@@ -85,8 +92,8 @@ func (self *Label) Draw() {
 	font.SetBold(self.FontObj,false) // avoing same font tangling set_bold to others
 	my_text := font.Render(self.FontObj,self.Text, true, self.Color, nil)
 
-	rect_ := &rect.Rect{self.PosX,self.PosY,self.Width,self.Height}
+	rect_ := rect.Rect(self.PosX,self.PosY,self.Width,self.Height)
 	
-	surface.Blit(self.CanvasHWND,my_text,rect_,nil)
+	surface.Blit(self.CanvasHWND,my_text,&rect_,nil)
 	
 }

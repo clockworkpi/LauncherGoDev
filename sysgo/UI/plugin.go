@@ -1,12 +1,13 @@
 package UI
 
 import (
-	"plugin"
+	"log"
+	goplugin "plugin"
 )
 var PluginPool = NewPluginPool()
 
-type PluginInterface {
-	Name() string
+type PluginInterface interface {
+	GetName() string
 	Init(screen *MainScreen)
 	Run(screen *MainScreen)
 }
@@ -15,7 +16,7 @@ type Plugin struct {
 	Name string // only ID for plugin
 }
 
-func (self *Plugin) Name() string {
+func (self *Plugin) GetName() string {
 	return self.Name
 }
 
@@ -35,20 +36,22 @@ func NewPluginPool() map[string]PluginInterface {
 }
 
 func PluginPoolRegister( pi PluginInterface ) bool {
-	name := pi.Name()
+	name := pi.GetName()
 	
 	if _,ok := PluginPool[name]; ok {
 		return false
 	}
 	
 	PluginPool[name] = pi
+	return true
+	
 }
 
-func LoadPlugin( pname string) (*plugin.Plugin,error) {
-	return plugin.Load(pname)
+func LoadPlugin( pname string) (*goplugin.Plugin,error) {
+	return goplugin.Open(pname)
 }
 
-func InitPlugin(p *plugin.Plugin, main_screen *MainScreen) {
+func InitPlugin(p *goplugin.Plugin, main_screen *MainScreen) {
 	symAPI,err := p.Lookup("APIOBJ")
 
 	if err!= nil {
@@ -66,7 +69,7 @@ func InitPlugin(p *plugin.Plugin, main_screen *MainScreen) {
 	pi.Init(main_screen)
 }
 
-func RunPlugin(p *plugin.Plugin, main_screen *MainScreen) {
+func RunPlugin(p *goplugin.Plugin, main_screen *MainScreen) {
 	symAPI,err := p.Lookup("APIOBJ")
 
 	if err!= nil {

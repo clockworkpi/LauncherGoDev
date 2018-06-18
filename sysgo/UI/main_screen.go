@@ -1,15 +1,22 @@
 package UI
 
 import (
-
+	"fmt"
+	"io/ioutil"
 	"strings"
+	"log"
+	
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 
-	"github.com/cuu/gogame/display"	
+	"github.com/cuu/gogame/display"
 	"github.com/cuu/gogame/surface"
+	"github.com/cuu/gogame/draw"
 	"github.com/cuu/gogame/color"
+	"github.com/cuu/gogame/rect"
+	"github.com/cuu/gogame/font"
 	"github.com/cuu/gogame/time"
+	
 	"github.com/cuu/gogame/event"
 
 	"../DBUS"
@@ -23,7 +30,7 @@ var (
 type MessageBox struct {
 	Label
 	Parent *MainScreen
-
+	HWND *sdl.Surface
 }
 
 func NewMessageBox() *MessageBox {
@@ -56,7 +63,7 @@ func (self *MessageBox) SetText( text string) {
 func (self *MessageBox) Draw() {
 	self.Width = 0
 	self.Height = 0
-	surface.Fill(self.CanvasHWND, color.Color{255,255,255,255} )
+	surface.Fill(self.CanvasHWND, &color.Color{255,255,255,255} )
 
 	words := strings.Split(self.Text," ")
 	space,_ := font.Size(self.FontObj," ")
@@ -70,8 +77,8 @@ func (self *MessageBox) Draw() {
 
 	for _,word := range words {
 		word_surface := font.Render( self.FontObj, word, true, self.Color,nil)
-		word_width := word_surface.W
-		word_height := word_surface.H
+		word_width := int(word_surface.W)
+		word_height := int(word_surface.H)
 		row_total_width += word_width
 		if lines == 0 {
 			lines += word_height
@@ -109,15 +116,20 @@ func (self *MessageBox) Draw() {
 
 	rect_ := rect.Rect(x-padding,y-padding, self.Width+padding*2, self.Height+padding*2)
 	
-	draw.Rect(self.HWND , &color.Color{255,255,255,255},&rect_,0)
-
 	if self.HWND != nil {
+		
+		draw.Rect(self.HWND , &color.Color{255,255,255,255},&rect_,0)
+		
 		rect__ := draw.MidRect(self.Parent.Width/2, self.Parent.Height/2,self.Width,self.Height,Width,Height)
-		dest_rect := rect.Rect(0,0,self.Width,self,Height)
-		surface.Blit(self.HWND, rect__, &dest_rect,nil)
+		
+		dest_rect := rect.Rect(0,0,self.Width,self.Height)
+		
+		surface.Blit(self.HWND, self.CanvasHWND, rect__, &dest_rect)
+		
+		draw.Rect(self.HWND , &color.Color{0,0,0,255},&rect_,1)
+		
 	}
 
-	draw.Rect(self.HWND , &color.Color{0,0,0,255},&rect_,1)
 	
 }
 
@@ -153,6 +165,7 @@ func NewMainScreen() *MainScreen {
 	
 	m.MsgBoxFont = Fonts["veramono20"]
 	m.IconFont   = Fonts["varela15"]
+	return m
 }
 
 func (self *MainScreen) Init() {
@@ -160,12 +173,12 @@ func (self *MainScreen) Init() {
 	
 	self.MsgBox     = NewMessageBox()
 	self.MsgBox.Parent = self
-	self.MsgBox.Init(" ", self.MsgBoxFont, &color.Color{83,83,83})
+	self.MsgBox.Init(" ", self.MsgBoxFont, &color.Color{83,83,83,255})
 
 	self.SkinManager = NewSkinManager()
 	self.SkinManager.Init()
 
-	self.DBusManager = NewDBus()
+	self.DBusManager = DBUS.NewDBus()
 	self.DBusManager.Init()
 }
 
@@ -177,7 +190,8 @@ func (self *MainScreen) FartherPages() { // right after ReadTheDirIntoPages
 		self.Pages[i].SetCanvasHWND(self.CanvasHWND)
 		self.Pages[i].UpdateIconNumbers() // IconNumbers always == len(Pages[i].Icons)
 		self.Pages[i].SetScreen(self)
-
+		self.Pages[i].Adjust()
+		
 		if self.Pages[i].GetIconNumbers() > 1 {
 			self.Pages[i].SetPsIndex(1)
 			self.Pages[i].SetIconIndex( 1 )
@@ -213,14 +227,16 @@ func (self *MainScreen) AppendPage( pg PageInterface ) {
 }
 
 func (self *MainScreen) ClearCanvas() {
-	surface.Fill(self.CanvasHWND, color.Color{255,255,255,255} ) 
+	surface.Fill(self.CanvasHWND, &color.Color{255,255,255,255} ) 
 }
 
 func (self *MainScreen) SwapAndShow() {
 	if self.HWND != nil {
 		rect_ := rect.Rect( self.PosX,self.PosY,self.Width,self.Height)
-		surface.Blit(self.HWND,self.CanvasHWND,*rect_, nil)
+		surface.Blit(self.HWND,self.CanvasHWND,&rect_, nil)
 	}
+
+	display.Flip()
 }
 
 func (self *MainScreen) ExtraName(name string) string {
@@ -308,9 +324,9 @@ func (self *MainScreen) ReadTheDirIntoPages(_dir string, pglevel int, cur_page P
 					untitled := NewUntitledIcon()
 					untitled.Init()
 					if len(i2) > 1 {
-						untitled.SetWords(i2[0],i2[1])
+						untitled.SetWords(string(i2[0]),string(i2[1]))
 					}else if len(i2) == 1 {
-						untitled.SetWords(i2[0],i2[0])
+						untitled.SetWords(string(i2[0]),string(i2[0]))
 					}else {
 						untitled.SetWords("G","s")
 					}
@@ -336,7 +352,7 @@ func (self *MainScreen) ReadTheDirIntoPages(_dir string, pglevel int, cur_page P
 		} else if IsAFile(_dir+"/"+f.Name()) && (pglevel > 0) {
 			if strings.HasSuffix(strings.ToLower(f.Name()),IconExt) {
 				i2 := self.ExtraName(f.Name())
-				iconitem = NewIconItem()
+				iconitem := NewIconItem()
 				iconitem.CmdPath = _dir+"/"+f.Name()
 				MakeExecutable( iconitem.CmdPath )
 				iconitem.MyType = ICON_TYPES["EXE"]
@@ -346,9 +362,9 @@ func (self *MainScreen) ReadTheDirIntoPages(_dir string, pglevel int, cur_page P
 					untitled:= NewUntitledIcon()
 					untitled.Init()
 					if len(i2) > 1 {
-						untitled.SetWords(i2[0],i2[1])
+						untitled.SetWords(string(i2[0]),string(i2[1]))
 					}else if len(i2) == 1 {
-						untitled.SetWords(i2[0],i2[0])
+						untitled.SetWords(string(i2[0]),string(i2[0]))
 					}else {
 						untitled.SetWords("G","s")
 					}
@@ -357,7 +373,7 @@ func (self *MainScreen) ReadTheDirIntoPages(_dir string, pglevel int, cur_page P
 				}
 
 				iconitem.AddLabel(strings.Split(i2,".")[0], self.IconFont)
-				iconfont.LinkPage = nil
+				iconitem.LinkPage = nil
 				cur_page.AppendIcon(iconitem)
 			}
 		}
@@ -406,13 +422,17 @@ func (self *MainScreen) DrawRun() {
 }
 
 func (self *MainScreen) Draw() {
-	self.CurrentPage.Draw()
+	if self.CurrentPage != nil {
+		self.CurrentPage.Draw()
+	}
+	
 	if self.TitleBar != nil {
 		self.TitleBar.Draw( self.CurrentPage.GetName())
 	}
 
 	if self.FootBar != nil {
-		self.FootBar.SetLabelTexts( self.CurrentPage.GetFootMsg())
-		self.FootBar.Draw()
+		fmt.Println( len(self.CurrentPage.GetFootMsg()))
+//		self.FootBar.SetLabelTexts( self.CurrentPage.GetFootMsg())
+//		self.FootBar.Draw()
 	}
 }
