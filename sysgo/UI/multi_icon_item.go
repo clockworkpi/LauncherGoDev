@@ -24,7 +24,7 @@ func NewMultiIconItem() *MultiIconItem {
 	return m 
 }
 
-func (self * MultiIconItem) CreateImageSurf() {
+func (self * MultiIconItem) CreateImgSurf() {
 	if self.ImgSurf == nil && self.ImageName != "" {
 		self.ImgSurf = image.Load(self.ImageName)
 	}

@@ -1,6 +1,7 @@
 package UI
 
 import (
+	"fmt"
 	
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -185,9 +186,10 @@ func (self *IconItem) AddLabel(text string, fontobj *ttf.Font) {
 	if self.Label == nil {
 		l:= NewLabel()
 		self.Label = l
-	}else {
-		self.Label.Init(text,fontobj,nil)
-	}	
+	}
+	
+	self.Label.Init(text,fontobj,nil)
+	
 }
 
 func (self *IconItem) GetLinkPage() PageInterface {
@@ -254,7 +256,10 @@ func (self *IconItem) Draw() {
 		lab_w,lab_h:= self.Label.Size()
 		
 		if self.Align == ALIGN["VCenter"] {
-			self.Label.NewCoord( self.PosX - lab_w/2 + parent_x, self.PosY + lab_h/2+6+parent_y)
+			fmt.Println("IconItem Draw VCenter:",lab_w,lab_h,self.Label.GetText())
+			
+			self.Label.NewCoord( self.PosX - lab_w/2 + parent_x, self.PosY + self.Height/2+6+parent_y)
+			
 		}else if self.Align == ALIGN["HLeft"] {
 			self.Label.NewCoord( self.PosX + self.Width/2+3+parent_x, self.PosY - lab_h/2 + parent_y)
 		}

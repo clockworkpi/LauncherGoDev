@@ -21,9 +21,9 @@ func SkinMap(orig_file_or_dir string) string {
 			ret = strings.Replace(orig_file_or_dir,"..", skin_dir_prefix + DefaultSkin,-1)
 		}
 	}else {
-		ret = skin_dir_prefix+sysgo.SKIN+"/sysgo/"+orig_file_or_dir
+		ret = skin_dir_prefix+sysgo.SKIN+"/"+orig_file_or_dir
 		if FileExists(ret) == false {
-			ret = skin_dir_prefix+DefaultSkin+"/sysgo/"+orig_file_or_dir
+			ret = skin_dir_prefix+DefaultSkin+"/"+orig_file_or_dir
 		}
 	}
 

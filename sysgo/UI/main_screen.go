@@ -321,6 +321,7 @@ func (self *MainScreen) ReadTheDirIntoPages(_dir string, pglevel int, cur_page P
 				if FileExists( SkinMap(_dir+"/"+i2+".png")) {
 					iconitem.ImageName = SkinMap(_dir+"/"+i2+".png")
 				}else {
+					fmt.Println(  SkinMap(_dir+"/"+i2+".png") )
 					untitled := NewUntitledIcon()
 					untitled.Init()
 					if len(i2) > 1 {
@@ -359,6 +360,7 @@ func (self *MainScreen) ReadTheDirIntoPages(_dir string, pglevel int, cur_page P
 				if FileExists( SkinMap( _dir+"/"+ ReplaceSuffix(i2,"png"))) {
 					iconitem.ImageName = SkinMap( _dir+"/"+ ReplaceSuffix(i2,"png"))
 				}else {
+					
 					untitled:= NewUntitledIcon()
 					untitled.Init()
 					if len(i2) > 1 {
@@ -431,8 +433,7 @@ func (self *MainScreen) Draw() {
 	}
 
 	if self.FootBar != nil {
-		fmt.Println( len(self.CurrentPage.GetFootMsg()))
-//		self.FootBar.SetLabelTexts( self.CurrentPage.GetFootMsg())
-//		self.FootBar.Draw()
+		self.FootBar.SetLabelTexts( self.CurrentPage.GetFootMsg())
+		self.FootBar.Draw()
 	}
 }

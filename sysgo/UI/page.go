@@ -91,6 +91,8 @@ type PageSelector struct {
 
 func NewPageSelector() *PageSelector {
 	p := &PageSelector{}
+	p.OnShow = true
+	
 	return p
 }
 
@@ -736,6 +738,7 @@ func (self *Page) ResetPageSelector() {
 
 func (self *Page) DrawPageSelector() {
 	if self.Ps.GetOnShow() == true {
+		fmt.Println("DrawPageSelector")
 		self.Ps.Draw()
 	}
 }

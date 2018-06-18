@@ -16,7 +16,6 @@ import (
 	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/font"
 	"github.com/cuu/gogame/draw"
-	
 	"github.com/itchyny/volume-go"
 	
 	"github.com/vjeantet/jodaTime"
@@ -38,9 +37,28 @@ type TitleBarIconItem struct {
 
 func NewTitleBarIconItem() *TitleBarIconItem {
 	m := &TitleBarIconItem{}
-
+	m.IconIndex = 0
+	m.IconWidth = 18
+	m.IconHeight = 18
+	m.Align = ALIGN["VCenter"]
 	return m
 
+}
+
+func (self *TitleBarIconItem) Adjust(x,y,w,h,at int) {
+	self.PosX = x
+	self.PosY = y
+	self.Width = w
+	self.Height = h
+	self.AnimationTime = at
+
+	if self.Label != nil {
+		self.Label.SetCanvasHWND(self.Parent.CanvasHWND)
+	}
+
+	self.CreateImgSurf()
+//	self.AdjustLinkPage()
+	
 }
 
 func (self *TitleBarIconItem) Draw() {
@@ -114,7 +132,7 @@ func NewTitleBar() *TitleBar {
 	
 	t.Icons = make(map[string]IconItemInterface)
 	
-	t.icon_base_path  = SkinMap("gameshell/titlebar_icons/")
+	t.icon_base_path  = SkinMap("sysgo/gameshell/titlebar_icons/")
 
 	t.TitleFont = Fonts["varela12"]
 	t.TimeFont  = Fonts["varela16"]
@@ -344,6 +362,7 @@ func (self *TitleBar) Draw(title string) {
 
 	if self.DBusManager.IsWifiConnectedNow() == true {
 		ge := self.GetWifiStrength( self.DBusManager.WifiStrength() )
+		fmt.Println("wifi ge: ",ge)
 		if ge > 0 {
 			self.Icons["wifistatus"].SetIconIndex(ge)
 			self.Icons["wifistatus"].NewCoord(start_x+self.IconWidth+5, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2 )
@@ -353,8 +372,11 @@ func (self *TitleBar) Draw(title string) {
 			self.Icons["wifistatus"].Draw()
 		}
 	}else {
+		
 		self.Icons["wifistatus"].SetIconIndex(0)
+		
 		self.Icons["wifistatus"].NewCoord(start_x+self.IconWidth+5, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2)
+		
 		self.Icons["wifistatus"].Draw()
 	}
 

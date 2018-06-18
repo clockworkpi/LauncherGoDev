@@ -19,13 +19,34 @@ import (
 var FootBar_BarHeight = 20
 
 type FootBarIconItem struct {
-	MultiIconItem
+	MultiIconItem 
 	Parent *FootBar
 }
 
 func NewFootBarIconItem() *FootBarIconItem {
 	m := &FootBarIconItem{}
+	m.IconIndex = 0
+	m.IconWidth = 18
+	m.IconHeight = 18
+	m.Align = ALIGN["VCenter"]
+	
 	return m
+}
+
+func (self *FootBarIconItem) Adjust(x,y,w,h,at int) {
+	self.PosX = x
+	self.PosY = y
+	self.Width = w
+	self.Height = h
+	self.AnimationTime = at
+
+	if self.Label != nil {
+		self.Label.SetCanvasHWND(self.Parent.CanvasHWND)
+	}
+
+	self.CreateImgSurf()
+//	self.AdjustLinkPage()
+	
 }
 
 func (self *FootBarIconItem) TotalWidth() int {
@@ -48,7 +69,8 @@ func (self *FootBarIconItem) Draw() {
 	if self.ImgSurf != nil {
 		portion := rect.Rect(0, self.IconIndex*self.IconHeight, self.IconWidth, self.IconHeight)
 		surface.Blit(self.Parent.CanvasHWND, self.ImgSurf, draw.MidRect(self.PosX,self.PosY, self.Width,self.Height, Width,Height),&portion)
-		
+	}else {
+		fmt.Println("self.ImgSurf is nil ")
 	}
 	
 }
@@ -88,7 +110,7 @@ func NewFootBar() *FootBar {
 	
 	f.LabelFont = Fonts["veramono10"]
 	f.State = "normal"
-	f.icon_base_path = SkinMap("gameshell/footbar_icons/")
+	f.icon_base_path = SkinMap("sysgo/gameshell/footbar_icons/")
 
 	f.Icons = make(map[string]IconItemInterface)
 	
@@ -109,6 +131,8 @@ func (self *FootBar) ReadFootBarIcons( icondir string) {
 		it.Parent = self
 		it.ImgSurf = share_surf
 		it.Align = ALIGN["HLeft"] // (X)Text
+		it.IconWidth = self.IconWidth
+		it.IconHeight =self.IconHeight
 		it.AddLabel("game", self.LabelFont)
 		it.Adjust( self.IconWidth/2+i*self.IconWidth, self.IconHeight/2+2, self.IconWidth,self.IconHeight,0)
 		it.IconIndex = i
@@ -122,6 +146,8 @@ func (self *FootBar) Init(main_screen *MainScreen) {
 	self.HWND = main_screen.HWND
 	self.SkinManager = main_screen.SkinManager
 
+	self.ReadFootBarIcons(self.icon_base_path)
+	
 	round_corners := NewFootBarIconItem()
 	round_corners.IconWidth = 10
 	round_corners.IconHeight = 10
@@ -196,6 +222,7 @@ func (self *FootBar) ClearCanvas() {
 
 func (self *FootBar) Draw() {
 	self.ClearCanvas()
+	
 	self.Icons["nav"].NewCoord(self.IconWidth/2+3, self.IconHeight/2+2)
 	self.Icons["nav"].Draw()
 

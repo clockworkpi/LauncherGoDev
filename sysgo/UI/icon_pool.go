@@ -1,6 +1,7 @@
 package UI
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strings"
@@ -18,7 +19,7 @@ type IconPool struct {
 
 func NewIconPool() *IconPool {
 	i := &IconPool{}
-	i.GameShellIconPath = SkinMap("gameshell/icons/")
+	i.GameShellIconPath = SkinMap("sysgo/gameshell/icons/")
 	i.Icons = make( map[string]*sdl.Surface )
 	return i
 }
@@ -49,6 +50,7 @@ func (self *IconPool) GetImgSurf(keyname string) *sdl.Surface {
 	if _,ok := self.Icons[keyname]; ok {
 		return self.Icons[keyname]
 	} else {
+		fmt.Println("IconPool GetImgSurf ", keyname, "  failed")
 		return nil
 	}
 }
