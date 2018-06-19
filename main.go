@@ -61,16 +61,15 @@ func run() int {
 		if ev.Type == event.KEYDOWN {
 			fmt.Println(ev)
 			if ev.Data["Key"] == "Q" {
+				main_screen.OnExitCb()
 				return 0
-			}
-			if ev.Data["Key"] == "Escape" {
-				return 0
-			}
-			if ev.Data["Key"] == "T" {
+			}else if ev.Data["Key"] == "D" {
 				time.Delay(1000)
-			}
-			if ev.Data["Key"] == "P" {				
+			}else if ev.Data["Key"] == "P" {				
 				event.Post(event.RUNEVT,"GODEBUG=cgocheck=0 sucks") // just id and string, simpify the stuff
+				
+			}else {
+				main_screen.KeyDown(ev)
 			}
 		}
 	}
