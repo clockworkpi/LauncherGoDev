@@ -387,10 +387,10 @@ func (self *MainScreen) RunEXE( cmdpath string) {
 	self.DrawRun()
 	self.SwapAndShow()
 
-	time.Delay(1000)
+	
+	time.BlockDelay(1000)
 
 	cmdpath = strings.Trim(cmdpath," ")
-
 	cmdpath = CmdClean(cmdpath)
 	
 	event.Post(event.RUNEVT,cmdpath)

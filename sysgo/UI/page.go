@@ -381,9 +381,11 @@ func (self *Page) AdjustSAutoLeftAlign() { //  ## adjust coordinator and append 
 			it.SetParent(self)
 			it.SetIndex(i)
 			it.Adjust(start_x+i*self.PageIconMargin + i*IconWidth, start_y, IconWidth-6, IconHeight-6, 0)
+			
 			old_surf := it.GetImgSurf()
 			it_w,it_h := it.Size()
 			it.SetImgSurf( transform.SmoothScale( old_surf, it_w,it_h))			
+      
 		}
 	}
 
