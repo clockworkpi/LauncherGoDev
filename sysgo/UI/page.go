@@ -355,11 +355,12 @@ func (self *Page) AdjustSAutoLeftAlign() { //  ## adjust coordinator and append 
 		it := self.Icons[0]
 		it.SetParent(self)
 		it.SetIndex(0)
-		it.Adjust(start_x,start_y, IconWidth-6,IconHeight-6,0)
+		it.Adjust(start_x,start_y, IconWidth,IconHeight,0)
+		/*
 		old_surf := it.GetImgSurf()
 		it_w,it_h := it.Size()
 		it.SetImgSurf( transform.SmoothScale(old_surf, it_w,it_h))
-		
+		*/
 	}else if self.IconNumbers == 2 {
 		start_x = (self.Width - self.PageIconMargin - self.IconNumbers*IconWidth) / 2 + IconWidth/2
 		start_y = self.Height /2
@@ -368,11 +369,12 @@ func (self *Page) AdjustSAutoLeftAlign() { //  ## adjust coordinator and append 
 			it := self.Icons[i]
 			it.SetParent(self)
 			it.SetIndex(i)
-			it.Adjust( start_x+ i*self.PageIconMargin+i*IconWidth, start_y, IconWidth-6, IconHeight-6,0)
+			it.Adjust( start_x+ i*self.PageIconMargin+i*IconWidth, start_y, IconWidth, IconHeight,0)
+			/*
 			old_surf := it.GetImgSurf()
 			it_w,it_h := it.Size()
 			it.SetImgSurf( transform.SmoothScale( old_surf, it_w,it_h))
-			
+			*/
 		}
 		
 	}else if self.IconNumbers > 2 {
@@ -380,12 +382,12 @@ func (self *Page) AdjustSAutoLeftAlign() { //  ## adjust coordinator and append 
 			it := self.Icons[i]
 			it.SetParent(self)
 			it.SetIndex(i)
-			it.Adjust(start_x+i*self.PageIconMargin + i*IconWidth, start_y, IconWidth-6, IconHeight-6, 0)
-			
+			it.Adjust(start_x+i*self.PageIconMargin + i*IconWidth, start_y, IconWidth, IconHeight, 0)
+			/*
 			old_surf := it.GetImgSurf()
 			it_w,it_h := it.Size()
 			it.SetImgSurf( transform.SmoothScale( old_surf, it_w,it_h))			
-      
+      */
 		}
 	}
 
