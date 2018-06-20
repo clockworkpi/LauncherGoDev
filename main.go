@@ -59,7 +59,7 @@ func run() int {
 			fmt.Println("UserEvent: ",ev.Data["Msg"])
 		}
 		if ev.Type == event.KEYDOWN {
-			if ev.Data["Key"] == "Q" {
+			if ev.Data["Key"] == "Q" || ev.Data["Key"] == "Escape" {
 				main_screen.OnExitCb()
 				return 0
 			}else if ev.Data["Key"] == "D" {
