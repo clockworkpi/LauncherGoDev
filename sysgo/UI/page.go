@@ -3,7 +3,7 @@ package UI
 import (
 	"fmt"
 	
-	"math"
+//	"math"
 	"sync"
 	
 	"github.com/veandco/go-sdl2/sdl"
@@ -562,17 +562,18 @@ func (self *Page) Init() {
 func (self *Page) IconStepMoveData(icon_eh ,cuts int)  []int {  //  no Sine,No curve,plain movement steps data
 	var all_pieces []int
 	
-	piece := float64( icon_eh / cuts )
-	c := 0.0
-	prev := 0.0
+	piece := float32( icon_eh / cuts )
+	c := float32(0.0)
+	prev := float32(0.0)
 	for i:=0;i<cuts;i++ {
 		c+= piece
 		dx:= c-prev
 		if dx < 0.5 {
-			dx = 1.0
+			dx = float32(1.0)
 		}
-		all_pieces = append(all_pieces, int(math.Ceil(dx)))
-		if c >= float64(icon_eh) {
+		dx += 0.9
+		all_pieces = append(all_pieces, int(dx))
+		if c >= float32(icon_eh) {
 			break
 		}
 	}
@@ -581,9 +582,9 @@ func (self *Page) IconStepMoveData(icon_eh ,cuts int)  []int {  //  no Sine,No c
 	bidx := 0
 
 	for _,v := range all_pieces {
-		c += float64(v)
+		c += float32(v)
 		bidx+=1
-		if c >= float64(icon_eh) {
+		if c >= float32(icon_eh) {
 			break
 		}
 	}
