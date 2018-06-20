@@ -604,18 +604,18 @@ func (self *Page) IconStepMoveData(icon_eh ,cuts int)  []int {  //  no Sine,No c
 }
 
 func (self *Page) EasingData(start,distance int) []int {
-	current_time := 0.0
-	start_posx   := 0.0
+	current_time := float32(0.0)
+	start_posx   := float32(0.0)
 	current_posx := start_posx
-	final_posx   := float64(distance)
+	final_posx   := float32(distance)
 //	posx_init    := start
 	dur          := self.EasingDur
-	last_posx    := 0.0
+	last_posx    := float32(0.0)
 
 	var all_last_posx []int
 
 	for i:=0;i<distance*dur;i++ {
-		current_posx = float64(easings.SineIn(float32(current_time), float32(start_posx), float32(final_posx-start_posx),float32(dur)))
+		current_posx = float32(easings.SineIn(float32(current_time), float32(start_posx), float32(final_posx-start_posx),float32(dur)))
 		if current_posx >= final_posx {
 			current_posx = final_posx
 		}
