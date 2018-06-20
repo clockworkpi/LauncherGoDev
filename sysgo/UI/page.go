@@ -245,7 +245,7 @@ func NewPage() *Page {
 	p := &Page{}
 	p.PageIconMargin = 20
 	p.SelectedIconTopOffset = 20
-	p.EasingDur = 30
+	p.EasingDur = 10
 
 	p.Align = ALIGN["SLeft"]
 	
