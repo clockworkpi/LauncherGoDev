@@ -19,7 +19,7 @@ import (
 	
 	"github.com/cuu/gogame/event"
 
-	"../DBUS"
+	"github.com/cuu/AppStore/sysgo/DBUS"
 )
 
 var (

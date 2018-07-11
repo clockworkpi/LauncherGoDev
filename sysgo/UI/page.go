@@ -15,7 +15,7 @@ import (
 	"github.com/cuu/gogame/event"
 
 	"github.com/cuu/gogame/transform"
-	"../easings"
+	"github.com/cuu/AppStore/sysgo/easings"
 	
 )
 

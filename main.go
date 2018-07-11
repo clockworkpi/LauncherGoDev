@@ -13,7 +13,7 @@ import (
 	"github.com/cuu/gogame/font"
 	"github.com/cuu/gogame/time"
 	
-	"./sysgo/UI"
+	"github.com/cuu/AppStore/sysgo/UI"
 )
 
 
@@ -59,7 +59,7 @@ func run() int {
 			fmt.Println("UserEvent: ",ev.Data["Msg"])
 		}
 		if ev.Type == event.KEYDOWN {
-			if ev.Data["Key"] == "Q" || ev.Data["Key"] == "Escape" {
+			if ev.Data["Key"] == "Q" {
 				main_screen.OnExitCb()
 				return 0
 			}else if ev.Data["Key"] == "D" {

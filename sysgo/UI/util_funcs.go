@@ -8,7 +8,7 @@ import (
 	
 	"github.com/cuu/gogame/display"
 
-	"../../sysgo"
+	"github.com/cuu/AppStore/sysgo"
 )
 
 func SkinMap(orig_file_or_dir string) string {
