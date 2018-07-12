@@ -13,7 +13,7 @@ import (
 	"github.com/cuu/gogame/font"
 	"github.com/cuu/gogame/time"
 	
-	"github.com/cuu/AppStore/sysgo/UI"
+	"github.com/cuu/LauncherGo/sysgo/UI"
 )
 
 

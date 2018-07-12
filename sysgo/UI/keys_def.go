@@ -1,7 +1,7 @@
 package UI
 
 import (
-	"github.com/cuu/AppStore/sysgo"
+	"github.com/cuu/LauncherGo/sysgo"
 )
 
 

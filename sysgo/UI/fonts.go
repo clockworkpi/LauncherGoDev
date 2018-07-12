@@ -7,7 +7,7 @@ import (
 	"github.com/veandco/go-sdl2/ttf"
 	
 	"github.com/cuu/gogame/font"	
-	"github.com/cuu/AppStore/sysgo"
+	"github.com/cuu/LauncherGo/sysgo"
 )
 
 var Fonts map[string]*ttf.Font
