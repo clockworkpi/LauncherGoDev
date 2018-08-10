@@ -106,7 +106,7 @@ func run() int {
 				time.Delay(1000)
 			}
 			if ev.Data["Key"] == "P" {				
-				event.Post(event.RUNEVT,"GODEBUG=cgocheck=0 sucks") // just id and string, simpify the stuff
+				event.Post(event.RUNEVT,"GODEBUG=cgocheck=0 sucks") // just id and string, simplify the stuff
 			}
 		}
 	}

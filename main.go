@@ -46,7 +46,9 @@ func run() int {
 	UI.SwapAndShow()
 	
 	fmt.Println(main_screen)
-	
+    
+    event.AddCustomEvent(UI.RUNEVT)
+
 	running := true
 	for running {
 		ev := event.Wait()
@@ -65,7 +67,7 @@ func run() int {
 			}else if ev.Data["Key"] == "D" {
 				time.Delay(1000)
 			}else if ev.Data["Key"] == "P" {				
-				event.Post(event.RUNEVT,"GODEBUG=cgocheck=0 sucks") // just id and string, simpify the stuff
+				event.Post(UI.RUNEVT,"GODEBUG=cgocheck=0 sucks") // just id and string, simpify the stuff
 				
 			}else {
 				main_screen.KeyDown(ev)

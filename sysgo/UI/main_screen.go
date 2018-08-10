@@ -393,7 +393,7 @@ func (self *MainScreen) RunEXE( cmdpath string) {
 	cmdpath = strings.Trim(cmdpath," ")
 	cmdpath = CmdClean(cmdpath)
 	
-	event.Post(event.RUNEVT,cmdpath)
+	event.Post(RUNEVT,cmdpath)
 	
 }
 
