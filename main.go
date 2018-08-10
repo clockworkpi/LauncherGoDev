@@ -21,7 +21,8 @@ func run() int {
 	display.Init()
 	font.Init()
 	screen := display.SetMode(int32(UI.Width),int32(UI.Height),0,32)
-
+    
+    UI.Init()
 	UI.MyIconPool.Init()
 
 	main_screen := UI.NewMainScreen()
