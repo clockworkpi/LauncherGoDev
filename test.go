@@ -18,6 +18,9 @@ import (
 	"github.com/cuu/gogame/time"	
 )
 
+const (
+    RUNEVT=1
+)
 func run() int {
 
 	width := 320
@@ -82,7 +85,8 @@ func run() int {
 	
 	display.Flip()
 
-	
+	event.AddCustomEvent(RUNEVT)
+    
 	running := true
 	for running {
 		ev := event.Wait()
@@ -106,7 +110,7 @@ func run() int {
 				time.Delay(1000)
 			}
 			if ev.Data["Key"] == "P" {				
-				event.Post(event.RUNEVT,"GODEBUG=cgocheck=0 sucks") // just id and string, simplify the stuff
+				event.Post(RUNEVT,"GODEBUG=cgocheck=0 sucks") // just id and string, simplify the stuff
 			}
 		}
 	}
