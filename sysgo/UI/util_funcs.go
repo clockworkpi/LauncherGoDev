@@ -11,6 +11,12 @@ import (
 	"github.com/cuu/LauncherGo/sysgo"
 )
 
+func abs(n int) int {
+	y := n >> 63
+	return (n ^ y) - y
+}
+
+
 func SkinMap(orig_file_or_dir string) string {
 	DefaultSkin := "default"
 	ret := ""

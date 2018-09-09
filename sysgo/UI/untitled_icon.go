@@ -38,7 +38,7 @@ func NewUntitledIcon() *UntitledIcon {
 
 	u.Color = &color.Color{83,83,83,255}
 
-	u.BlankPng = SkinMap("gameshell/blank.png")
+	u.BlankPng = SkinMap("sysgo/gameshell/blank.png")
 	return u
 }
 
