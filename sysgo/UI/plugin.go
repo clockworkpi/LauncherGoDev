@@ -51,22 +51,26 @@ func LoadPlugin( pname string) (*goplugin.Plugin,error) {
 	return goplugin.Open(pname)
 }
 
-func InitPlugin(p *goplugin.Plugin, main_screen *MainScreen) {
+func InitPlugin(p *goplugin.Plugin, main_screen *MainScreen) PluginInterface {
 	symAPI,err := p.Lookup("APIOBJ")
 
 	if err!= nil {
 		log.Fatal( "init plugin failed")
-		return
+		return nil
 	}
 
 	var pi PluginInterface
 	pi,ok := symAPI.(PluginInterface)
 	if !ok {
 		log.Fatal("unexpected type from module symbol")
-		return
+		return nil
 	}
 
+	//PluginPoolRegister(pi)
+	
 	pi.Init(main_screen)
+
+	return pi
 }
 
 func RunPlugin(p *goplugin.Plugin, main_screen *MainScreen) {

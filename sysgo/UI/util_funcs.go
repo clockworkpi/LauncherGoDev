@@ -5,11 +5,30 @@ import (
 	"log"
 	"path/filepath"
 	"strings"
+	"fmt"
 	
 	"github.com/cuu/gogame/display"
 
 	"github.com/cuu/LauncherGo/sysgo"
 )
+
+func ShowErr(e error) {
+	if e != nil {
+		fmt.Println(e)
+	}
+}
+
+func Assert(e error) {
+	if e != nil {
+		log.Fatal("Assert: " , e)
+	}
+}
+
+func CheckAndPanic(e error) {
+    if e != nil {
+        panic(e)
+    }
+}
 
 func Abs(n int) int {
 	y := n >> 63

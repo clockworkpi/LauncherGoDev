@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"strings"
 	"log"
+	"encoding/json"
 	
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -26,6 +27,24 @@ var (
 	emulator_flag = "action.config"
 	plugin_flag   = "plugin.config"
 )
+
+type ActionConifg struct {
+	ROM string `json:"ROM"`
+	ROM_SO string `json:"ROM_SO"`
+	EXT []string   `json:"EXT"`
+	EXCLUDE []string `json:"EXCLUDE"`
+	FILETYPE string  `json:"FILETYPE"`   // defalut is file
+	LAUNCHER string  `json:"LAUNCHER"`
+	TITLE   string   `json:"TITLE"` // defaut is Game
+	SO_URL string    `json:"SO_URL"`
+	RETRO_CONFIG string `json:"RETRO_CONFIG"`
+}
+
+type PluginConfig struct {
+	NAME string    `json:"NAME"`  // plugin name,default could be the same as Plugin Folder's name
+	SO_FILE string `json:"SO_FILE"`
+	
+}
 
 type MessageBox struct {
 	Label
@@ -336,9 +355,27 @@ func (self *MainScreen) ReadTheDirIntoPages(_dir string, pglevel int, cur_page P
 				}
 
 				if self.IsPluginPackage(_dir+"/"+f.Name()) {
-					iconitem.MyType = ICON_TYPES["FUNC"]
-					iconitem.CmdPath = f.Name()
-					cur_page.AppendIcon(iconitem)
+					p_c := PluginConfig{}
+
+					dat, err := ioutil.ReadFile(_dir+"/"+f.Name()+"/" +plugin_flag)
+					ShowErr(err)
+
+					err = json.Unmarshal(dat, &p_c)
+					if err == nil {
+						if p_c.NAME == "" {
+							p_c.NAME = f.Name()
+						}
+
+						pi,err := LoadPlugin(_dir+"/"+f.Name()+"/"+p_c.SO_FILE)
+						Assert(err)
+						iconitem.CmdInvoke = InitPlugin(pi,self)
+						if iconitem.CmdInvoke != nil {
+							
+							iconitem.MyType = ICON_TYPES["FUNC"]
+							iconitem.CmdPath = f.Name()
+							cur_page.AppendIcon(iconitem)
+						}
+					}
 					//Init it 
 				}else {
 					iconitem.MyType = ICON_TYPES["DIR"]
