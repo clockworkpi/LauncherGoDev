@@ -1,6 +1,8 @@
 package UI
 
 import (
+	"strings"
+	
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 	
@@ -101,11 +103,12 @@ func (self *MultiLabel) blit_text(surf *sdl.Surface,text string, pos_x,pos_y int
 	row_total_width := 0
 	lines := 0
 
-	for i,line := range words[:4] {
+	for _,line := range words[:4] {
+		word_height := 0
 		for _,word := range line[:12] {
 			word_surface := font.Render(fnt,word,true,self.Color,nil)
 			word_width   := surface.GetWidth(word_surface)
-			word_height  := surface.GetHeight(word_surface)
+			word_height   = surface.GetHeight(word_surface)
 			row_total_width += word_width
 			if row_total_width+space >= max_width {
 				x = pos_x

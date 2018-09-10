@@ -190,6 +190,7 @@ type PageInterface interface {
 	DrawIcons()
 	
 	GetName() string
+	SetName(n string)
 	GetFootMsg() [5]string
 
 	KeyDown( ev *event.Event)
@@ -977,6 +978,10 @@ func (self *Page) Size() (int,int) {
 
 func (self *Page) GetName() string {
 	return self.Name
+}
+
+func (self *Page) SetName(n string) {
+	self.Name = n
 }
 
 func (self *Page) SetIndex(idx int) {

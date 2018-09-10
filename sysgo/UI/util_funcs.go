@@ -11,7 +11,7 @@ import (
 	"github.com/cuu/LauncherGo/sysgo"
 )
 
-func abs(n int) int {
+func Abs(n int) int {
 	y := n >> 63
 	return (n ^ y) - y
 }

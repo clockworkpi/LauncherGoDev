@@ -6,6 +6,7 @@ import (
 	"github.com/cuu/gogame/surface"
 	"github.com/cuu/gogame/event"
 	"github.com/cuu/gogame/rect"
+	"github.com/cuu/gogame/color"
 	
 	"github.com/cuu/LauncherGo/sysgo/UI"
 	
@@ -16,8 +17,8 @@ type InfoPageListItem struct{
 	PosY   int
 	Width  int
 	Height int
-	Labels map[string]LabelInterface
-	Icons  map[string]IconItemInterface
+	Labels map[string]UI.LabelInterface
+	Icons  map[string]UI.IconItemInterface
 	Fonts  map[string]*ttf.Font
 
 	Parent UI.PageInterface
@@ -27,8 +28,8 @@ type InfoPageListItem struct{
 
 func NewInfoPageListItem() *InfoPageListItem {
 	i := &InfoPageListItem{}
-	i.Labels = make(map[string]LabelInterface)
-	i.Icons = make( map[string]IconItemInterface)
+	i.Labels = make(map[string]UI.LabelInterface)
+	i.Icons = make( map[string]UI.IconItemInterface)
 	i.Fonts = make(map[string]*ttf.Font)
 
 	i.Height = 20
@@ -38,7 +39,7 @@ func NewInfoPageListItem() *InfoPageListItem {
 }
 
 func (self *InfoPageListItem) Init(text string) {
-	l := NewLabel()
+	l := UI.NewLabel()
 	l.PosX = 10
 	l.SetCanvasHWND(self.Parent.GetCanvasHWND())
 	l.Init(text,self.Fonts["normal"],nil)
@@ -48,7 +49,7 @@ func (self *InfoPageListItem) Init(text string) {
 }
 
 func (self *InfoPageListItem) SetSmallText( text string) {
-	l := NewMultiLabel()
+	l := UI.NewMultiLabel()
 	l.SetCanvasHWND(self.Parent.GetCanvasHWND())
 	l.Init(text,self.Fonts["small"],nil)
 
@@ -62,7 +63,7 @@ func (self *InfoPageListItem) Draw() {
 	self.Labels["Text"].NewCoord(x_,self.PosY)
 	self.Labels["Text"].Draw()
 
-	if val, ok := self.Labels["Small"]; ok {
+	if _, ok := self.Labels["Small"]; ok {
 		w_,_ := self.Labels["Text"].Size()
 		self.Labels["Small"].NewCoord(w_+16,self.PosY)
 		self.Labels["Small"].Draw()
@@ -106,7 +107,7 @@ func (self *HelloWorldPage) Init() {
 	if self.Screen != nil {
 		if self.Screen.CanvasHWND != nil && self.CanvasHWND == nil {
 			self.HWND = self.Screen.CanvasHWND
-			self.CanvasHWND = surface.Surface(self.Screen.Width,self.BGeight)
+			self.CanvasHWND = surface.Surface(self.Screen.Width,self.BGheight)
 		}
 
 		self.PosX = self.Index * self.Screen.Width
@@ -136,7 +137,7 @@ func (self *HelloWorldPage) HelloWorld() {
 	hello["label"] = "HelloWorld "
 	hello["value"] = "GameShell"
 
-	p.AList["hello"] = hello
+	self.AList["hello"] = hello
 	
 }
 
@@ -150,7 +151,7 @@ func (self *HelloWorldPage) GenList() {
 	last_height := 0
 
 
-	for i,u := range []string{"hello"} {
+	for _,u := range []string{"hello"} {
 		if val,ok := self.AList[u];ok {
 
 			li := NewInfoPageListItem()
@@ -182,7 +183,7 @@ func (self *HelloWorldPage) GenList() {
 
 func (self *HelloWorldPage) ScrollDown() {
 	dis := 10
-	if UI.abs(self.Scrolled) < ( self.BGheight - self.Height)/2 + 0 {
+	if UI.Abs(self.Scrolled) < ( self.BGheight - self.Height)/2 + 0 {
 		self.PosY -= dis
 		self.Scrolled -= dis
 	}
@@ -246,8 +247,9 @@ func (self *HelloWorldPage) Draw() {
 	if self.HWND != nil {
 		surface.Fill(self.HWND, &color.Color{255,255,255,255})
 
-		surface.Blit(self.HWND,self.CanvasHWND,&rect.Rect(self.PosX,self.PosY,self.Width,self.Height), nil)
-		self.Scroller.UpdateSize(self.BGheight,UI.abs(self.Scrolled)*3)
+		rect_ := rect.Rect(self.PosX,self.PosY,self.Width,self.Height)
+		surface.Blit(self.HWND,self.CanvasHWND,&rect_, nil)
+		self.Scroller.UpdateSize(self.BGheight,UI.Abs(self.Scrolled)*3)
 		self.Scroller.Draw()
 		
 	}

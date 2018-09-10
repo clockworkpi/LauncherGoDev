@@ -2,12 +2,12 @@ package UI
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
-	"github.com/veandco/go-sdl2/ttf"
+//	"github.com/veandco/go-sdl2/ttf"
 	
-	"github.com/cuu/gogame/surface"
-	"github.com/cuu/gogame/rect"
+//	"github.com/cuu/gogame/surface"
+//	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/color"
-	"github.com/cuu/gogame/font"
+//	"github.com/cuu/gogame/font"
 	"github.com/cuu/gogame/draw"
 )
 
