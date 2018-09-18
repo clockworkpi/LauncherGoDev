@@ -1,6 +1,8 @@
 package UI
 
 import (
+	"fmt"
+	
 	"github.com/veandco/go-sdl2/sdl"
 //	"github.com/veandco/go-sdl2/ttf"
 	
@@ -31,6 +33,7 @@ type ListScroller struct{
 
 func NewListScroller() *ListScroller {
 	l := &ListScroller{}
+	l.Width = 7
 	l.Color = &color.Color{131,199,219,255} // SkinManager().GiveColor('Front')
 	return l
 }
@@ -81,7 +84,10 @@ func (self *ListScroller) Draw() {
 	w_,h_ := self.Parent.Size()
 
 	start_rect := draw.MidRect(self.PosX+self.StartX,self.StartY+self.Value,self.Width,self.Height,w_,h_)
-	
-	draw.AARoundRect(self.CanvasHWND,start_rect,self.Color,3,0,self.Color)
 
+	if self.Width < 1 {
+		fmt.Println("ListScroller width error")
+	}else {
+		draw.AARoundRect(self.CanvasHWND,start_rect,self.Color,3,0,self.Color)
+	}
 }

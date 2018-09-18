@@ -41,7 +41,7 @@ func run() int {
 	fmt.Println(screen.Pitch)
 	fmt.Println( screen.BytesPerPixel() )
 
-	img_surf := image.Load("skin/default/sys.go/gameshell/icons/roundcorners.png")
+	img_surf := image.Load("skin/default/sysgo/gameshell/icons/roundcorners.png")
 
 	
 	fmt.Println("WxH: ", img_surf.W,img_surf.H)
@@ -68,6 +68,9 @@ func run() int {
 	rect2 := rect.Rect(3,120,200,30)
 	draw.AARoundRect(screen,&rect2,&color.Color{0,213,222,255},10,0, &color.Color{0,213,222,255})
 
+	rect3 := rect.Rect(300,12,7,200)
+	draw.AARoundRect(screen,&rect3,&color.Color{0,213,222,255},3,0, &color.Color{0,213,222,255})
+	
 	font.Init()
 	
 	font_path := "skin/default/truetype/NotoSansCJK-Regular.ttf"

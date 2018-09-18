@@ -103,9 +103,19 @@ func (self *MultiLabel) blit_text(surf *sdl.Surface,text string, pos_x,pos_y int
 	row_total_width := 0
 	lines := 0
 
-	for _,line := range words[:4] {
+	tmp := words
+	if len(words) > 4 {
+		tmp = words[:4]
+	}
+	
+	for _,line := range tmp {
 		word_height := 0
-		for _,word := range line[:12] {
+		tmp2 := line
+		if len(line) > 12 {
+			tmp2 = line[:12]
+		}
+		
+		for _,word := range tmp2 {
 			word_surface := font.Render(fnt,word,true,self.Color,nil)
 			word_width   := surface.GetWidth(word_surface)
 			word_height   = surface.GetHeight(word_surface)
