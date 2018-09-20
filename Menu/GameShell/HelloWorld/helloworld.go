@@ -13,10 +13,7 @@ import (
 )
 
 type InfoPageListItem struct{
-	PosX   int
-	PosY   int
-	Width  int
-	Height int
+	UI.Widget
 	Labels map[string]UI.LabelInterface
 	Icons  map[string]UI.IconItemInterface
 	Fonts  map[string]*ttf.Font
@@ -83,6 +80,7 @@ type HelloWorldPage struct {
 	Scroller *UI.ListScroller
 
 	MyList []*InfoPageListItem
+	
 }
 
 func NewHelloWorldPage() *HelloWorldPage {
@@ -99,6 +97,8 @@ func NewHelloWorldPage() *HelloWorldPage {
 	p.MyList = make([]*InfoPageListItem,0)
 
 	p.ListFontObj = UI.Fonts["varela13"]
+
+	p.Index = 0
 	
 	return p
 }

@@ -14,10 +14,7 @@ import (
 
 //MultiLabel is also a LabelInterface
 type MultiLabel struct {
-	PosX       int
-	PosY       int
-	Width      int
-	Height     int
+	Widget
 	Text       string
 	FontObj    *ttf.Font
 	Color      *color.Color
@@ -52,19 +49,6 @@ func (self *MultiLabel) SetCanvasHWND( canvas *sdl.Surface) {
 	self.CanvasHWND = canvas
 }
 
-func (self *MultiLabel) Coord() (int,int) {
-	return self.PosX,self.PosY
-}
-
-func (self *MultiLabel) Size() (int,int) {
-	return self.Width,self.Height
-}
-
-func (self *MultiLabel) NewCoord(x,y int) {
-	self.PosX = x
-	self.PosY = y
-	
-}
 
 func (self *MultiLabel) SetColor(col *color.Color){
 	if col != nil {

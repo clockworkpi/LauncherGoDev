@@ -14,10 +14,7 @@ import (
 )
 
 type ListScroller struct{
-	PosX int
-	PosY int
-	Width int
-	Height int
+	Widget
 	MinHeight int
 	Parent PageInterface
 	Color  *color.Color
@@ -40,6 +37,8 @@ func NewListScroller() *ListScroller {
 
 func (self *ListScroller) Init() {
 	//just set the CanvasHWND
+	cav_ := self.Parent.GetCanvasHWND()
+	self.SetCanvasHWND(cav_)
 }
 
 func (self *ListScroller) SetCanvasHWND( canvas *sdl.Surface) {

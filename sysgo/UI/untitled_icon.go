@@ -15,11 +15,7 @@ import (
 
 
 type UntitledIcon struct {
-
-	PosX int
-	PosY int
-	Width int
-	Height int
+	Widget
 	Words []string
 	FontObj *ttf.Font
 	BG *sdl.Surface

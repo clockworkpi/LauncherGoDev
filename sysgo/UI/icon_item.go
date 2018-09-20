@@ -37,10 +37,10 @@ type IconItemInterface interface {
 	
 	Coord() (int,int)
 	NewCoord(x,y int)
+	Size() (int,int)
+	NewSize(w,h int)
 
 	TotalWidth() int
-	Size() (int,int)
-
 	
 	AddLabel(text string, fontobj *ttf.Font)
 	GetLinkPage() PageInterface
@@ -59,10 +59,7 @@ type IconItemInterface interface {
 }
 
 type IconItem struct {
-	PosX int
-	PosY int
-	Width int
-	Height int
+	Widget
 	ImageName string
 	ImgSurf *sdl.Surface
 	Parent  PageInterface

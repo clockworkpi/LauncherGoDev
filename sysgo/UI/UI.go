@@ -10,6 +10,31 @@ import (
 	"github.com/cuu/LauncherGo/sysgo"
 )
 
+type Widget struct {
+	PosX int
+	PosY int
+	Width int
+	Height int
+}
+
+func (self *Widget) Size() (int,int) {
+	return self.Width,self.Height
+}
+
+func (self *Widget) NewSize(w,h int) {
+	self.Width = w
+	self.Height = h
+}
+
+func (self *Widget) Coord() (int,int) {
+	return self.PosX,self.PosY
+}
+
+func (self *Widget) NewCoord(x,y int) {
+	self.PosX = x
+	self.PosY = y
+}
+
 
 func Init() {
 	font.Init()

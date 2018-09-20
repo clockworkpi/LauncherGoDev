@@ -16,6 +16,7 @@ type LabelInterface interface {
 	Coord() (int,int)
 	Size() (int,int)
 	NewCoord(x,y int)
+	NewSize(w,h int)
 	SetColor(col *color.Color )
 	GetText() string
 	SetText(text string)
@@ -23,10 +24,7 @@ type LabelInterface interface {
 }
 
 type Label struct {
-	PosX int
-	PosY int
-	Width int
-	Height int
+	Widget
 	Text string
 	FontObj *ttf.Font
 	Color  *color.Color

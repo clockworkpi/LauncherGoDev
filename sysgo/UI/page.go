@@ -73,20 +73,23 @@ type PageSelectorInterface interface {
 	Adjust(x,y,w,h,alpha int)
 	GetOnShow() bool
 	SetOnShow(onshow bool)
+
+	Coord() (int,int)
+	NewCoord(x,y int)
+	Size() (int,int)
+	NewSize(w,h int)
+	
 	Draw()
 }
 
 type PageSelector struct {
+	Widget
 	
-	PosX int
-	PosY int
-	Width int
-	Height int
-	Parent PageInterface
 	Alpha int
 	OnShow bool
 	IconSurf  *sdl.Surface
 	
+	Parent PageInterface
 }
 
 func NewPageSelector() *PageSelector {
@@ -176,8 +179,11 @@ type PageInterface interface {
 	GetIconIndex() int
 
 	Coord() (int, int)
+	NewCoord(x,y int)
 	Size() (int,int)
-
+	NewSize(w,h int)
+	
+	
 	UpdateIconNumbers()
 	GetIconNumbers() int
 
@@ -188,6 +194,8 @@ type PageInterface interface {
 	AppendIcon( it interface{} )
 	ClearIcons()
 	DrawIcons()
+
+	GetMyList() []ListItemInterface
 	
 	GetName() string
 	SetName(n string)
@@ -212,10 +220,7 @@ type PageInterface interface {
 }
 
 type Page struct {
-	PosX int
-	PosY int
-	Width int
-	Height int
+	Widget
 	Icons []IconItemInterface // slice ,use append
 	IconNumbers int
 	IconIndex int
@@ -231,6 +236,8 @@ type Page struct {
 	CanvasHWND *sdl.Surface
 	HWND       *sdl.Surface
 
+	MyList []ListItemInterface
+	
 	OnShow bool
 	Name  string
 	Screen *MainScreen
@@ -851,7 +858,9 @@ func (self *Page) DrawIcons() {
 	}	
 }
 
-
+func (self *Page) GetMyList() []ListItemInterface {
+	return self.MyList
+}
 
 func (self *Page) KeyDown( ev *event.Event) {
 	if ev.Data["Key"] == CurKeys["A"] {
@@ -964,15 +973,6 @@ func (self *Page) SetIconIndex( idx int) {
 
 func (self *Page) GetIconIndex() int {
 	return self.IconIndex
-}
-
-
-func (self *Page) Coord() (int,int) {
-	return self.PosX,self.PosY
-}
-
-func (self *Page) Size() (int,int) {
-	return self.Width,self.Height
 }
 
 
