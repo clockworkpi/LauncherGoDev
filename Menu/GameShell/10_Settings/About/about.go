@@ -88,7 +88,7 @@ type AboutPage struct {
 	Scroller *UI.ListScroller
 
 	MyList []*InfoPageListItem
-	
+	Icons map[string]IconItemInterface
 }
 
 func NewAboutPage() *AboutPage {
@@ -108,6 +108,7 @@ func NewAboutPage() *AboutPage {
 
 	p.Index = 0
 	
+  p.Icons = make(map[string]IconItemInterface)
 	return p
 	
 }
@@ -217,7 +218,150 @@ func (self *AboutPage) GenList() {
 
 func (self *AboutPage) Init() {
 
+	if self.Screen != nil {
+		if self.Screen.CanvasHWND != nil && self.CanvasHWND == nil {
+			self.HWND = self.Screen.CanvasHWND
+			self.CanvasHWND = surface.Surface(self.Screen.Width,self.BGheight)
+		}
 
-  
-  
+		self.PosX = self.Index * self.Screen.Width
+		self.Width = self.Screen.Width
+		self.Height = self.Screen.Height
+
+    bgpng := NewIconItem()
+    bgpng.ImgSurf = UI.MyIconPool.GetImgSurf("about_bg")
+    bgpng.MyType = UI.ICON_TYPES["STAT"]
+    bgpng.Parent = self
+    bgpng.Adjust(0,0,self.BGwidth,self.BGheight,0)
+    
+    self.Icons["bg"] = bgpng
+
+
+		self.CpuInfo()
+    self.MemInfo()
+    self.CpuMhz()
+    self.Uname()
+    
+		self.GenList()
+
+		self.Scroller = UI.NewListScroller()
+		
+		self.Scroller.Parent = self
+		self.Scroller.PosX = self.Width - 10
+		self.Scroller.PosY = 2
+		self.Scroller.Init()
+		self.Scroller.SetCanvasHWND(self.HWND)
+		
+	}
 }
+
+func (self *AboutPage) ScrollDown() {
+	dis := 10
+	if UI.Abs(self.Scrolled) < ( self.BGheight - self.Height)/2 + 50 {
+		self.PosY -= dis
+		self.Scrolled -= dis
+	}
+}
+
+func (self *AboutPage) ScrollUp() {
+	dis := 10
+	if self.PosY < 0 {
+		self.PosY += dis
+		self.Scrolled += dis
+	}
+}
+
+func (self *AboutPage) OnLoadCb() {
+	self.Scrolled = 0
+	self.PosY     = 0
+	self.DrawOnce = false
+}
+
+func (self *AboutPage) OnReturnBackCb() {
+	self.ReturnToUpLevelPage()
+	self.Screen.Draw()
+	self.Screen.SwapAndShow()
+}
+
+
+func (self *AboutPage) KeyDown( ev *event.Event) {
+	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+		self.ReturnToUpLevelPage()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
+
+	if ev.Data["Key"] == UI.CurKeys["Up"] {
+		self.ScrollUp()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
+
+	if ev.Data["Key"] == UI.CurKeys["Down"] {
+		self.ScrollDown()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}	
+	
+}
+
+
+func (self *AboutPage) Draw() {
+	if self.DrawOnce == false {
+
+		self.ClearCanvas()
+
+    self.Icons["bg"].NewCoord(self.Width/2, self.Height/2 + (self.BGheight - UI.Height)/2 + self.Screen.TitleBar.Height)
+    self.Icons["bg"].Draw()
+    
+		for _,v := range self.MyList {
+			v.Draw()
+		}
+		
+		self.DrawOnce = true
+	}
+
+	if self.HWND != nil {
+		surface.Fill(self.HWND, &color.Color{255,255,255,255})
+
+		rect_ := rect.Rect(self.PosX,self.PosY,self.Width,self.Height)
+		surface.Blit(self.HWND,self.CanvasHWND,&rect_, nil)
+    
+		self.Scroller.UpdateSize(self.BGheight,UI.Abs(self.Scrolled)*3)
+		self.Scroller.Draw()
+		
+	}
+}
+
+
+/******************************************************************************/
+type AboutPlugin struct {
+	UI.Plugin
+	Page UI.PageInterface
+}
+
+
+func (self *AboutPlugin) Init( main_screen *UI.MainScreen ) {
+	self.Page = NewAboutPage()
+	self.Page.SetScreen( main_screen)
+	self.Page.SetName("About")
+	self.Page.Init()
+}
+
+func (self *AboutPlugin) Run( main_screen *UI.MainScreen ) {
+	if main_screen != nil {
+		main_screen.PushPage(self.Page)
+		main_screen.Draw()
+		main_screen.SwapAndShow()
+	}
+}
+
+var APIOBJ AboutPlugin
+
+
+
+
+
+
+
+
