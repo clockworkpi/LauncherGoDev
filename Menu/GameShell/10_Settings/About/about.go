@@ -92,7 +92,7 @@ type AboutPage struct {
 }
 
 func NewAboutPage() *AboutPage {
-	p := &HelloWorldPage{}
+	p := &AboutPage{}
 	
 	p.FootMsg = [5]string{"Nav.","","","Back",""}
 
@@ -136,7 +136,21 @@ func (self *AboutPage) Uname() {
 
 
 func (self *AboutPage) CpuMhz() {
-	
+  
+  lines, err := readLines("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq")
+  UI.ShowErr(err)
+  
+  mhz ,_ := strconv.ParseInt(lines[0], 10, 0))
+  
+  mhz_float := float64(mhz)/1000.0
+  
+  out := make(map[string]string)
+  out["key"] = "cpuscalemhz"
+  out["label"]="CPU Mhz:"
+  out["value"] =  strconv.FormatFloat(mhz_float, 'f', 2, 64)
+  
+  self.AList["cpuscalemhz"] = out
+  
 }
 
 func (self *AboutPage) CpuInfo() {
@@ -144,11 +158,66 @@ func (self *AboutPage) CpuInfo() {
 }
 
 func (self *AboutPage) MemInfo() {
-	
+  lines, err := readLines("/proc/meminfo")
+  UI.ShowErr(err)	
+  
+  for _,line := range lines {
+    if strings.HasPrefix(line,"MemTotal") {
+      parts := strings.Split(line,":")
+      kb := strings.Replace(parts[1],"KB","",-1)
+      kb = strings.TrimSpace(kb)
+      kb_int,_ := strconv.ParseInt(kb,10,0)
+      
+      kb_float := float64(kb_int)/1000.0
+      memory := make(map[string]string)
+      memory["key"] = "memory" 
+      memory["label"] = "Memory:"
+      memory["value"] = strconv.FormatFloat(kb_float,'f',2,64) + " MB"
+      self.AList["memory"] = memory 
+      break
+    }
+  }  
 }
 
 func (self *AboutPage) GenList() {
+	self.MyList = nil
+	self.MyList = make([]*InfoPageListItem,0)
+  
+  start_x  := 0
+  start_y  := 10
+  last_height := 0 
+  
+  for i,u := range ( []string{"processor","armcores","cpuscalemhz","features","memory","uname"} ) {
+    if val, ok := self.AList[u]; ok {
+      
+			li := NewInfoPageListItem()
+			li.Parent = self
+			li.PosX = start_x
+			li.PosY = start_y + last_height
+			li.Width = UI.Width
+			li.Fonts["normal"] = self.ListFontObj
+			li.Fonts["small"] = UI.Fonts["varela12"]      
+      
+      if self.AList[u]["label"] != "" {
+        li.Init( self.AList[u]["label"]  )
+      }else {
+        li.Init( self.AList[u]["key"])
+      }
+      
+			li.Flag = val["key"]
+      li.SetSmallText(val["value"])
+      
+      self.MyList = append(self.MyList,li)
 
+    }
+  } 
 	
 }
 
+
+func (self *AboutPage) Init() {
+
+
+  
+  
+}
