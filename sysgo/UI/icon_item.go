@@ -80,11 +80,7 @@ func NewIconItem() *IconItem {
 	i.MyType = ICON_TYPES["EXE"]
 
 	i.Align = ALIGN["VCenter"]
-	
-	l := NewLabel()
-	
-	i.Label = l
-	
+		
 	return i
 }
 

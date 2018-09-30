@@ -85,7 +85,7 @@ func (self *SettingsPage) Init() {
 		self.CanvasHWND = self.Screen.CanvasHWND
 
 
-		ps := &SettingsPageSelector{}
+		ps := NewSettingsPageSelector()
 		ps.Parent = self
 		self.Ps = ps
 		self.PsIndex = 0
@@ -142,7 +142,18 @@ func (self *SettingsPage) ScrollDown() {
 }
 
 func (self *SettingsPage) Click() {
+	if len(self.MyList) == 0 {
+		return
+	}
 	
+	cur_li := self.MyList[self.PsIndex]
+
+	lk_obj := cur_li.GetLinkObj()
+
+	if lk_obj != nil {
+		lk_obj.Run(self.Screen)
+	}
+
 }
 
 func (self *SettingsPage) KeyDown( ev *event.Event) {

@@ -11,11 +11,15 @@ import (
 type ListItemInterface interface {
 
 	Init(text string)
+	
 	Size() (int,int)
 	NewSize(w,h int)
 	Coord() (int,int)
 	NewCoord(x,y int)
+
+	GetLinkObj() PluginInterface
 	Draw()
+	
 }
 
 type ListItem struct {
@@ -61,10 +65,13 @@ func (self *ListItem) Size() (int,int) {
 }
 
 
+func (self *ListItem) GetLinkObj() PluginInterface {
+	return self.LinkObj
+}
 
 func (self *ListItem) Draw() {
 	x_,_ := self.Labels["Text"].Coord()
-	h_,_ := self.Labels["Text"].Size()
+	_,h_ := self.Labels["Text"].Size()
 	
 	self.Labels["Text"].NewCoord(x_, self.PosY+(self.Height - h_)/2)
 	self.Labels["Text"].Draw()

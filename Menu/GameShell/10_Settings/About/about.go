@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"strconv"
+	
 	"strings"
 	"os/exec"
 	
@@ -88,7 +91,7 @@ type AboutPage struct {
 	Scroller *UI.ListScroller
 
 	MyList []*InfoPageListItem
-	Icons map[string]IconItemInterface
+	Icons map[string]UI.IconItemInterface
 }
 
 func NewAboutPage() *AboutPage {
@@ -108,7 +111,7 @@ func NewAboutPage() *AboutPage {
 
 	p.Index = 0
 	
-  p.Icons = make(map[string]IconItemInterface)
+  p.Icons = make(map[string]UI.IconItemInterface)
 	return p
 	
 }
@@ -138,11 +141,11 @@ func (self *AboutPage) Uname() {
 
 func (self *AboutPage) CpuMhz() {
   
-  lines, err := readLines("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq")
+  lines, err := UI.ReadLines("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq")
   UI.ShowErr(err)
-  
-  mhz ,_ := strconv.ParseInt(lines[0], 10, 0))
-  
+
+  mhz ,err := strconv.ParseInt(lines[0], 10, 64)
+	UI.ShowErr(err)
   mhz_float := float64(mhz)/1000.0
   
   out := make(map[string]string)
@@ -159,7 +162,7 @@ func (self *AboutPage) CpuInfo() {
 }
 
 func (self *AboutPage) MemInfo() {
-  lines, err := readLines("/proc/meminfo")
+  lines, err := UI.ReadLines("/proc/meminfo")
   UI.ShowErr(err)	
   
   for _,line := range lines {
@@ -188,7 +191,7 @@ func (self *AboutPage) GenList() {
   start_y  := 10
   last_height := 0 
   
-  for i,u := range ( []string{"processor","armcores","cpuscalemhz","features","memory","uname"} ) {
+  for _,u := range ( []string{"processor","armcores","cpuscalemhz","features","memory","uname"} ) {
     if val, ok := self.AList[u]; ok {
       
 			li := NewInfoPageListItem()
@@ -207,7 +210,8 @@ func (self *AboutPage) GenList() {
       
 			li.Flag = val["key"]
       li.SetSmallText(val["value"])
-      
+      last_height += li.Height
+			
       self.MyList = append(self.MyList,li)
 
     }
@@ -228,7 +232,7 @@ func (self *AboutPage) Init() {
 		self.Width = self.Screen.Width
 		self.Height = self.Screen.Height
 
-    bgpng := NewIconItem()
+    bgpng := UI.NewIconItem()
     bgpng.ImgSurf = UI.MyIconPool.GetImgSurf("about_bg")
     bgpng.MyType = UI.ICON_TYPES["STAT"]
     bgpng.Parent = self
@@ -240,7 +244,7 @@ func (self *AboutPage) Init() {
 		self.CpuInfo()
     self.MemInfo()
     self.CpuMhz()
-    self.Uname()
+		self.Uname()
     
 		self.GenList()
 

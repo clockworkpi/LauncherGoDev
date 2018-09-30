@@ -12,7 +12,7 @@ var PC        map[string]string
 
 
 func DefinePC() {
-	PC["UP"] = "Up"
+	PC["Up"] = "Up"
 	PC["Down"] = "Down"
 	PC["Left"] = "Left"
 	PC["Right"] = "Right"
@@ -30,7 +30,7 @@ func DefinePC() {
 }
 
 func DefineGameShell() {
-	GameShell["UP"] = "Up"
+	GameShell["Up"] = "Up"
 	GameShell["Down"] = "Down"
 	GameShell["Left"] = "Left"
 	GameShell["Right"] = "Right"

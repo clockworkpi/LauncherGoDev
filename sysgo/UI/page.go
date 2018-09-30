@@ -751,7 +751,7 @@ func (self *Page) ResetPageSelector() {
 
 func (self *Page) DrawPageSelector() {
 	if self.Ps.GetOnShow() == true {
-		fmt.Println("DrawPageSelector")
+//		fmt.Println("DrawPageSelector")
 		self.Ps.Draw()
 	}
 }
