@@ -22,7 +22,7 @@ func run() int {
 	font.Init()
 	screen := display.SetMode(int32(UI.Width),int32(UI.Height),0,32)
     
-    UI.Init()
+	UI.Init()
 	UI.MyIconPool.Init()
 
 	main_screen := UI.NewMainScreen()
@@ -48,7 +48,7 @@ func run() int {
 	
 	fmt.Println(main_screen)
     
-    event.AddCustomEvent(UI.RUNEVT)
+	event.AddCustomEvent(UI.RUNEVT)
 
 	running := true
 	for running {

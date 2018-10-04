@@ -10,6 +10,13 @@ import (
 	"github.com/cuu/LauncherGo/sysgo"
 )
 
+type WidgetInterface interface {
+	Size() (int,int)
+	NewSize(w,h int)
+	Coord()(int,int)
+	NewCoord(x,y int)
+}
+
 type Widget struct {
 	PosX int
 	PosY int
