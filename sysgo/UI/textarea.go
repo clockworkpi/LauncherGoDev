@@ -1,10 +1,17 @@
 package UI
 
 import (
+	"fmt"
+	"strings"
+	
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
-	
+
+	"github.com/cuu/gogame/surface"
 	"github.com/cuu/gogame/color"
+	"github.com/cuu/gogame/draw"
+	"github.com/cuu/gogame/font"
+	"github.com/cuu/gogame/rect"
 )
 
 type Textarea struct {
@@ -79,7 +86,6 @@ func (self *Textarea) AppendAndBlitText(alphabet string) {
 	if self.TextFull == false {
 		
 		if self.TextIndex <= len(self.MyWords) {
-			m = append(m[:idx], append([]string{"U"}, m[idx:]...)...)
 			self.MyWords = append(self.MyWords[:self.TextIndex],
 				append([]string{alphabet},self.MyWords[self.TextIndex:]...)...)
 			
@@ -96,12 +102,131 @@ func (self *Textarea) AppendAndBlitText(alphabet string) {
 func (self *Textarea) BuildBlitText() {
 	blit_rows := make([][]string,0)
 
-	w := 0
-	xmargin := 5
+	w         := 0
+//	xmargin   := 5
 	endmargin :=15
-	x := self.PosX + xmargin
 	linenumber := 0
 	cursor_row := 0
 
+	
+	for i,v :=  range self.MyWords {
+		t := font.Render(self.FontObj,v,true,&color.Color{8,135,174,255},nil)
+		t_width := surface.GetWidth(t)
+		w+=t_width
+
+		if linenumber < len(blit_rows) {
+			blit_rows[linenumber] = append(blit_rows[linenumber],v)
+		}else {	
+			blit_rows = append(blit_rows,[]string{v})
+		}
+
+		if i == self.TextIndex - 1 {
+			cursor_row = linenumber
+		}
+
+		if w + t_width >= self.Width - endmargin {
+			w = 0
+			linenumber += 1
+			blit_rows = append(blit_rows,[]string{})
+		}
+	}
+
+	if len(blit_rows) == 1 {
+		self.BlitWords = blit_rows[0]
+		self.BlitIndex = self.TextIndex
+	}else if len(blit_rows) == 2 || cursor_row < 2 {
+		self.BlitWords = append(blit_rows[0], blit_rows[1]...)
+		self.BlitIndex = self.TextIndex
+		
+	}else {
+		self.BlitWords = append(blit_rows[cursor_row-1], blit_rows[cursor_row]...)
+		self.BlitIndex = self.TextIndex
+
+		for i,v := range blit_rows {
+			if i == cursor_row - 1 {
+				break
+			}
+			self.BlitIndex -= len(v)
+		}
+	}
+	
+}
+
+func (self *Textarea) BlitText() {
+	//blit every single word into surface and calc the width ,check multi line
+	self.BuildBlitText()
+
+	w := 0
+	xmargin := 5
+	endmargin := 15
+
+	x := self.PosX + xmargin
+	y := self.PosY
+
+	linenumber := 0
+
+	if len(self.MyWords) > self.TextLimit {
+		self.TextFull = true
+	}else {
+		self.TextFull = false
+	}
+
+	for _,v := range self.BlitWords {
+		t := font.Render(self.FontObj,v,true,&color.Color{8,135,174,255},nil)
+		w += surface.GetWidth(t)
+
+		if w >= self.Width - endmargin && linenumber == 0 {
+			linenumber += 1
+			x = self.PosX + xmargin
+			y = self.PosY + surface.GetHeight(t) * linenumber
+			w = 0
+		}
+
+		rect_ := rect.Rect(x,y,0,0)
+		surface.Blit(self.CanvasHWND,t,&rect_,nil)
+		x += surface.GetWidth(t)
+		
+	}
+}
+
+func (self *Textarea) Cursor() {
+	w := 0
+	xmargin := 5
+	endmargin := 15
+	x := self.PosX+xmargin
+	y := self.PosY
+	linenumber := 0
+
+	for _,v := range self.BlitWords[:self.BlitIndex] {
+		t := font.Render(self.FontObj,v,true,&color.Color{8,135,174,255},nil)
+		w += surface.GetWidth(t)
+
+		if w >= self.Width - endmargin && linenumber == 0 {
+			x = self.PosX + xmargin
+			y = self.PosY + surface.GetHeight(t)
+			w = 0
+			linenumber +=1
+		}
+
+		if w >= self.Width - endmargin*3 && linenumber > 0 {
+			x += surface.GetWidth(t)
+			break
+		}
+		x += surface.GetWidth(t)
+	}
+
+	c_t := font.Render(self.FontObj,"_",true,&color.Color{0,0,0,255},nil)
+	rect_ := rect.Rect(x+1,y-2,0,0)
+	surface.Blit(self.CanvasHWND,c_t,&rect_,nil)
+}
+
+func (self *Textarea) Draw() {
+	
+	rect_:= rect.Rect(self.PosX,self.PosY,self.Width,self.Height)
+	
+  draw.AARoundRect(self.CanvasHWND,&rect_,self.BackgroundColor,4,0,self.BackgroundColor)
+	
+	self.BlitText()
+	self.Cursor()
 	
 }
