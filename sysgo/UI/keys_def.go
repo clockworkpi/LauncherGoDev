@@ -27,6 +27,9 @@ func DefinePC() {
 	PC["Space"] = "Space"
 	PC["Enter"] = "Return"
 	PC["Start"] = "S"
+
+	PC["LK1"]  = "H"
+	PC["LK5"]  = "L"
 }
 
 func DefineGameShell() {
@@ -45,6 +48,10 @@ func DefineGameShell() {
 	GameShell["Space"] = "Space"
 	GameShell["Enter"] = "K"
 	GameShell["Start"] = "Return"
+
+	GameShell["LK1"]  = "H"
+	GameShell["LK5"]  = "L"
+	
 }
 
 func init(){

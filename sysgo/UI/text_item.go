@@ -11,6 +11,14 @@ import (
 	
 )
 
+type TextItemInterface interface{
+	GetBold() bool
+	SetBold(bold bool)
+	GetStr() string
+	Draw()
+}
+
+
 type TextItem struct {
 	IconItem
 	Str string
@@ -26,6 +34,18 @@ func NewTextItem() *TextItem {
 	p.Bold  = false
 	
 	return p
+}
+
+func (self *TextItem) GetBold() bool {
+	return self.Bold
+}
+
+func (self *TextItem) SetBold(bold bool) {
+	self.Bold = bold
+}
+
+func (self *TextItem) GetStr() string {
+	return self.Str
 }
 
 func (self *TextItem) Draw() {
