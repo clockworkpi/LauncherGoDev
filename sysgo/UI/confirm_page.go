@@ -141,7 +141,7 @@ func (self *ConfirmPage) Init() {
 
 func (self *ConfirmPage) KeyDown( ev *event.Event ) {
 
-	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+	if ev.Data["Key"] == CurKeys["A"] || ev.Data["Key"] == CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()

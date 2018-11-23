@@ -1,2 +1,405 @@
 package main
+//wifi_list.py
+
+import (
+  "github.com/cuu/gogame/surface"
+  "github.com/cuu/gogame/font"
+  "github.com/cuu/gogame/color"
+  "github.com/cuu/gogame/event"
+  "github.com/cuu/gogame/time"
+	"github.com/cuu/LauncherGo/sysgo/UI"
+  "github.com/cuu/LauncherGo/sysgo/DBUS"
+)
+
+type WifiDisconnectConfirmPage struct {
+    UI.ConfirmPage
+    Parent *WifiInfoPage
+}
+
+func NewWifiDisconnectConfirmPage() *WifiDisconnectConfirmPage {
+  p := &WifiDisconnectConfirmPage{}  
+  p.ConfirmText ="Confirm Disconnect?"
+  return p
+}
+
+func (self *WifiDisconnectConfirmPage) KeyDown(ev *event.Event ) {
+
+	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+		self.ReturnToUpLevelPage()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
+  
+  if ev.Data["key"] == UI.CurKeys["B"] {
+    self.SnapMsg("Disconnecting...")
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+    
+    self.Parent.Daemon.Disconnect()
+    
+    time.BlockDelay(400)
+    
+    self.ReturnToUpLevelPage()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+    
+  }
+}
+
+type WifiInfoPage struct {
+  UI.Page
+  ListFontObj  *ttf.Font
+  
+  Wireless *DBUS.DbusInterface
+  Daemon   *DBUS.DbusInterface
+  AList map[string]map[string]string
+  NetworkId  int
+  
+  MyList []*UI.ListItemInterface
+  
+  DisconnectConfirmPage *WifiDisconnectConfirmPage //child page 
+}
+
+func NewWifiInfoPage() *WifiInfoPage {
+  p := &WifiInfoPage{}
+  p.FootMsg = [5]string{"Nav","Disconnect","","Back",""}
+  
+  p.ListFontObj = UI.Fonts["varela15"]
+  
+  p.AList = make(map[string]map[string]string)
+
+  p.NetworkId = -1
+  return p
+  
+}
+
+func (self *WifiInfoPage) GenList() {
+  var iwconfig string
+  var cur_network_id int
+  self.MyList = nil
+  self.MyList = make([]*UI.ListItemInterface,0)
+  
+  cur_network_id = -2
+  
+  if self.NetworkId != -1 {
+    self.AList["ip"]["value"] = "Not Connected"
+    self.Wireless.Get( self.Wireless.Method("GetIwconfig"), &iwconfig)
+    self.Wireless.Get( self.Wireless.Method("GetCurrentNetworkID",iwconfig), &cur_network_id)
+    if cur_network_id == self.NetworkId {
+      var ip string 
+      self.Wireless.Get( self.Wireless.Method("GetWirelessIP",''), &ip)
+      
+      if len(ip) > 0 {
+        self.AList["ip"]["value"]=ip
+      }
+    }
+    var bssid string
+    self.Wireless.Get( self.Wireless.Method("GetWirelessProperty",self.NetworkId,"bssid"),&bssid)
+    
+    self.AList["bssid"]["value"] = bssid
+  }
+  
+  start_x := 0 
+  start_y := 0 
+  i := 0
+  for k,_ := range self.AList {
+    li := UI.NewInfoPageListItem()
+    li.Parent = self
+    li.PosX = start_x
+    li.PosY = start_y + i * li.Height//default is 30
+    li.Width = UI.Width
+    li.Fonts["normal"] = self.ListFontObj
+    li.Fonts["small"]  = UI.Fonts["varela12"]
+    
+    if self.AList[k]["label"] != "" {
+      li.Init(self.AList[k]["label"])
+    }else {
+      li.Init(self.AList[k]["key"])
+    }
+    
+    li.Flag = self.AList[k]["key"]
+    
+    li.SetSmallText(self.AList[k]["value"])
+    self.MyList = append(self.MyList,li)
+    i+=1
+  }
+  
+}
+
+func (self *WifiInfoPage) Init() {
+  if self.Screen != nil {
+    if self.Screen.CanvasHWND != nil && self.CanvasHWND == nil {
+      self.CanvasHWND = self.Screen.CanvasHWND
+    }
+  
+  self.PosX = self.Index * self.Screen.Width
+  self.Width = self.Screen.Width
+  self.Height = self.Screen.Height
+  
+  ps := UI.NewInfoPageSelector()
+  ps.Parent = self
+  ps.PosX = 2
+  self.Ps = ps
+  self.PsIndex = 0
+  
+  ip := make(map[string]string) // ip = {}
+  ip["key"] = "ip"
+  ip["label"] = "IP"
+  ip["value"] = "Not Connected"
+  
+  bssid := make(map[string]string) // bssid = {}
+  bssid["key"] = "bssid"
+  bssid["label"] = "BSSID"
+  bssid["value"] = ""
+  
+  self.AList["ip"] = ip
+  self.AList["bssid"] = bssid
+  
+  self.GenList()
+  
+  self.DisconnectConfirmPage = NewWifiDisconnectConfirmPage()
+  self.DisconnectConfirmPage.Screen = self.Screen
+  self.DisconnectConfirmPage.Name   = "Confirm Disconnect"
+  self.DisconnectConfirmPage.Parent = self
+  
+  self.DisconnectConfirmPage.Init()
+}
+
+func (self *WifiInfoPage) ScrollUp() {
+	if len(self.MyList) == 0 {
+    return
+  }
+  
+  self.PsIndex -= 1
+  
+  if self.PsIndex < 0 {
+    self.PsIndex = 0
+  }
+  cur_li := self.MyList[self.PsIndex]
+  x,y := cur_li.Coord()
+  if x < 0 {
+    for i:=0;i<len(self.MyList);i++ {
+      _,h := self.MyList[i].Size()
+      x,y  = self.MyList[i].Coord()
+      self.MyList[i].NewCoord(x, y+h)
+    }
+  }
+}
+
+func (self *WifiInfoPage) ScrollDown() {
+   if len(self.MyList) == 0 {
+    return
+  }
+  
+  self.PsIndex += 1
+  if self.PsIndex >= len(self.MyList) {
+    self.PsIndex = len(self.MyList) - 1
+  }
+  
+  cur_li := self.MyList[self.PsIndex]
+  x,y  := cur_li.Coord()
+  _,h  := cur_li.Size()
+  
+  if y + h > self.Height {
+    for i:=0;i<len(self.MyList);i++ {
+      _,h = self.MyList[i].Size()
+      x,y = self.MyList[i].Coord()
+      self.MyList[i].NewCoord(x, y - h)
+    }
+  }
+}
+
+func (self *WifiInfoPage) Click() {
+/*
+  cur_li = self._MyList[self._PsIndex]
+  print(cur_li._Flag) 
+*/
+}
+
+func (self *WifiInfoPage) TryDisconnect() {
+  var iwconfig string
+  var cur_network_id int 
+  var ip string 
+  self.Wireless.Get( self.Wireless.Method("GetIwconfig"), &iwconfig)
+  self.Wireless.Get( self.Wireless.Method("GetCurrentNetworkID",iwconfig), &cur_network_id)  
+  self.Wireless.Get( self.Wireless.Method("GetWirelessIP",''), &ip)
+  
+  if cur_network_id == self.NetworkId  && len(ip) >  1 {
+    self.Screen.PushPage(self.DisconnectConfirmPage)
+    self.Screen.Draw()
+    self.SwapAndShow()
+  }else {
+    return
+  }
+}
+
+func (self *WifiInfoPage) OnLoadCb() {
+  var iwconfig string
+  var cur_network_id int 
+  var ip string 
+  self.Wireless.Get( self.Wireless.Method("GetIwconfig"), &iwconfig)
+  self.Wireless.Get( self.Wireless.Method("GetCurrentNetworkID",iwconfig), &cur_network_id)  
+  self.Wireless.Get( self.Wireless.Method("GetWirelessIP",''), &ip)
+  
+  if cur_network_id == self.NetworkId && len(ip) > 1 {
+    self.FootMsg[1]="Disconnect"
+  }else {
+    self.FootMsg[1] = ""
+  }
+  self.GenList()  
+}
+
+
+func (self *WifiInfoPage) OnReturnBackCb() {
+
+	self.ReturnToUpLevelPage()
+	self.Screen.Draw()
+	self.Screen.SwapAndShow()  
+    
+}
+
+func (self *WifiInfoPage) KeyDown(ev *event.Event ) {
+
+	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+		self.ReturnToUpLevelPage()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
+  
+  if ev.Data["Key"] == UI.CurKeys["Up"] {
+    self.ScrollUp()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+  }
+  
+  if ev.Data["Key"] == UI.CurKeys["Down"] {
+    self.ScrollDown()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()    
+  }
+  
+  if ev.Data["Key"] == UI.CurKeys["Enter"] {
+    self.Click()
+  }
+  
+  if ev.Data["Key"] == UI.CurKeys["X"] {
+    self.TryDisconnect()
+  }
+}
+
+func (self *WifiInfoPage) Draw() {
+  self.ClearCanvas()
+  self.Ps.Draw()
+  
+  for i:=0;i<len(self.MyList);i++ {
+    self.MyList[i].Draw()
+  }
+}
+
+
+type WifiListSelector struct{
+  UI.PageSelector
+  BackgroundColor *color.Color
+  
+  Parent *WifiList
+}
+
+func NewWifiListSelector() *WifiListSelector {
+  p := &WifiListSelector{}
+  p.BackgroundColor = &color.Color{131,199,219,255} //SkinManager().GiveColor('Front')
+  
+  return p  
+}
+
+func (self *WifiListSelector) Draw() {
+  idx := self.Parent.PsIndex
+  if idx < len(self.Parent.WirelessList) {
+    x := self.Parent.WirelessList[idx].PosX + 11
+    y := self.Parent.WirelessList[idx].PosY + 1
+    h := self.Parent.WirelessList[idx].Height - 3
+    
+    self.PosX = x
+    self.PosY = y
+    self.Height = h
+    
+    rect_ := rect.Rect(x,y,self.Width,h)
+    draw.AARoundRect(self.Parent.CanvasHWND,&rect_,self.BackgroundColor,4,0,self.BackgroundColor)
+  }
+}
+
+type WifiListMessageBox struct{
+  UI.Label
+  Parent *WifiList
+}
+
+func NewWifiListMessageBox() *WifiListMessageBox{
+  p := &WifiListMessageBox{}
+  
+  return p
+}
+
+
+func (self *WifiListMessageBox) Draw() {
+  my_text := font.Render(self.FontObj,self.Text,true,self.Color)
+  
+  w := surface.GetWidth(my_text)
+  h := surface.GetHeight(my_text)
+  
+  x := (self.Parent.Width - w )/2
+  y := (self.Parent.Height - h)/2
+  
+  padding := 10
+  
+  white := &color.Color{255,255,255,255}
+  black := &color.Color{0,  0,  0,  255}
+  
+  rect_ := rect.Rect(x-padding,y-padding,w+padding*2,h+padding*2)
+  
+  draw.Rect(self.CanvasHWND,white,&rect_,0)
+  draw.Rect(self.CanvasHWND,black,&rect_,1)
+  
+  rect_2 := rect.Rect(x,y,w,h)
+  surface.Blit(self.CanvasHWND,my_text,&rect_2,nil)
+  
+}
+
+//---------WifiList---------------------------------
+type BlockCbFunc func()
+
+type WifiList struct{
+  UI.Page
+  Wireless *DBUS.DbusInterface
+  Daemon   *DBUS.DbusInterface
+  WifiPassword string
+  Connecting  bool
+  Scanning    bool
+  
+  //PrevWicdState  ?
+  
+  ShowingMessageBox bool
+  MsgBox   *WifiListMessageBox
+  ConnectTry  int
+  
+  BlockingUI  bool
+  BlockCb     BlockCbFunc
+  
+  LastStatusMsg string
+  ListFontObj  *ttf.Font
+  
+  InfoPage   *WifiInfoPage
+}
+
+func NewWifiList() *WifiList {
+  p:= &WifiList{}
+  
+  return p
+}
+
+
+func (self *WifiList) Init() {
+  
+}
+
+
+
 

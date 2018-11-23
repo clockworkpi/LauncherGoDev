@@ -133,12 +133,49 @@ func (self *SettingsPage) Init() {
 }
 
 func (self *SettingsPage) ScrollUp() {
-	
+	if len(self.MyList) == 0 {
+    return
+  }
+  
+  self.PsIndex -= 1
+  
+  if self.PsIndex < 0 {
+    self.PsIndex = 0
+  }
+  cur_li := self.MyList[self.PsIndex]
+  x,y := cur_li.Coord()
+  if x < 0 {
+    for i:=0;i<len(self.MyList);i++ {
+      _,h := self.MyList[i].Size()
+      x,y  = self.MyList[i].Coord()
+      self.MyList[i].NewCoord(x, y+h)
+    }
+  }
 }
 
 
 func (self *SettingsPage) ScrollDown() {
-	
+  if len(self.MyList) == 0 {
+    return
+  }
+  
+  self.PsIndex += 1
+  if self.PsIndex >= len(self.MyList) {
+    self.PsIndex = len(self.MyList) - 1
+  }
+  
+  cur_li := self.MyList[self.PsIndex]
+  x,y  := cur_li.Coord()
+  _,h  := cur_li.Size()
+  
+  if y + h > self.Height {
+    for i:=0;i<len(self.MyList);i++ {
+      _,h = self.MyList[i].Size()
+      x,y = self.MyList[i].Coord()
+      self.MyList[i].NewCoord(x, y - h)
+    }
+  }
+  
 }
 
 func (self *SettingsPage) Click() {
