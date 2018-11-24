@@ -12,10 +12,13 @@ import (
 )
 
 type TextItemInterface interface{
+  
+  IconItemInterface
+  
 	GetBold() bool
 	SetBold(bold bool)
 	GetStr() string
-	Draw()
+
 }
 
 

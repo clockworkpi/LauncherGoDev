@@ -10,6 +10,7 @@ import (
 	"github.com/cuu/LauncherGo/sysgo/UI"
 	
 )
+var NetItemDefaultHeight = 30
 
 type NetItemMultiIcon struct {
 	UI.MultiIconItem
@@ -97,7 +98,7 @@ func NewNetItem() *NetItem {
 	p.bitrate = "auto"
 	p.dhcphostname = "GameShell"
 
-	p.Height = 30
+	p.Height = NetItemDefaultHeight 
 	
 	p.Labels = make(map[string]UI.LabelInterface)
 	p.Icons = make( map[string]UI.IconItemInterface)

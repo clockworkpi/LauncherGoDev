@@ -16,6 +16,7 @@ import (
 type ListPageSelector struct {
   PageSelector
   BackgroundColor *color.Color
+  Parent *ConfirmPage
 }
 
 func NewListPageSelector() *ListPageSelector {
@@ -27,7 +28,7 @@ func NewListPageSelector() *ListPageSelector {
 
 func (self *ListPageSelector) Draw() {
   idx := self.Parent.GetPsIndex()
-  mylist := self.Parent.GetMyList()
+  mylist := self.Parent.MyList
   if idx > (len(mylist) -1) {
     idx = len(mylist)
     if idx > 0 {
@@ -78,33 +79,36 @@ func NewConfirmPage() *ConfirmPage  {
 }
 
 
-func (self *ConfirmPage) GetMyList() []LabelInterface {
-	return self.MyList
-}
-
 func (self *ConfirmPage) Reset() {
   self.MyList[0].SetText(self.ConfirmText)
+  x,y := self.MyList[0].Coord()
+  w,h := self.MyList[0].Size()
   
-  self.MyList[0].PosX = (self.Width - self.MyList[0].Width)/2
-  self.MyList[0].PosY = (self.Width - self.MyList[0].Height)/2
+  self.MyList[0].NewCoord( (self.Width - w)/2, (self.Width - h)/2) 
   
-  self.BGPosX = self.MyList[0].PosX - 10
-  self.BGPosY = self.MyList[0].PosY - 10
+  x,y = self.MyList[0].Coord()
   
-  self.BGWidth = self.MyList[0].Width + 20
-  self.BGHeight = self.MyList[0].Height +20  
+  self.BGPosX = x - 10
+  self.BGPosY = y - 10
+  
+  self.BGWidth =  w + 20
+  self.BGHeight = h + 20  
 }
 
 func (self *ConfirmPage) SnapMsg(msg string) {
   self.MyList[0].SetText(msg)
-  self.MyList[0].PosX = (self.Width - self.MyList[0].Width)/2
-  self.MyList[0].PosY = (self.Width - self.MyList[0].Height)/2
+  x,y := self.MyList[0].Coord()
+  w,h := self.MyList[0].Size()
+   
+  self.MyList[0].NewCoord( (self.Width - w )/2, (self.Width - h)/2 )
   
-  self.BGPosX = self.MyList[0].PosX - 10
-  self.BGPosY = self.MyList[0].PosY - 10
+  x, y = self.MyList[0].Coord()
   
-  self.BGWidth = self.MyList[0].Width + 20
-  self.BGHeight = self.MyList[0].Height +20
+  self.BGPosX = x - 10
+  self.BGPosY = y - 10
+  
+  self.BGWidth = w + 20
+  self.BGHeight = h +20
   
 }
 
@@ -123,7 +127,7 @@ func (self *ConfirmPage) Init() {
     
     li := NewLabel()
     li.SetCanvasHWND(self.CanvasHWND)
-    li.Init(self.ConfirmText,self.ListFont)
+    li.Init(self.ConfirmText,self.ListFont,nil)
     
     li.PosX = (self.Width - li.Width)/2
     li.PosY = (self.Height - li.Height)/2

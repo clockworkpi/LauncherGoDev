@@ -35,8 +35,8 @@ func (self *InfoPageSelector) Draw() {
   mylist := self.Parent.GetMyList()
   
   if idx < len(mylist) {
-    x,y := mylist[idx].Coord()
-    w,h := mylist[idx].Size()
+    _,y := mylist[idx].Coord()
+    _,h := mylist[idx].Size()
     
     self.PosY = y+1
     self.Height = h-3

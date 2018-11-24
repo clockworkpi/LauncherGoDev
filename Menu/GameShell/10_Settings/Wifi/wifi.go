@@ -9,6 +9,9 @@ import (
   "github.com/cuu/gogame/time"
 	"github.com/cuu/LauncherGo/sysgo/UI"
   "github.com/cuu/LauncherGo/sysgo/DBUS"
+  
+  "github.com/cuu/LaucherGo/sysgo/wicd/misc"
+  
 )
 
 type WifiDisconnectConfirmPage struct {
@@ -384,9 +387,14 @@ type WifiList struct{
   BlockCb     BlockCbFunc
   
   LastStatusMsg string
+  EncMethods []*misc.CurType
+  Scroller  *UI.ListScroller
   ListFontObj  *ttf.Font
   
   InfoPage   *WifiInfoPage
+  
+  MyList []*NetItem 
+  
 }
 
 func NewWifiList() *WifiList {
@@ -395,11 +403,91 @@ func NewWifiList() *WifiList {
   return p
 }
 
-
-func (self *WifiList) Init() {
+func (self *WifiList) ShowBox(msg string ) {
+  self.MsgBox.Text = msg 
+  self.ShowingMessageBox = true
+  self.Screen.Draw()
+  self.MsgBox.Draw()
+  self.Screen.SwapAndShow()
   
 }
 
+func (self *WifiList) HideBox() {
+  self.Draw()
+  self.ShowingMessageBox = false
+  self.Screen.SwapAndShow()
+}
 
+
+func (self *WifiList) Init() {
+  self.PosX = self.Index * self.Screen.Width
+  self.Width = self.Screen.Width
+  self.Height = self.Screen.Height
+  
+  self.CanvasHWND = self.Screen.CanvasHWND
+  
+  ps := NewWifiListSelector()
+  ps.Parent = self
+  ps.Width = UI.Width - 12
+  
+  self.Ps = ps
+  self.PsIndex = 0
+  
+  msgbox := NewWifiListMessageBox()
+  msgbox.CanvasHWND = self.CanvasHWND
+  msgbox.Init(" ",UI.Fonts["veramono12"])
+  msgbox.Parent = self
+  
+  self.MsgBox = msgbox
+  
+  self.EncMethods = misc.LoadEncryptionMethods() //# load predefined templates from /etc/wicd/...
+  /*
+    {
+    'fields': [],
+    'name': 'WPA 1/2 (Passphrase)',
+    'optional': [],
+    'protected': [
+      ['apsk', 'Preshared_Key'],
+    ],
+    'required': [
+      ['apsk', 'Preshared_Key'],
+    ],
+    'type': 'wpa-psk',
+  },
+  */
+  
+  self.UpdateNetList(true,true) // self.UpdateNetList(force_check=True,firstrun=True)
+  
+  self.Scroller = UI.NewListScroller()
+  self.Scroller.Parent = self
+  self.Scroller.PosX = 2
+  self.Scroller.PosY = 2
+  self.Scroller.Init()
+  
+  self.InfoPage = NewWifiInfoPage()
+  self.InfoPage.Screen = self.Screen
+  self.InfoPage.Name = "Wifi info"
+  
+  self.InfoPage.Init()
+  
+}
+
+func (self *WifiList) Draw() {
+  self.ClearCanvas()
+  
+  if len(self.MyList) == 0 {
+    return
+  }
+  
+  self.Ps.Draw()
+  
+  for _,v := range self.MyList {
+    v.Draw()
+  }  
+  
+  self.Scroller.UpdateSize( len(self.MyList)*NetItemDefaultHeight, self.PsIndex*NetItemDefaultHeight)
+  self.Scroller.Draw()
+  
+}
 
 

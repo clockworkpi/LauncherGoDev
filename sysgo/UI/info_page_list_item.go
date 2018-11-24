@@ -48,7 +48,7 @@ func (self *InfoPageListItem) Draw() {
     self.Labels["Text"].SetColor(&color.Color{83,83,83,255} ) // SkinManager().GiveColor("Text")
   }
   
-  x,y := self.Labels["Text"].Coord()
+  x,_ := self.Labels["Text"].Coord()
   w,h := self.Labels["Text"].Size()
   
   self.Labels["Text"].NewCoord( x + self.PosX, self.PosY + (self.Height - h)/2 )
@@ -58,7 +58,7 @@ func (self *InfoPageListItem) Draw() {
   self.Labels["Text"].NewCoord(x, self.PosY + (self.Height - h)/2 )
   
   if _, ok := self.Labels["Small"]; ok {
-    x,y = self.Labels["Small"].Coord()
+    x,_ = self.Labels["Small"].Coord()
     w,h = self.Labels["Small"].Size()
     
     self.Labels["Small"].NewCoord( self.Width - w + 5 , self.PosY + (self.Height - h)/2 )

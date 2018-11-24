@@ -1,7 +1,10 @@
 package UI
 
 import (
-	
+  "fmt"
+	"strings"
+  
+  "github.com/cuu/gogame/font"
 	"github.com/cuu/gogame/draw"
 	"github.com/cuu/gogame/surface"
 	"github.com/cuu/gogame/color"
@@ -52,12 +55,10 @@ func (self *KeyboardSelector) Draw() {
 	row_idx := self.Parent.RowIndex
 	idx     := self.Parent.PsIndex
 
-	x       := self.Parent.SecsKeys[sec_idx][row_idx][idx].PosX
-	y       := self.Parent.SecsKeys[sec_idx][row_idx][idx].PosY
-	w       := self.Parent.SecsKeys[sec_idx][row_idx][idx].Width+6
-	h       := self.Parent.SecsKeys[sec_idx][row_idx][idx].Height+1
+	x, y    := self.Parent.SecsKeys[sec_idx][row_idx][idx].Coord()
+	w, h    := self.Parent.SecsKeys[sec_idx][row_idx][idx].Size()
 
-	rect_   := draw.MidRect(x,y,w,h,self.Parent.Width,self.Parent.Height)
+	rect_   := draw.MidRect(x,y,w+6,h+1,self.Parent.Width,self.Parent.Height)
 
 	if rect_.W <= 0 || rect_.H <= 0 {
 		return
@@ -200,7 +201,7 @@ func (self *Keyboard) Init() {
 
 			start_y = 84 * j * (word_margin+14)
 
-			for idx,val := range self.Secs[i][j] {
+			for _,val := range self.Secs[i][j] {
 				ti := NewTextItem()
 				ti.FontObj = fontobj
 				ti.Parent = self
@@ -248,9 +249,10 @@ func (self *Keyboard) Init() {
 
 	ps.Parent = self
 	ps.Init(start_x,start_y,25,25,128)
+  ps.OnShow = true
+  
 	self.Ps = ps
 	self.PsIndex = 0
-	self.Ps.OnShow = true
 
 }
 
@@ -295,7 +297,7 @@ func (self *Keyboard) SelectNextChar() {
 	row_idx := self.RowIndex
 	self.PsIndex+=1
 	
-	if self._PsIndex >= len(self.SecsKeys[sec_idx][row_idx]) {
+	if self.PsIndex >= len(self.SecsKeys[sec_idx][row_idx]) {
 		self.PsIndex = 0
 		self.RowIndex+=1
 	
@@ -330,7 +332,8 @@ func (self *Keyboard) SelectPrevChar() {
 
 func (self *Keyboard) ClickOnChar() {
 	sec_idx := self.SectionIndex        
-	alphabet := self.SecsKeys[sec_idx][self.RowIndex][self.PsIndex].Str
+	alphabet := self.SecsKeys[sec_idx][self.RowIndex][self.PsIndex].GetStr()
+  
 	if alphabet == "Space"{
 		alphabet = " "
 	}
@@ -387,7 +390,8 @@ func (self *Keyboard) KeyboardShift() {
 		for j:=0;j<self.SectionNumbers;j++ {
 			for _,u := range self.SecsKeys[j] {
 				for _,x := range u {
-					x.PosX = += self.LeftOrRight*v
+          x_,y_ := x.Coord()
+          x.NewCoord(x_+self.LeftOrRight*v,y_)
 				}
 			}
 		}
@@ -399,7 +403,7 @@ func (self *Keyboard) KeyboardShift() {
 	}
 }
 
-func (self *keyboard) ShiftKeyboardPage() {
+func (self *Keyboard) ShiftKeyboardPage() {
 	self.KeyboardShift()
 	self.SectionIndex -= self.LeftOrRight
 	self.Draw()

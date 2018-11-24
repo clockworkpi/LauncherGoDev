@@ -28,7 +28,7 @@ var (
 	plugin_flag   = "plugin.config"
 )
 
-type ActionConifg struct {
+type ActionConfig struct {
 	ROM string `json:"ROM"`
 	ROM_SO string `json:"ROM_SO"`
 	EXT []string   `json:"EXT"`
