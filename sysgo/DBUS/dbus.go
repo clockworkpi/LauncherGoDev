@@ -42,14 +42,18 @@ func (self *DbusInterface) Method(name string, args...interface{} ) *dbus.Call {
 	}
 }
 
-func (self *DbusInterface) Get( thecall *dbus.Call, retvalues ...interface{}) {
+func (self *DbusInterface) Get( thecall *dbus.Call, retvalues ...interface{}) error {
 	if len(thecall.Body) == 0 {
-		return
+		return nil
 	}
 	err:=  thecall.Store(retvalues...)
+  
+  return err
+  /*
 	if err != nil {
 		panic(fmt.Sprintf("Failed: %s",err))
 	}
+  */
 }
 
 type DBusInterface interface {

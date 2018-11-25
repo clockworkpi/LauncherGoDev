@@ -2,6 +2,7 @@ package main
 //wifi_list.py
 
 import (
+  gotime "time"
   "github.com/cuu/gogame/surface"
   "github.com/cuu/gogame/font"
   "github.com/cuu/gogame/color"
@@ -377,7 +378,7 @@ type WifiList struct{
   Connecting  bool
   Scanning    bool
   
-  //PrevWicdState  ?
+  PrevWicdState  int
   
   ShowingMessageBox bool
   MsgBox   *WifiListMessageBox
@@ -399,6 +400,7 @@ type WifiList struct{
 
 func NewWifiList() *WifiList {
   p:= &WifiList{}
+  p.PrevWicdState = -1
   
   return p
 }
@@ -460,6 +462,174 @@ func (self *WifiList) GenNetworkList() {
     
   }
   self.PsIndex = 0
+}
+
+func (self *WifiList) Disconnect() {
+  self.Connecting = false
+  self.Daemon.Method("Disconnect")
+}
+
+func (self *WifiList) ShutDownConnecting() {
+  fmt.Println("Shutdownconnecting...", self.ConnectTry)
+  self.Daemon.Method("CancelConnect")
+  self.Daemon.Method("SetForcedDisconnect",true)
+  self.Connecting= false
+}
+
+func (self *WifiList) Rescan(sync bool) { // sync default should be false
+  fmt.Println("start Rescan")
+  if self.Wireless!= nil {
+    self.Wireless.Method("Scan",sync)
+  }
+}
+
+// dbus signal functions
+func (self *WifiList) DbusScanFinishedSig() {
+}
+
+func (self *WifiList) DbusScanStarted() {
+
+}
+
+
+func (self *WifiList) UpdateNetList(state int,info []string ,force_check bool,firstrun bool) { //force_check default ==false, firstrun default == false 
+  if self.Daemon == nil {
+    return
+  }
+  
+  var state_ int
+  var trash []string
+  
+  if state == -1 {
+    self.Daemon.Get(self.Daemon.Method("GetConnectionStatus"),&state_,&trash)
+    fmt.Println("state ",state_)
+    fmt.Println("Trash ",trash)
+  }
+  
+  if force_check == true || self.PrevWicdState != state {
+    self.GenNetworkList()
+  }
+  
+  if len(info) > 0 {
+    if len(info) > 3 {
+      _id,_ := strconv.Atoi(info[3])
+      if _id < len(self.MyList) {
+        self.MyList[_id].UpdateStrenLabel(info[2])
+      }
+    }
+  }
+  
+  self.PrevWicdState = state
+
+}
+
+func (self *WifiList) SetConnectingStatus(fast bool) bool { // default fast == false
+  
+  var wireless_connecting bool
+  var iwconfig string 
+  
+  var essid string
+  var stat  string
+  var status_msg string 
+  
+  self.Wireless.Get(self.Wireless.Method("CheckIfWirelessConnecting"),&wireless_connecting)
+  
+  
+  if wireless_connecting == true {
+    if fast == false {
+      self.Wireless.Get(self.Wireless.Method("GetIwconfig"),&iwconfig)
+    }else {
+      iwconfig=""
+    }
+    
+    self.Wireless.Get(self.Wireless.Method("GetCurrentNetwork",iwconfig),&essid)
+    
+    err := self.Wireless.Get(self.Wireless.Method("CheckWirelessConnectingMessage"),&stat) // wicd will return False or stat message,False is a boolean,stat is string
+    if err != nil {
+      return false
+    }
+    
+    status_msg := fmt.Sprintf("%s: %s", essid,stat)
+    
+    if self.LastStatusMsg != status_msg {
+      fmt.Printf("%s: %s\n",essid,stat)
+      self.LastStatusMsg = status_msg
+      
+      self.ShowBox(self.LastStatusMsg)
+      
+      self.Screen.FootBar.UpdateNavText(self.LastStatusMsg)
+      UI.SwapAndShow()
+      
+    }
+    
+    return true
+    
+  }else {
+    self.Connecting=false
+    return self.Connecting
+  }
+  
+  return false
+}
+
+func (self *WifiList) UpdateStatus() bool {
+  fmt.Println("UpdateStatus")
+  var wireless_connecting bool
+  var fast bool 
+  
+  self.Wireless.Get(self.Wireless.Method("CheckIfWirelessConnecting"),&wireless_connecting)
+  
+  self.Daemon.Get(self.Daemon.Method("NeedsExternalCalls"),&fast)
+  
+  fast = !fast
+  
+  self.Connecting = wireless_connecting
+  
+  if self.Connecting  == true {
+    go func() {
+      for {
+        gotime.Sleep(250 * gotime.Millisecond)
+        ret := self.SetConnectingStatus(fast)
+        if ret == false {
+          break
+        }
+      }
+    }()
+  }else {
+    
+    var iwconfig string 
+    var ip string 
+    if fast == false {
+      self.Wireless.Get(self.Wireless.Method("GetIwconfig"),&iwconfig)
+    }else {
+      iwconfig = ""
+    }
+    
+    self.Wireless.Get( self.Wireless.Method("GetWirelessIP",''), &ip)
+    
+    if self.CheckForWireless(iwconfig,ip,"") == true { // self.CheckForWireless(iwconfig,self._Wireless.GetWirelessIP(''),None)
+      return true
+    }else {
+      fmt.Println("not Connected")
+      return true
+    }
+  }
+  
+  return true
+  
+}
+
+func (self *WifiList) DbusDaemonStatusChangedSig(state int,info []string) {
+  
+}
+
+func (self *WifiList) DbusConnectResultsSent( result string) {
+  
+}
+
+//set_status == "" not used
+func (self *WifiList) CheckForWireless(iwconfig string, wireless_ip string , set_status string ) { 
+  
 }
 
 func (self *WifiList) Init() {
