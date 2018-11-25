@@ -418,6 +418,49 @@ func (self *WifiList) HideBox() {
   self.Screen.SwapAndShow()
 }
 
+func (self *WifiList) GenNetworkList() {
+  self.MyList = nil
+  self.MyList = make([]*NetItem,0)
+  
+  start_x := 0 
+  start_y := 0
+  
+  var num_of_networks int
+  var cur_signal_strength int
+  var cur_network_id int // -1 or 0-n
+  var iwconfig string  
+  var wireless_ip string 
+  
+  var is_active bool
+  
+  self.Wireless.Method("GetNumberOfNetworks"),&num_of_networks)
+  
+  for network_id:=0;network_id< num_of_networks;network_id++ {
+    is_active = false
+    
+    self.Wireless.Get(self.Wireless.Method("GetCurrentSignalStrength",""), &cur_signal_strength)
+    self.Wireless.Get(self.Wireless.Method("GetIwconfig"),&iwconfig)
+    self.Wireless.Get(self.Wireless.Method("GetCurrentNetworkID",iwconfig),&cur_network_id)
+    
+    if cur_signal_strength != 0 && cur_network_id == network_id {
+      self.Wireless.Get(self.Wireless.Method("GetWirelessIP",""),&wireless_ip)
+      if wireless_ip != "" {
+        is_active = true
+      }
+    }
+    
+    ni := NewNetItem()
+    ni.Parent = self
+    ni.PosX   = start_x
+    ni.PosY   = start_y + network_id* NetItemDefaultHeight
+    ni.Width  = UI.Width
+    ni.FontObj = self.ListFontObj
+    ni.Init(network_id, is_active)
+    self.MyList = append(self.MyList,ni)
+    
+  }
+  self.PsIndex = 0
+}
 
 func (self *WifiList) Init() {
   self.PosX = self.Index * self.Screen.Width
