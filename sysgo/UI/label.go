@@ -1,6 +1,7 @@
 package UI
 
 import (
+  //"fmt"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 	
@@ -88,6 +89,7 @@ func (self *Label) SetText(text string) {
 
 func (self *Label) Draw() {
 	font.SetBold(self.FontObj,false) // avoing same font tangling set_bold to others
+  
 	my_text := font.Render(self.FontObj,self.Text, true, self.Color, nil)
 
 	rect_ := rect.Rect(self.PosX,self.PosY,self.Width,self.Height)

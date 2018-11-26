@@ -10,7 +10,7 @@ import (
 	"github.com/cuu/gogame/color"
 */	
 	"github.com/cuu/LauncherGo/sysgo/UI"
-	
+	"github.com/cuu/LauncherGo/sysgo/DBUS"
 )
 
 /******************************************************************************/
@@ -28,6 +28,13 @@ func (self *WifiPlugin) Init( main_screen *UI.MainScreen ) {
   self.PasswordPage.Init()
   
   self.ScanPage = NewWifiList()
+  self.ScanPage.Name = "Scan wifi"
+  self.ScanPage.Wireless = DBUS.DBusHandler.Wifi
+  self.ScanPage.Daemon   = DBUS.DBusHandler.Daemon
+  
+  self.ScanPage.Screen = main_screen
+  
+  self.ScanPage.Init()
   
 }
 

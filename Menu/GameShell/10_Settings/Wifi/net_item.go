@@ -1,13 +1,19 @@
 package main
 
 import (
+  "fmt"
+  "strconv"
+  "strings"
+  
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
-	
+  "github.com/cuu/gogame/color"
+	"github.com/cuu/gogame/draw"
 	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/surface"
-	"github.com/veandco/go-sdl2/sdl"
 	"github.com/cuu/LauncherGo/sysgo/UI"
+  
+  "github.com/cuu/LauncherGo/sysgo/DBUS"
 	
 )
 var NetItemDefaultHeight = 30
@@ -47,7 +53,7 @@ func NewNetItemIcon() *NetItemIcon {
 }
 
 func (self *NetItemIcon) Draw() {
-	_,h_ := self.Parent.SIze()
+	_,h_ := self.Parent.Size()
 
 	dest_rect := rect.Rect(self.PosX,self.PosY+(h_-self.Height)/2,self.Width,self.Height)
 
@@ -82,7 +88,7 @@ type NetItem struct {
 	Stren     string // 19%
 	NetId     int
 	Mode      string // Master or AdHoc
-	Parent    UI.PageInterface
+	Parent    *WifiList
 	IsActive  bool
 	
 	Labels map[string]UI.LabelInterface
@@ -90,6 +96,9 @@ type NetItem struct {
 	Fonts  map[string]*ttf.Font
 	FontObj *ttf.Font
 	
+  Wireless *DBUS.DbusInterface
+  Daemon   *DBUS.DbusInterface
+  
 }
 
 func NewNetItem() *NetItem {
@@ -112,10 +121,9 @@ func (self *NetItem) SetActive( act bool) {
 }
 
 func (self *NetItem) UpdateStrenLabel( strenstr string) { //  ## strenstr should be 'number',eg:'90'
-	the_main_screen := self.Parent.GetScreen()
-	dbus := the_main_screen.DBusManager
 
-	dbus.Daemon.Get( self.Daemon.Method("FormatSignalForPrinting",strenstr), &strenstr) 
+
+	self.Daemon.Get( self.Daemon.Method("FormatSignalForPrinting",strenstr), &strenstr) 
 
 	self.Stren = strenstr
 
@@ -129,11 +137,13 @@ func (self *NetItem) Init(i int,is_active bool) {
 	var sig_display_type int
 	strenstr := "quality"
 	gap := 4
-
-	the_main_screen := self.Parent.GetScreen()
-	dbus := the_main_screen.DBusManager
-	
-	dbus.Daemon.Get( dbus.Daemon.Method("GetSignalDisplayType"), &sig_display_type )
+  
+  the_main_screen := self.Parent.GetScreen()
+  
+  self.Wireless = self.Parent.Wireless
+  self.Daemon   = self.Parent.Daemon
+  	
+	self.Daemon.Get( self.Daemon.Method("GetSignalDisplayType"), &sig_display_type )
 
 	if sig_display_type == 0 {
 		strenstr = "quality"
@@ -146,36 +156,38 @@ func (self *NetItem) Init(i int,is_active bool) {
 	self.NetId = i
 
 	tmp :=""
-	dbus.Wireless.Get(dbus.Wireless.Method("GetWirelessProperty",self.NetId, strenstr),&tmp)
-	dbus.Daemon.Get( self.Daemon.Method("FormatSignalForPrinting",tmp), &tmp)
+	self.Wireless.Get(self.Wireless.Method("GetWirelessProperty",self.NetId, strenstr),&tmp)
+	self.Daemon.Get( self.Daemon.Method("FormatSignalForPrinting",tmp), &tmp)
 	self.Stren = tmp
 
-	dbus.Wireless.Get( dbus.Wireless.Method("GetWirelessProperty",self.NetId,"essid"),&self.Essid)
-	dbus.Wireless.Get( dbus.Wireless.Method("GetWirelessProperty",self.NetId,"bssid"),&self.Bssid)
+	self.Wireless.Get( self.Wireless.Method("GetWirelessProperty",self.NetId,"essid"),&self.Essid)
+	self.Wireless.Get( self.Wireless.Method("GetWirelessProperty",self.NetId,"bssid"),&self.Bssid)
 
 
 	check_enc := false
-	dbus.Wireless.Get( dbus.Wireless.Method("GetWirelessProperty",self.NetId,"encryption"),&check_enc)
+	self.Wireless.Get( self.Wireless.Method("GetWirelessProperty",self.NetId,"encryption"),&check_enc)
 
 	if check_enc == true {
-		dbus.Wireless.Get( dbus.Wireless.Method("GetWirelessProperty",self.NetId,"encryption_method"),&self.Encrypt)
+		self.Wireless.Get( self.Wireless.Method("GetWirelessProperty",self.NetId,"encryption_method"),&self.Encrypt)
 	}else {
 		self.Encrypt = "Unsecured"
 	}
 
-	dbus.Wireless.Get( dbus.Wireless.Method("GetWirelessProperty",self.NetId,"mode"),&self.Mode)
+	self.Wireless.Get( self.Wireless.Method("GetWirelessProperty",self.NetId,"mode"),&self.Mode)
 
-	dbus.Wireless.Get( dbus.Wireless.Method("GetWirelessProperty",self.NetId,"channel"),&self.Channel)
+	self.Wireless.Get( self.Wireless.Method("GetWirelessProperty",self.NetId,"channel"),&self.Channel)
 
 	theString := fmt.Sprintf("  %-*s %25s %9s %17s %6s %4s",gap,self.Stren,self.Essid,self.Encrypt,self.Bssid,self.Mode,
 		self.Channel)
-
+  
+  
 	if is_active {
 		theString = ">> " + theString[1:]
 		self.SetActive(is_active)
 	}
 
-
+  fmt.Println(theString)
+  
 	essid_label := UI.NewLabel()
 	essid_label.PosY = 36
 	essid_label.CanvasHWND = self.Parent.GetCanvasHWND()
@@ -187,7 +199,7 @@ func (self *NetItem) Init(i int,is_active bool) {
 	}else {
 		essid_ = self.Essid
 	}
-
+  fmt.Println(essid_)
 	essid_label.Init(essid_, self.FontObj,nil)
 
 	self.Labels["essid"] = essid_label
@@ -195,7 +207,7 @@ func (self *NetItem) Init(i int,is_active bool) {
 	stren_label := UI.NewLabel()
 	stren_label.CanvasHWND = self.Parent.GetCanvasHWND()
 
-	stren_label.Init(self.Stren, self.FontObj)
+	stren_label.Init(self.Stren, self.FontObj,nil)
 	stren_label.PosX = self.Width - 23 - stren_label.Width-2
 
 	self.Labels["stren"] = stren_label
@@ -214,7 +226,7 @@ func (self *NetItem) Init(i int,is_active bool) {
 	self.Icons["done"] = done_icon
 
 	nimt := NewNetItemMultiIcon()
-	nimt.ImgSurf = the_main_screen.TitleBar.Icons["wifistatus"].ImgSurf
+	nimt.ImgSurf = the_main_screen.TitleBar.Icons["wifistatus"].GetImgSurf()
 	nimt.CanvasHWND = self.Parent.GetCanvasHWND()
 	nimt.Parent = self // WidgetInterface
 
@@ -226,10 +238,8 @@ func (self *NetItem) Init(i int,is_active bool) {
 
 
 func (self *NetItem) Connect() {
-	the_main_screen := self.Parent.GetScreen()
-	dbus := the_main_screen.DBusManager
 
-	dbus.Wireless.Method("ConnectWireless",self.NetId)
+	self.Wireless.Method("ConnectWireless",self.NetId)
 	
 }
 
@@ -252,9 +262,10 @@ func (self *NetItem) Draw() {
 		self.Icons["lock"].Draw()
 	}
 
-	stren_int,err := strconv.ParseInt(strings.Replace(self.Stren,"%",""),10,64)
+	stren_int,err := strconv.ParseInt(strings.Replace(self.Stren,"%","",-1),10,64)
 	if err == nil {
-		ge := the_main_screen.TitleBar.GetWifiStrength(stren_int)
+    the_main_screen := self.Parent.GetScreen()
+		ge := the_main_screen.TitleBar.GetWifiStrength(int(stren_int))
 		if ge > 0 {
 			self.Icons["wifistatus"].SetIconIndex(ge)
 			self.Icons["wifistatus"].NewCoord(self.Width-23,self.PosY)
@@ -266,7 +277,7 @@ func (self *NetItem) Draw() {
 		}
 	}
 
-	draw.Line(self.ParseInt.GetCanvasHWND(),
+	draw.Line(self.Parent.GetCanvasHWND(),
 		&color.Color{169,169,169,255},
 		self.PosX,self.PosY+self.Height-1,
 		self.PosX+self.Width,self.PosY+self.Height-1,

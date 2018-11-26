@@ -197,8 +197,9 @@ func (self *MainScreen) Init() {
 	self.SkinManager = NewSkinManager()
 	self.SkinManager.Init()
 
-	self.DBusManager = DBUS.NewDBus()
-	self.DBusManager.Init()
+	//self.DBusManager = DBUS.NewDBus()
+  self.DBusManager = DBUS.DBusHandler
+	//self.DBusManager.Init()
 }
 
 func (self *MainScreen) FartherPages() { // right after ReadTheDirIntoPages

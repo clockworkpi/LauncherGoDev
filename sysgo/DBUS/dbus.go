@@ -48,12 +48,11 @@ func (self *DbusInterface) Get( thecall *dbus.Call, retvalues ...interface{}) er
 	}
 	err:=  thecall.Store(retvalues...)
   
-  return err
-  /*
 	if err != nil {
-		panic(fmt.Sprintf("Failed: %s",err))
+		panic(fmt.Sprintf("Failed: %s,%s",err,thecall.Method))
 	}
-  */
+  
+  return err
 }
 
 type DBusInterface interface {
@@ -170,3 +169,10 @@ func (self *DBus) ListenSignal() {
 	}
 }
 
+var DBusHandler *DBus //global 
+
+func init() {
+  DBusHandler = NewDBus()
+  DBusHandler.Init()
+  fmt.Println("dbus inited")
+}

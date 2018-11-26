@@ -2,17 +2,25 @@ package main
 //wifi_list.py
 
 import (
+  "fmt"
+  "strconv"
   "strings"
   gotime "time"
+  
+  "github.com/veandco/go-sdl2/ttf"
+  
   "github.com/cuu/gogame/surface"
   "github.com/cuu/gogame/font"
   "github.com/cuu/gogame/color"
   "github.com/cuu/gogame/event"
   "github.com/cuu/gogame/time"
+  "github.com/cuu/gogame/rect"
+  "github.com/cuu/gogame/draw"
 	"github.com/cuu/LauncherGo/sysgo/UI"
   "github.com/cuu/LauncherGo/sysgo/DBUS"
   
-  "github.com/cuu/LaucherGo/sysgo/wicd/misc"
+  
+  "github.com/cuu/LauncherGo/sysgo/wicd/misc"
   
 )
 
@@ -23,6 +31,9 @@ type WifiDisconnectConfirmPage struct {
 
 func NewWifiDisconnectConfirmPage() *WifiDisconnectConfirmPage {
   p := &WifiDisconnectConfirmPage{}  
+  p.ListFont = UI.Fonts["veramono20"]
+  p.FootMsg = [5]string{"Nav","","","Cancel","Yes"}
+  
   p.ConfirmText ="Confirm Disconnect?"
   return p
 }
@@ -40,7 +51,7 @@ func (self *WifiDisconnectConfirmPage) KeyDown(ev *event.Event ) {
     self.Screen.Draw()
     self.Screen.SwapAndShow()
     
-    self.Parent.Daemon.Disconnect()
+    DBUS.DBusHandler.Daemon.Method("Disconnect")
     
     time.BlockDelay(400)
     
@@ -60,7 +71,7 @@ type WifiInfoPage struct {
   AList map[string]map[string]string
   NetworkId  int
   
-  MyList []*UI.ListItemInterface
+  MyList []UI.ListItemInterface
   
   DisconnectConfirmPage *WifiDisconnectConfirmPage //child page 
 }
@@ -82,7 +93,7 @@ func (self *WifiInfoPage) GenList() {
   var iwconfig string
   var cur_network_id int
   self.MyList = nil
-  self.MyList = make([]*UI.ListItemInterface,0)
+  self.MyList = make([]UI.ListItemInterface,0)
   
   cur_network_id = -2
   
@@ -92,7 +103,7 @@ func (self *WifiInfoPage) GenList() {
     self.Wireless.Get( self.Wireless.Method("GetCurrentNetworkID",iwconfig), &cur_network_id)
     if cur_network_id == self.NetworkId {
       var ip string 
-      self.Wireless.Get( self.Wireless.Method("GetWirelessIP",''), &ip)
+      self.Wireless.Get( self.Wireless.Method("GetWirelessIP",""), &ip)
       
       if len(ip) > 0 {
         self.AList["ip"]["value"]=ip
@@ -136,7 +147,7 @@ func (self *WifiInfoPage) Init() {
     if self.Screen.CanvasHWND != nil && self.CanvasHWND == nil {
       self.CanvasHWND = self.Screen.CanvasHWND
     }
-  
+  }
   self.PosX = self.Index * self.Screen.Width
   self.Width = self.Screen.Width
   self.Height = self.Screen.Height
@@ -168,6 +179,7 @@ func (self *WifiInfoPage) Init() {
   self.DisconnectConfirmPage.Parent = self
   
   self.DisconnectConfirmPage.Init()
+  
 }
 
 func (self *WifiInfoPage) ScrollUp() {
@@ -227,12 +239,12 @@ func (self *WifiInfoPage) TryDisconnect() {
   var ip string 
   self.Wireless.Get( self.Wireless.Method("GetIwconfig"), &iwconfig)
   self.Wireless.Get( self.Wireless.Method("GetCurrentNetworkID",iwconfig), &cur_network_id)  
-  self.Wireless.Get( self.Wireless.Method("GetWirelessIP",''), &ip)
+  self.Wireless.Get( self.Wireless.Method("GetWirelessIP",""), &ip)
   
   if cur_network_id == self.NetworkId  && len(ip) >  1 {
     self.Screen.PushPage(self.DisconnectConfirmPage)
     self.Screen.Draw()
-    self.SwapAndShow()
+    self.Screen.SwapAndShow()
   }else {
     return
   }
@@ -244,7 +256,7 @@ func (self *WifiInfoPage) OnLoadCb() {
   var ip string 
   self.Wireless.Get( self.Wireless.Method("GetIwconfig"), &iwconfig)
   self.Wireless.Get( self.Wireless.Method("GetCurrentNetworkID",iwconfig), &cur_network_id)  
-  self.Wireless.Get( self.Wireless.Method("GetWirelessIP",''), &ip)
+  self.Wireless.Get( self.Wireless.Method("GetWirelessIP",""), &ip)
   
   if cur_network_id == self.NetworkId && len(ip) > 1 {
     self.FootMsg[1]="Disconnect"
@@ -318,10 +330,10 @@ func NewWifiListSelector() *WifiListSelector {
 
 func (self *WifiListSelector) Draw() {
   idx := self.Parent.PsIndex
-  if idx < len(self.Parent.WirelessList) {
-    x := self.Parent.WirelessList[idx].PosX + 11
-    y := self.Parent.WirelessList[idx].PosY + 1
-    h := self.Parent.WirelessList[idx].Height - 3
+  if idx < len(self.Parent.MyList) {
+    x := self.Parent.MyList[idx].PosX + 11
+    y := self.Parent.MyList[idx].PosY + 1
+    h := self.Parent.MyList[idx].Height - 3
     
     self.PosX = x
     self.PosY = y
@@ -345,7 +357,7 @@ func NewWifiListMessageBox() *WifiListMessageBox{
 
 
 func (self *WifiListMessageBox) Draw() {
-  my_text := font.Render(self.FontObj,self.Text,true,self.Color)
+  my_text := font.Render(self.FontObj,self.Text,true,self.Color,nil)
   
   w := surface.GetWidth(my_text)
   h := surface.GetHeight(my_text)
@@ -402,6 +414,8 @@ type WifiList struct{
 func NewWifiList() *WifiList {
   p:= &WifiList{}
   p.PrevWicdState = -1
+  p.ListFontObj = UI.Fonts["notosanscjk15"]
+  p.FootMsg = [5]string{"Nav.","Scan","Info","Back","Enter"}
   
   return p
 }
@@ -436,7 +450,7 @@ func (self *WifiList) GenNetworkList() {
   
   var is_active bool
   
-  self.Wireless.Method("GetNumberOfNetworks"),&num_of_networks)
+  self.Wireless.Get(self.Wireless.Method("GetNumberOfNetworks"),&num_of_networks)
   
   for network_id:=0;network_id< num_of_networks;network_id++ {
     is_active = false
@@ -497,14 +511,18 @@ func (self *WifiList) UpdateNetList(state int,info []string ,force_check bool,fi
   if self.Daemon == nil {
     return
   }
+    
+  type status struct {
+    State int
+    Trash  []string
+  }
   
-  var state_ int
-  var trash []string
+  var mystatus status
   
   if state == -1 {
-    self.Daemon.Get(self.Daemon.Method("GetConnectionStatus"),&state_,&trash)
-    fmt.Println("state ",state_)
-    fmt.Println("Trash ",trash)
+    self.Daemon.Get(self.Daemon.Method("GetConnectionStatus"),&mystatus)
+    fmt.Println("state ",mystatus.State)
+    fmt.Println("Trash ",mystatus.Trash)
   }
   
   if force_check == true || self.PrevWicdState != state {
@@ -550,7 +568,7 @@ func (self *WifiList) SetConnectingStatus(fast bool) bool { // default fast == f
       return false
     }
     
-    status_msg := fmt.Sprintf("%s: %s", essid,stat)
+    status_msg = fmt.Sprintf("%s: %s", essid,stat)
     
     if self.LastStatusMsg != status_msg {
       fmt.Printf("%s: %s\n",essid,stat)
@@ -606,7 +624,7 @@ func (self *WifiList) UpdateStatus() bool {
       iwconfig = ""
     }
     
-    self.Wireless.Get( self.Wireless.Method("GetWirelessIP",''), &ip)
+    self.Wireless.Get( self.Wireless.Method("GetWirelessIP",""), &ip)
     
     if self.CheckForWireless(iwconfig,ip,"") == true { // self.CheckForWireless(iwconfig,self._Wireless.GetWirelessIP(''),None)
       return true
@@ -829,7 +847,7 @@ func (self *WifiList) KeyDown( ev *event.Event  ) {
       self.Wireless.Get(self.Wireless.Method("CheckIfWirelessConnecting"),&wireless_connecting)
       
       if wireless_connecting == true {
-        self.Shutdownconnecting()
+        self.ShutDownConnecting()
         self.ShowBox("ShutDownConnecting...")
         self.BlockingUI = true
         self.BlockCb = self.AbortedAndReturnToUpLevel
@@ -874,7 +892,7 @@ func (self *WifiList) KeyDown( ev *event.Event  ) {
       self.Screen.SetCurPage(APIOBJ.PasswordPage)
       
       thepass := ""
-      for i,v := range wicd_wireless_encrypt_pwd { //[]map[string]string
+      for _,v := range wicd_wireless_encrypt_pwd { //[]map[string]string
         if _, ok := v["preshared_key"]; ok {
           if len(v["preshared_key"]) > 0 {
             thepass = v["preshared_key"]
@@ -926,12 +944,12 @@ func (self *WifiList) Init() {
   
   msgbox := NewWifiListMessageBox()
   msgbox.CanvasHWND = self.CanvasHWND
-  msgbox.Init(" ",UI.Fonts["veramono12"])
+  msgbox.Init(" ",UI.Fonts["veramono12"],nil)
   msgbox.Parent = self
   
   self.MsgBox = msgbox
   
-  self.EncMethods = misc.LoadEncryptionMethods() //# load predefined templates from /etc/wicd/...
+  self.EncMethods = misc.LoadEncryptionMethods(false) //# load predefined templates from /etc/wicd/...
   /*
     {
     'fields': [],
@@ -947,7 +965,7 @@ func (self *WifiList) Init() {
   },
   */
   
-  self.UpdateNetList(true,true) // self.UpdateNetList(force_check=True,firstrun=True)
+  self.UpdateNetList(-1,[]string{}, true,true) // self.UpdateNetList(force_check=True,firstrun=True)
   
   self.Scroller = UI.NewListScroller()
   self.Scroller.Parent = self

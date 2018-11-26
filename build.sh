@@ -16,4 +16,7 @@ cd Menu/GameShell/10_Settings/About
 go build -o  about.so -buildmode=plugin
 cd -
 
+cd Menu/GameShell/10_Settings/Wifi
+go build -o  wifi.so -buildmode=plugin
+cd -
 
