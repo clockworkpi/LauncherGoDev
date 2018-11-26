@@ -2,6 +2,7 @@ package main
 //wifi_list.py
 
 import (
+  "strings"
   gotime "time"
   "github.com/cuu/gogame/surface"
   "github.com/cuu/gogame/font"
@@ -628,9 +629,286 @@ func (self *WifiList) DbusConnectResultsSent( result string) {
 }
 
 //set_status == "" not used
-func (self *WifiList) CheckForWireless(iwconfig string, wireless_ip string , set_status string ) { 
+func (self *WifiList) CheckForWireless(iwconfig string, wireless_ip string , set_status string ) bool { 
+  if len(wireless_ip) == 0 {
+    return false 
+  }
+  
+  var network string 
+  self.Wireless.Get(self.Wireless.Method("GetCurrentNetwork",iwconfig),&network)
+  
+  if len(network) == 0 {
+    return false
+  }
+  
+  var sig_display_type int
+  var strength int
+  
+  strength = -1
+  
+  self.Daemon.Get(self.Daemon.Method("GetSignalDisplayType"),&sig_display_type)
+  
+  if sig_display_type == 0 {
+    self.Wireless.Get(self.Wireless.Method("GetCurrentSignalStrength",iwconfig),&strength)
+  }else {
+    self.Wireless.Get(self.Wireless.Method("GetCurrentDBMStrength",iwconfig),&strength)
+  }
+  
+  if strength == -1 {
+    return false 
+  }
+  
+  var strength_str string
+  
+  self.Daemon.Get(self.Daemon.Method("FormatSignalForPrinting",strength),&strength_str)
+  
+  fmt.Printf("Connected to %s at %s (IP: %s)\n",network,strength_str,wireless_ip)
+  
+  return true
   
 }
+
+func (self *WifiList) ConfigWireless(password string) {
+  netid := self.PsIndex
+  fmt.Println(netid, " ", password)
+  
+  /*
+  self.Wireless.Method("SetWirelessProperty",netid,"dhcphostname","GameShell")
+  self.Wireless.Method("SetWirelessProperty",netid,"ip","None")
+  self.Wireless.Method("SetWirelessProperty",netid,"dns_domain","None")
+  self.Wireless.Method("SetWirelessProperty",netid,"gateway","None")
+  self.Wireless.Method("SetWirelessProperty",netid,"use_global_dns",0)
+  self.Wireless.Method("SetWirelessProperty",netid,"netmask","None")
+  self.Wireless.Method("SetWirelessProperty",netid,"usedhcphostname",0) ## set 1 to use hostname above
+  self.Wireless.Method("SetWirelessProperty",netid,"bitrate","auto")
+  self.Wireless.Method("SetWirelessProperty",netid,"allow_lower_bitrates",0)
+  self.Wireless.Method("SetWirelessProperty",netid,"dns3","None")
+  self.Wireless.Method("SetWirelessProperty",netid,"dns2","None")
+  self.Wireless.Method("SetWirelessProperty",netid,"dns1","None")
+  self.Wireless.Method("SetWirelessProperty",netid,"use_settings_globally",0)
+  self.Wireless.Method("SetWirelessProperty",netid,"use_static_dns",0)
+  self.Wireless.Method("SetWirelessProperty",netid,"search_domain","None")
+  */
+  
+  self.Wireless.Method("SetWirelessProperty",netid,"enctype","wpa-psk")
+  self.Wireless.Method("SetWirelessProperty",netid,"apsk",password)
+  self.Wireless.Method("SetWirelessProperty",netid,"automatic",1)
+  
+  self.ShowBox("Connecting...")
+  
+  self.MyList[netid].Connect()
+  
+  fmt.Println("after connect")
+  self.UpdateStatus()
+  
+
+}
+
+func (self *WifiList) GetWirelessEncrypt(network_id int) []map[string]string {
+  var results []map[string]string 
+  
+  activeID := -1
+  var enc_type string 
+  
+  for i,v := range self.EncMethods {
+    enc_type = ""
+    self.Wireless.Get(self.Wireless.Method("GetWirelessProperty",network_id,"enctype"),&enc_type)
+    if v.Type == enc_type {
+      activeID = i
+      break
+    }
+  }
+  
+  if activeID == -1 {
+    return results
+  }
+  
+  required_fields := self.EncMethods[activeID].Required
+  for _,field := range required_fields {
+    if len(field) != 2 {
+      continue
+    }
+    text := strings.Replace(strings.ToLower(field[1])," ","_",-1)
+    
+    var value string
+    
+    self.Wireless.Get(self.Wireless.Method("GetWirelessProperty",network_id,field[0]),&value)
+    
+    kv_map := make(map[string]string)
+    kv_map[text] = value
+    
+    results = append(results,kv_map)
+    
+/*
+         """
+        [{'preshared_key': 'blah blah blah',},]
+
+        or nothing 
+        [{'identity': "",},{'password': "",},]
+
+        """
+ */    
+    
+  }
+
+  optional_fields := self.EncMethods[activeID].Optional
+  for _,field := range optional_fields {
+    if len(field) != 2 {
+      continue
+    }
+    text := strings.Replace(strings.ToLower(field[1])," ","_",-1)
+    
+    var value string
+    
+    self.Wireless.Get(self.Wireless.Method("GetWirelessProperty",network_id,field[0]),&value)
+    
+    kv_map := make(map[string]string)
+    kv_map[text] = value
+    
+    results = append(results,kv_map)
+  }  
+  
+  return results
+  
+}
+
+func (self *WifiList) ScrollUp() {
+  if len(self.MyList) == 0 {
+    return
+  }
+  
+  self.PsIndex -= 1
+  if self.PsIndex < 0 {
+    self.PsIndex=0
+  }
+  
+  cur_ni := self.MyList[self.PsIndex]//*NetItem
+  if cur_ni.PosY < 0 {
+    for i:=0;i<len(self.MyList);i++ {
+      self.MyList[i].PosY += self.MyList[i].Height
+    }
+  }
+}
+
+func (self *WifiList) ScrollDown() {
+  if len(self.MyList) == 0 {
+    return 
+  }
+  
+  self.PsIndex += 1
+  if self.PsIndex >= len(self.MyList) {
+    self.PsIndex = len(self.MyList) - 1
+  }
+  
+  cur_ni := self.MyList[self.PsIndex]
+  if cur_ni.PosY + cur_ni.Height > self.Height {
+    for i:=0;i<len(self.MyList);i++ {
+      self.MyList[i].PosY -= self.MyList[i].Height
+    }
+  }
+
+}
+
+func (self *WifiList) AbortedAndReturnToUpLevel() {
+  self.HideBox()
+  self.Screen.FootBar.ResetNavText()
+  self.ReturnToUpLevelPage()
+  self.Screen.Draw()
+  self.Screen.SwapAndShow()
+}
+
+func (self *WifiList) OnReturnBackCb() {
+  password_inputed := strings.Join(APIOBJ.PasswordPage.Textarea.MyWords,"")
+  self.ConfigWireless(password_inputed)
+}
+
+func (self *WifiList) KeyDown( ev *event.Event  ) {
+  if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+    if self.Wireless != nil {
+      var wireless_connecting bool
+      self.Wireless.Get(self.Wireless.Method("CheckIfWirelessConnecting"),&wireless_connecting)
+      
+      if wireless_connecting == true {
+        self.Shutdownconnecting()
+        self.ShowBox("ShutDownConnecting...")
+        self.BlockingUI = true
+        self.BlockCb = self.AbortedAndReturnToUpLevel
+        
+      }else {
+        self.AbortedAndReturnToUpLevel()
+      }
+    }else {
+      self.HideBox()
+      self.ReturnToUpLevelPage()
+      self.Screen.Draw()
+      self.Screen.SwapAndShow()
+    }
+  }
+  
+  
+  if ev.Data["Key"] == UI.CurKeys["Up"] {
+    self.ScrollUp()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+  }
+
+  if ev.Data["Key"] == UI.CurKeys["Down"] {
+    self.ScrollDown()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+  }
+  
+  if ev.Data["Key"] == UI.CurKeys["Enter"] { // enter to set password,enter is B on GM
+    if len(self.MyList) == 0 {
+      return
+    }
+    
+    wicd_wireless_encrypt_pwd := self.GetWirelessEncrypt(self.PsIndex) 
+    
+    if self.MyList[self.PsIndex].IsActive == true {
+      var ip string
+      self.Wireless.Get(self.Wireless.Method("GetWirelessIP",""),&ip)
+      self.ShowBox(ip)
+    }else {
+      self.Screen.PushCurPage()
+      self.Screen.SetCurPage(APIOBJ.PasswordPage)
+      
+      thepass := ""
+      for i,v := range wicd_wireless_encrypt_pwd { //[]map[string]string
+        if _, ok := v["preshared_key"]; ok {
+          if len(v["preshared_key"]) > 0 {
+            thepass = v["preshared_key"]
+          }
+        }
+      }
+      
+      APIOBJ.PasswordPage.SetPassword(thepass)
+      self.Screen.Draw()
+      self.Screen.SwapAndShow()
+      
+    }
+  }
+
+  if ev.Data["Key"] == UI.CurKeys["X"] {
+    self.Rescan(false)
+  }
+  
+  if ev.Data["Key"] == UI.CurKeys["Y"] {
+    if len(self.MyList) == 0 {  
+      return
+    }
+    
+    self.InfoPage.NetworkId = self.PsIndex
+    self.InfoPage.Wireless  = self.Wireless
+    self.InfoPage.Daemon    = self.Daemon
+    
+    self.Screen.PushPage(self.InfoPage)
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+  }
+  
+}
+
 
 func (self *WifiList) Init() {
   self.PosX = self.Index * self.Screen.Width
