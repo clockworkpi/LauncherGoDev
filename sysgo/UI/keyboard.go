@@ -95,6 +95,11 @@ type Keyboard struct {
 func NewKeyboard() *Keyboard {
 	p := &Keyboard{}
 
+	p.PageIconMargin = 20
+	p.SelectedIconTopOffset = 20
+
+	p.Align = ALIGN["SLeft"]
+  
 	p.EasingDur = 10
 	
 	p.SectionNumbers = 3
@@ -199,7 +204,7 @@ func (self *Keyboard) Init() {
 			start_x = (self.Width-fw- len(self.Secs[i][j])*word_margin)/2+word_margin/2
 			start_x = start_x + i*self.Width
 
-			start_y = 84 * j * (word_margin+14)
+			start_y = 84 + j * (word_margin+14)
 
 			for _,val := range self.Secs[i][j] {
 				ti := NewTextItem()
@@ -432,11 +437,23 @@ func (self *Keyboard) KeyDown( ev *event.Event) {
 		return
 	}
 
-	if ev.Data["Key"] == CurKeys["B"] {
+	if ev.Data["Key"] == CurKeys["B"] || ev.Data["Key"] == CurKeys["Enter"] {
 		self.ClickOnChar()
 		return
 	}
-
+  
+  if ev.Data["Key"] == CurKeys["X"] {
+    if self.SectionIndex <= 0 {
+      self.LeftOrRight = -1
+    }
+    
+    if self.SectionIndex >= (self.SectionNumbers - 1) {
+      self.LeftOrRight = 1
+    }
+    
+    self.ShiftKeyboardPage()
+    
+  }
 
 	if ev.Data["Key"] == CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()

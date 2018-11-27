@@ -94,7 +94,7 @@ func (self *Textarea) AppendAndBlitText(alphabet string) {
 		}
 		
 	}else {
-		fmt.Printf("is Full %s",strings.Join(self.MyWords,""))
+		fmt.Printf("is Full %s\n",strings.Join(self.MyWords,""))
 	}
 	
 }

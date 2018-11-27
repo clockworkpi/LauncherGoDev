@@ -32,6 +32,9 @@ type TextItem struct {
 
 func NewTextItem() *TextItem {
 	p := &TextItem{}
+  
+	p.Align = ALIGN["VCenter"]
+    
 	p.Color = &color.Color{83,83,83,255}
 	p.MyType = ICON_TYPES["LETTER"]
 	p.Bold  = false
