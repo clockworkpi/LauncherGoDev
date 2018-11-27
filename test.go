@@ -15,7 +15,9 @@ import (
 	"github.com/cuu/gogame/draw"
 	"github.com/cuu/gogame/image"
 	"github.com/cuu/gogame/font"
-	"github.com/cuu/gogame/time"	
+	"github.com/cuu/gogame/time"
+  
+  "github.com/cuu/LauncherGo/sysgo/DBUS"
 )
 
 const (
@@ -88,8 +90,35 @@ func run() int {
 	
 	display.Flip()
 
+  
 	event.AddCustomEvent(RUNEVT)
-    
+  
+  type status struct {
+    State int
+    Trash  []string
+  }
+  
+  var mystatus status  
+  
+  DBUS.DBusHandler.Daemon.Get(DBUS.DBusHandler.Daemon.Method("GetConnectionStatus"),&mystatus)
+  fmt.Println("state ",mystatus.State)
+  fmt.Println("Trash ",mystatus.Trash)
+  
+  
+  var essid string 
+  var bssid string
+  
+  DBUS.DBusHandler.Wifi.Get(DBUS.DBusHandler.Wifi.Method("GetWirelessProperty",0,"essid"),&essid)
+  
+  fmt.Println(essid)
+  DBUS.DBusHandler.Wifi.Get(DBUS.DBusHandler.Wifi.Method("GetWirelessProperty",0,"bssid"),&bssid)
+  fmt.Println(bssid)
+  
+
+  
+  
+
+
 	running := true
 	for running {
 		ev := event.Wait()

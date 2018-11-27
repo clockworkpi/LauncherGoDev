@@ -26,8 +26,12 @@ type NetItemMultiIcon struct {
 
 func NewNetItemMultiIcon() *NetItemMultiIcon{
 	p := &NetItemMultiIcon{}
-	p.Width = 18
-	p.Height = 18
+	p.IconIndex = 0
+	p.IconWidth = 18
+	p.IconHeight = 18  
+  
+  p.Width  = 18
+  p.Height = 18
 	return p
 }
 
@@ -122,9 +126,6 @@ func (self *NetItem) SetActive( act bool) {
 
 func (self *NetItem) UpdateStrenLabel( strenstr string) { //  ## strenstr should be 'number',eg:'90'
 
-
-	self.Daemon.Get( self.Daemon.Method("FormatSignalForPrinting",strenstr), &strenstr) 
-
 	self.Stren = strenstr
 
 	if _, ok := self.Labels["stren"]; ok {
@@ -134,6 +135,7 @@ func (self *NetItem) UpdateStrenLabel( strenstr string) { //  ## strenstr should
 }
 
 func (self *NetItem) Init(i int,is_active bool) {
+
 	var sig_display_type int
 	strenstr := "quality"
 	gap := 4
@@ -142,9 +144,9 @@ func (self *NetItem) Init(i int,is_active bool) {
   
   self.Wireless = self.Parent.Wireless
   self.Daemon   = self.Parent.Daemon
-  	
+    
 	self.Daemon.Get( self.Daemon.Method("GetSignalDisplayType"), &sig_display_type )
-
+  
 	if sig_display_type == 0 {
 		strenstr = "quality"
 		gap = 4 // Allow for 100%
@@ -152,18 +154,19 @@ func (self *NetItem) Init(i int,is_active bool) {
 		strenstr = "strength"
 		gap = 7 //  -XX dbm = 7
 	}
-
+  
 	self.NetId = i
-
-	tmp :=""
+    
+	tmp := 0
 	self.Wireless.Get(self.Wireless.Method("GetWirelessProperty",self.NetId, strenstr),&tmp)
-	self.Daemon.Get( self.Daemon.Method("FormatSignalForPrinting",tmp), &tmp)
-	self.Stren = tmp
+  tmp2 := ""
+	self.Daemon.Get( self.Daemon.Method("FormatSignalForPrinting",tmp), &tmp2)
+  
+	self.Stren = tmp2
 
 	self.Wireless.Get( self.Wireless.Method("GetWirelessProperty",self.NetId,"essid"),&self.Essid)
 	self.Wireless.Get( self.Wireless.Method("GetWirelessProperty",self.NetId,"bssid"),&self.Bssid)
-
-
+  
 	check_enc := false
 	self.Wireless.Get( self.Wireless.Method("GetWirelessProperty",self.NetId,"encryption"),&check_enc)
 
@@ -186,10 +189,10 @@ func (self *NetItem) Init(i int,is_active bool) {
 		self.SetActive(is_active)
 	}
 
-  fmt.Println(theString)
+  //fmt.Println(theString)
   
 	essid_label := UI.NewLabel()
-	essid_label.PosY = 36
+	essid_label.PosX = 36
 	essid_label.CanvasHWND = self.Parent.GetCanvasHWND()
 
 	essid_  := ""
@@ -199,7 +202,7 @@ func (self *NetItem) Init(i int,is_active bool) {
 	}else {
 		essid_ = self.Essid
 	}
-  fmt.Println(essid_)
+ 
 	essid_label.Init(essid_, self.FontObj,nil)
 
 	self.Labels["essid"] = essid_label

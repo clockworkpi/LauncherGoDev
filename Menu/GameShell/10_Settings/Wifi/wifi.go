@@ -454,7 +454,7 @@ func (self *WifiList) GenNetworkList() {
   
   for network_id:=0;network_id< num_of_networks;network_id++ {
     is_active = false
-    
+        
     self.Wireless.Get(self.Wireless.Method("GetCurrentSignalStrength",""), &cur_signal_strength)
     self.Wireless.Get(self.Wireless.Method("GetIwconfig"),&iwconfig)
     self.Wireless.Get(self.Wireless.Method("GetCurrentNetworkID",iwconfig),&cur_network_id)
@@ -520,9 +520,11 @@ func (self *WifiList) UpdateNetList(state int,info []string ,force_check bool,fi
   var mystatus status
   
   if state == -1 {
+    
     self.Daemon.Get(self.Daemon.Method("GetConnectionStatus"),&mystatus)
     fmt.Println("state ",mystatus.State)
     fmt.Println("Trash ",mystatus.Trash)
+    
   }
   
   if force_check == true || self.PrevWicdState != state {
@@ -730,8 +732,9 @@ func (self *WifiList) GetWirelessEncrypt(network_id int) []map[string]string {
   
   for i,v := range self.EncMethods {
     enc_type = ""
-    self.Wireless.Get(self.Wireless.Method("GetWirelessProperty",network_id,"enctype"),&enc_type)
-    if v.Type == enc_type {
+    self.Wireless.Get(self.Wireless.Method("GetWirelessProperty",network_id,"encryption_method"),&enc_type)
+    enc_type = strings.ToLower(enc_type)
+    if enc_type != "" && v.Type == enc_type {
       activeID = i
       break
     }
@@ -882,6 +885,7 @@ func (self *WifiList) KeyDown( ev *event.Event  ) {
     }
     
     wicd_wireless_encrypt_pwd := self.GetWirelessEncrypt(self.PsIndex) 
+    fmt.Println("wicd_wireless_encrypt_pwd  ", wicd_wireless_encrypt_pwd)
     
     if self.MyList[self.PsIndex].IsActive == true {
       var ip string
@@ -900,7 +904,9 @@ func (self *WifiList) KeyDown( ev *event.Event  ) {
         }
       }
       
+      fmt.Println("APIOBJ.PasswordPage.SetPassword ", thepass,len(thepass))
       APIOBJ.PasswordPage.SetPassword(thepass)
+      
       self.Screen.Draw()
       self.Screen.SwapAndShow()
       
@@ -929,6 +935,7 @@ func (self *WifiList) KeyDown( ev *event.Event  ) {
 
 
 func (self *WifiList) Init() {
+    
   self.PosX = self.Index * self.Screen.Width
   self.Width = self.Screen.Width
   self.Height = self.Screen.Height

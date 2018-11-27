@@ -2,7 +2,7 @@ package misc
 
 import (
 	"bufio"
-	"fmt"
+	//"fmt"
 	"github.com/cuu/LauncherGo/sysgo/UI"
 	"log"
 	"os"
@@ -119,7 +119,6 @@ func LoadEncryptionMethods(wired bool) []*CurType {
 	}
 
 	enctypes, _ := UI.ReadLines(wpath_encryption + active_fname)
-	fmt.Println(enctypes)
 
 	var encryptionTypes []*CurType
 

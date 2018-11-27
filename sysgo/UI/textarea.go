@@ -101,7 +101,8 @@ func (self *Textarea) AppendAndBlitText(alphabet string) {
 
 func (self *Textarea) BuildBlitText() {
 	blit_rows := make([][]string,0)
-
+  blit_rows = append(blit_rows,[]string{})
+  
 	w         := 0
 //	xmargin   := 5
 	endmargin :=15
@@ -114,11 +115,7 @@ func (self *Textarea) BuildBlitText() {
 		t_width := surface.GetWidth(t)
 		w+=t_width
 
-		if linenumber < len(blit_rows) {
-			blit_rows[linenumber] = append(blit_rows[linenumber],v)
-		}else {	
-			blit_rows = append(blit_rows,[]string{v})
-		}
+		blit_rows[linenumber] = append(blit_rows[linenumber],v)
 
 		if i == self.TextIndex - 1 {
 			cursor_row = linenumber

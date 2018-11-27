@@ -10,7 +10,7 @@ import (
 	"github.com/cuu/gogame/color"
 */	
 	"github.com/cuu/LauncherGo/sysgo/UI"
-	"github.com/cuu/LauncherGo/sysgo/DBUS"
+	//"github.com/cuu/LauncherGo/sysgo/DBUS"
 )
 
 /******************************************************************************/
@@ -29,8 +29,8 @@ func (self *WifiPlugin) Init( main_screen *UI.MainScreen ) {
   
   self.ScanPage = NewWifiList()
   self.ScanPage.Name = "Scan wifi"
-  self.ScanPage.Wireless = DBUS.DBusHandler.Wifi
-  self.ScanPage.Daemon   = DBUS.DBusHandler.Daemon
+  self.ScanPage.Wireless = main_screen.DBusManager.Wifi
+  self.ScanPage.Daemon   = main_screen.DBusManager.Daemon
   
   self.ScanPage.Screen = main_screen
   
@@ -40,7 +40,8 @@ func (self *WifiPlugin) Init( main_screen *UI.MainScreen ) {
 
 func (self *WifiPlugin) Run( main_screen *UI.MainScreen ) {
 	if main_screen != nil {
-		main_screen.PushPage(self.ScanPage)
+    main_screen.PushCurPage()
+    main_screen.SetCurPage(self.ScanPage)
 		main_screen.Draw()
 		main_screen.SwapAndShow()
 	}

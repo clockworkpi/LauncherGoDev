@@ -2,7 +2,7 @@ package DBUS
 
 import (
 	"fmt"
-	"strconv"
+	//"strconv"
 	"github.com/godbus/dbus"
 )
 
@@ -127,8 +127,8 @@ func (self *DBus) check_for_wireless(iwconfig string, wireless_ip string)  bool 
 	if strength == 0 {
 		return false
 	}
-	strength_str := strconv.Itoa(strength)
-	self.Daemon.Get( self.Daemon.Method("FormatSignalForPrinting",strength_str), &strength_str)
+	strength_str := ""
+	self.Daemon.Get( self.Daemon.Method("FormatSignalForPrinting",strength), &strength_str)
 
 	return true
 }
@@ -174,5 +174,5 @@ var DBusHandler *DBus //global
 func init() {
   DBusHandler = NewDBus()
   DBusHandler.Init()
-  fmt.Println("dbus inited")
+  
 }

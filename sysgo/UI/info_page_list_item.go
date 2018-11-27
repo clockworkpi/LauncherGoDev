@@ -61,7 +61,7 @@ func (self *InfoPageListItem) Draw() {
     x,_ = self.Labels["Small"].Coord()
     w,h = self.Labels["Small"].Size()
     
-    self.Labels["Small"].NewCoord( self.Width - w + 5 , self.PosY + (self.Height - h)/2 )
+    self.Labels["Small"].NewCoord( self.Width - w - 5 , self.PosY + (self.Height - h)/2 )
     self.Labels["Small"].Draw()
     
   }
