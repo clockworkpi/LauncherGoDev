@@ -459,6 +459,7 @@ func (self *Keyboard) KeyDown( ev *event.Event) {
 		self.ReturnToUpLevelPage()
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
+    
 	}
 
 	if ev.Data["Key"] == CurKeys["Y"] { // done

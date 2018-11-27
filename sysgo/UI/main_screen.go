@@ -24,8 +24,8 @@ import (
 )
 
 var (
-	emulator_flag = "action.config"
-	plugin_flag   = "plugin.config"
+	emulator_flag = "action.json"
+	plugin_flag   = "plugin.json"
 )
 
 type ActionConfig struct {
@@ -197,9 +197,7 @@ func (self *MainScreen) Init() {
 	self.SkinManager = NewSkinManager()
 	self.SkinManager.Init()
 
-	//self.DBusManager = DBUS.NewDBus()
   self.DBusManager = DBUS.DBusHandler
-	//self.DBusManager.Init()
 }
 
 func (self *MainScreen) FartherPages() { // right after ReadTheDirIntoPages
