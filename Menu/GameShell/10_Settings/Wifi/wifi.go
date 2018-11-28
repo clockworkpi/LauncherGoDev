@@ -7,6 +7,8 @@ import (
   "strings"
   gotime "time"
   
+  "github.com/godbus/dbus"
+  
   "github.com/veandco/go-sdl2/ttf"
   
   "github.com/cuu/gogame/surface"
@@ -351,7 +353,7 @@ type WifiListMessageBox struct{
 
 func NewWifiListMessageBox() *WifiListMessageBox{
   p := &WifiListMessageBox{}
-  
+  p.Color = &color.Color{83,83,83,255}
   return p
 }
 
@@ -499,13 +501,81 @@ func (self *WifiList) Rescan(sync bool) { // sync default should be false
 }
 
 // dbus signal functions
-func (self *WifiList) DbusScanFinishedSig() {
+func (self *WifiList) WifiDbusScanFinishedSig(body []interface{}) {
+  if self.Screen.CurrentPage != self {
+    return
+  }
+  
+  self.ResetPageSelector()
+  
+  self.UpdateNetList(-1,[]string{}, true,false)
+  
+  self.Scanning= false
+  self.HideBox()
+  
+  self.BlockingUI = false
+  fmt.Println("dbus says scan finished")
+  
 }
 
-func (self *WifiList) DbusScanStarted() {
-
+func (self *WifiList) WifiDbusScanStarted(body []interface{} ) {
+  if self.Screen.CurrentPage != self {
+    return
+  }
+  
+  self.Scanning = true
+  self.ShowBox("Wifi scanning...")
+  self.BlockingUI = true
+  fmt.Println("dbus says start scan")
 }
 
+
+func (self *WifiList) DbusDaemonStatusChangedSig(body []interface{}) {
+	var state int
+	var info []dbus.Variant
+
+	err := dbus.Store(body,&state,&info)
+
+	if err != nil {
+		fmt.Println(err)
+	}else {
+		fmt.Println(state," ", info)
+	}
+  
+  var info_str []string 
+  for i,v := range info {
+    info_str = append(info_str, v.String())
+  } 
+  
+  self.UpdateNetList(state,info_str,false,false)
+  if len(info_str) > 0 {
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+  }
+  
+}
+
+func (self *WifiList) DbusConnectResultsSent(body []interface{}) {
+  var ret_val string
+	err := dbus.Store(body,&ret_val)
+
+	if err != nil {
+		fmt.Println(err)
+	}else {
+		fmt.Println(ret_val)
+	}  
+  
+  self.Connecting = flase
+  self.BlockingUI = false
+  if self.BlockCb != nil {
+    self.BlockCb()
+    self.BlockCb = nil
+  }
+  
+  self.Screen.FootBar.ResetNavText()
+}
+
+//----------------------------------------------------------------------------------
 
 func (self *WifiList) UpdateNetList(state int,info []string ,force_check bool,firstrun bool) { //force_check default ==false, firstrun default == false 
   if self.Daemon == nil {
@@ -637,14 +707,6 @@ func (self *WifiList) UpdateStatus() bool {
   }
   
   return true
-  
-}
-
-func (self *WifiList) DbusDaemonStatusChangedSig(state int,info []string) {
-  
-}
-
-func (self *WifiList) DbusConnectResultsSent( result string) {
   
 }
 

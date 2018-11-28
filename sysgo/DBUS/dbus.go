@@ -11,6 +11,7 @@ type DbusInterface struct {
 	Path dbus.ObjectPath
 	Iface string
 	Obj *dbus.Object
+  SigFuncs  map[string]interface{}
 }
 
 func NewDbusInterface(conn *dbus.Conn,dest string, path dbus.ObjectPath ,iface string) *DbusInterface {
@@ -20,6 +21,8 @@ func NewDbusInterface(conn *dbus.Conn,dest string, path dbus.ObjectPath ,iface s
 	m.Obj = o.(*dbus.Object)
 	m.Dest = dest
 	m.Path = path
+  
+	m.SigFuncs = make(map[string]interface{})
 
 	if len(iface) > 2 {
 		m.Iface = iface
@@ -55,6 +58,34 @@ func (self *DbusInterface) Get( thecall *dbus.Call, retvalues ...interface{}) er
   return err
 }
 
+func (self *DbusInterface) EnableSignal(signame string) {
+  iface := self.Dest
+  if self.Iface != "" {
+    iface = iface+ "."+self.Iface
+  }
+  self.Obj.AddMatchSignal(iface,signame)
+}
+
+
+func (self *DbusInterface) HandleSignal( sig *dbus.Signal) {
+	
+	iface := self.Dest
+	if self.Iface != "" {
+		iface = iface+ "."+self.Iface
+	}
+
+	if strings.HasPrefix(sig.Name,iface) {
+		func_name := strings.Replace( sig.Name, iface, "",-1)[1:]
+		for k,v := range self.SigFuncs {
+			if k == func_name {
+				v.(func([]interface{}))(sig.Body)
+				break
+			}
+		}
+	}
+
+}
+
 type DBusInterface interface {
 	WifiStrength() int
 	IsWifiConnectedNow() bool 	
@@ -72,7 +103,11 @@ func NewDBus() *DBus {
 }
 
 func (self *DBus) Init() {
+  //conn_option := dbus.WithSignalHandler(self)
+  
 	conn, err := dbus.SystemBus()
+  //conn,err := dbus.SystemBusPrivate(conn_option)
+  
   if err != nil {
     panic(fmt.Sprintf("Failed to connect to system bus:", err))
   }
@@ -164,9 +199,15 @@ func (self *DBus) IsWifiConnectedNow() bool {
 func (self *DBus) ListenSignal() {
 	c := make(chan *dbus.Signal, 10)
 	self.Conn.Signal(c)
-	for v := range c {
-		fmt.Printf("%+v %#v\n",v,v)
-	}
+  
+  for v := range c {
+    fmt.Printf("%+v %#v\n",v,v)
+    fmt.Printf("body len:%d \n\n",len(v.Body)) 
+    
+    self.Wifi.HandleSignal(v)
+    self.Daemon.HandleSignal(v)
+    
+  }  
 }
 
 var DBusHandler *DBus //global 
@@ -174,5 +215,8 @@ var DBusHandler *DBus //global
 func init() {
   DBusHandler = NewDBus()
   DBusHandler.Init()
+  
+  go DBusHandler.ListenSignal()
+  
   
 }

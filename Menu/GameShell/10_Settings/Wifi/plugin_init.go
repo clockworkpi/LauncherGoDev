@@ -35,7 +35,15 @@ func (self *WifiPlugin) Init( main_screen *UI.MainScreen ) {
   self.ScanPage.Screen = main_screen
   
   self.ScanPage.Init()
-  
+ 
+  if self.ScanPage.Daemon != nil {
+    self.ScanPage.Daemon.EnableSignal("StatusChanged")
+    self.ScanPage.Daemon.EnableSignal("ConnectResultsSent")
+    self.ScanPage.Wireless.EnableSignal("SendStartScanSignal")
+    self.ScanPage.Wireless.EnableSignal("SendEndScanSignal")
+    
+    
+  }
 }
 
 func (self *WifiPlugin) Run( main_screen *UI.MainScreen ) {

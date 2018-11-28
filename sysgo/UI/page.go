@@ -821,6 +821,8 @@ func (self *Page) ReturnToUpLevelPage() {
 		page_ := pop_page.(PageInterface)
 		page_.Draw()
 		self.Screen.SetCurPage(page_)
+    self.Screen.CurrentPage.OnReturnBackCb()
+    
 	}else {
 		if self.Screen.MyPageStack.Length() == 0 {
 			if len(self.Screen.Pages) > 0 {
