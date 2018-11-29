@@ -92,8 +92,9 @@ func (self *SettingsPage) Init() {
 		
 
 		alist := [][]string{ // "so file", "folder name", "label text"
-			{"about.so","About","About"}, 
       {"wifi.so","Wifi","Wi-Fi"},
+			{"about.so","About","About"}, 
+      
 		}
 
 

@@ -42,6 +42,11 @@ func (self *WifiPlugin) Init( main_screen *UI.MainScreen ) {
     self.ScanPage.Wireless.EnableSignal("SendStartScanSignal")
     self.ScanPage.Wireless.EnableSignal("SendEndScanSignal")
     
+    self.ScanPage.Daemon.SigFuncs["StatusChanged"] = self.ScanPage.DbusDaemonStatusChangedSig
+    self.ScanPage.Daemon.SigFuncs["ConnectResultSent"] = self.ScanPage.DbusConnectResultsSent
+    
+    self.ScanPage.Wireless.SigFuncs["SendStartScanSignal"] = self.ScanPage.WifiDbusScanStarted
+    self.ScanPage.Wireless.SigFuncs["SendEndScanSignal"]   = self.ScanPage.WifiDbusScanFinishedSig
     
   }
 }

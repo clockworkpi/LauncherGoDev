@@ -543,7 +543,7 @@ func (self *WifiList) DbusDaemonStatusChangedSig(body []interface{}) {
 	}
   
   var info_str []string 
-  for i,v := range info {
+  for _,v := range info {
     info_str = append(info_str, v.String())
   } 
   
@@ -565,7 +565,7 @@ func (self *WifiList) DbusConnectResultsSent(body []interface{}) {
 		fmt.Println(ret_val)
 	}  
   
-  self.Connecting = flase
+  self.Connecting = false
   self.BlockingUI = false
   if self.BlockCb != nil {
     self.BlockCb()

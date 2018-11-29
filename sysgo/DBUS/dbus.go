@@ -2,6 +2,7 @@ package DBUS
 
 import (
 	"fmt"
+  "strings"
 	//"strconv"
 	"github.com/godbus/dbus"
 )
