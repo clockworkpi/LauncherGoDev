@@ -97,7 +97,7 @@ type AboutPage struct {
 func NewAboutPage() *AboutPage {
 	p := &AboutPage{}
 	
-	p.FootMsg = [5]string{"Nav.","","","Back",""}
+	p.FootMsg = [5]string{"Nav","","","Back",""}
 
 	p.AList = make(map[string]map[string]string)
 
@@ -115,9 +115,6 @@ func NewAboutPage() *AboutPage {
 	return p
 	
 }
-
-
-
 
 func (self *AboutPage) Uname() {
 	out := make(map[string]string)
@@ -158,7 +155,8 @@ func (self *AboutPage) CpuMhz() {
 }
 
 func (self *AboutPage) CpuInfo() {
-	
+  last_processor := 0
+  
 }
 
 func (self *AboutPage) MemInfo() {
