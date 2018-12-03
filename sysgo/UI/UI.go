@@ -7,7 +7,7 @@ import (
 	"github.com/veandco/go-sdl2/ttf"
 	
 	"github.com/cuu/gogame/font"	
-	"github.com/cuu/LauncherGo/sysgo"
+	"github.com/cuu/LauncherGoDev/sysgo"
 )
 
 type WidgetInterface interface {

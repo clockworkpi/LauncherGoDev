@@ -20,9 +20,9 @@ import (
 	
 	"github.com/vjeantet/jodaTime"
 
-	"github.com/cuu/LauncherGo/sysgo/DBUS"
+	"github.com/cuu/LauncherGoDev/sysgo/DBUS"
 	
-	"github.com/cuu/LauncherGo/sysgo"
+	"github.com/cuu/LauncherGoDev/sysgo"
 
 	
 )

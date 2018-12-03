@@ -5,8 +5,8 @@ import(
   
   "strconv"
   "github.com/cuu/gogame/event"
-  "github.com/cuu/LauncherGo/sysgo"
-  "github.com/cuu/LauncherGo/sysgo/UI"
+  "github.com/cuu/LauncherGoDev/sysgo"
+  "github.com/cuu/LauncherGoDev/sysgo/UI"
 )
 
 type OnChangeCB_T func(int)

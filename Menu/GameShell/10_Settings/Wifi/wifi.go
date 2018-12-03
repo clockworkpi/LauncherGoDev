@@ -18,11 +18,11 @@ import (
   "github.com/cuu/gogame/time"
   "github.com/cuu/gogame/rect"
   "github.com/cuu/gogame/draw"
-	"github.com/cuu/LauncherGo/sysgo/UI"
-  "github.com/cuu/LauncherGo/sysgo/DBUS"
+	"github.com/cuu/LauncherGoDev/sysgo/UI"
+  "github.com/cuu/LauncherGoDev/sysgo/DBUS"
   
   
-  "github.com/cuu/LauncherGo/sysgo/wicd/misc"
+  "github.com/cuu/LauncherGoDev/sysgo/wicd/misc"
   
 )
 

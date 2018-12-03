@@ -14,7 +14,7 @@ import (
 	"github.com/cuu/gogame/event"
 
 	//"github.com/cuu/gogame/transform"
-	//"github.com/cuu/LauncherGo/sysgo/easings"
+	//"github.com/cuu/LauncherGoDev/sysgo/easings"
 	
 )
 

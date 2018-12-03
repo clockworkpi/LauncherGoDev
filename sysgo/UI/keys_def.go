@@ -1,7 +1,7 @@
 package UI
 
 import (
-	"github.com/cuu/LauncherGo/sysgo"
+	"github.com/cuu/LauncherGoDev/sysgo"
 )
 
 

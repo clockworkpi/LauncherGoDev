@@ -12,7 +12,7 @@ import (
 	
 	"github.com/cuu/gogame/color"
 	
-	"github.com/cuu/LauncherGo/sysgo"
+	"github.com/cuu/LauncherGoDev/sysgo"
 )
 
 type SkinManager struct {

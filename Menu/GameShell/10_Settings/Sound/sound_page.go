@@ -3,7 +3,7 @@ package main
 import(
   "fmt"
   "github.com/cuu/gogame/event"
-  "github.com/cuu/LauncherGo/sysgo/UI"
+  "github.com/cuu/LauncherGoDev/sysgo/UI"
 )
 
 type OnChangeCB_T func(int)

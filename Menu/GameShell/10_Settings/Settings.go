@@ -9,7 +9,7 @@ import (
 	"github.com/cuu/gogame/color"
 	"github.com/cuu/gogame/draw"
 	
-	"github.com/cuu/LauncherGo/sysgo/UI"
+	"github.com/cuu/LauncherGoDev/sysgo/UI"
 	
 )
 

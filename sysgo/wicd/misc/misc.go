@@ -3,7 +3,7 @@ package misc
 import (
 	"bufio"
 	//"fmt"
-	"github.com/cuu/LauncherGo/sysgo/UI"
+	"github.com/cuu/LauncherGoDev/sysgo/UI"
 	"log"
 	"os"
 	"strings"
