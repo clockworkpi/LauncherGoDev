@@ -156,6 +156,83 @@ func (self *AboutPage) CpuMhz() {
 
 func (self *AboutPage) CpuInfo() {
   last_processor := 0
+  if UI.FileExists("/proc/cpuinfo") == false {
+    return
+  }
+  
+  cpuinfos,err := UI.ReadLines("/proc/cpuinfo")
+  if err != nil {
+    fmt.Println(err)
+    return
+  }
+  
+  for _,v := range cpuinfos {
+    if strings.HasPrefix(v,"processor") {
+      parts := strings.Split(v,":")
+      if cur_processor_number,err := strconv.Atoi(strings.Trim(parts[1],"\r\n ")); err == nil {
+        if cur_processor_number > last_processor {
+          last_processor = cur_processor_number
+        }
+      }else {
+        fmt.Println(err)
+      }
+    }
+    
+    
+    if strings.HasPrefix(v,"model name") {
+      parts := strings.Split(v,":")
+      processor := make(map[string]string)
+      processor["key"] = "processor"
+      processor["label"] = "Processor:"
+      processor["value"] = strings.Trim(parts[1],"\r\n ")
+      self.AList["processor"] = processor
+    }
+    
+    if strings.HasPrefix(v,"cpu MHz") {
+      parts := strings.Split(v,":")
+      cpumhz := make(map[string]string)
+      cpumhz["key"] = "cpumhz"
+      cpumhz["label"] = "CPU MHz:"
+      cpumhz["value"] = strings.Trim(parts[1],"\r\n ")
+      self.AList["cpumhz"] = cpumhz
+    }
+    
+    if strings.HasPrefix(v,"cpu cores") {
+      parts := strings.Split(v,":")
+      cpucores := make(map[string]string)
+      cpucores["key"] = "cpucores"
+      cpucores["label"] = "CPU cores:"
+      cpucores["value"] = strings.Trim(parts[1],"\r\n ")
+      self.AList["cpucores"] = cpucores
+    }
+    
+    if strings.HasPrefix(v,"Features") {
+      parts := strings.Split(v,":")
+      f_ := make(map[string]string)
+      f_["key"] = "features"
+      f_["label"] = "Features:"
+      f_["value"] = strings.Trim(parts[1],"\r\n ")
+      self.AList["features"] = f_
+    }
+    
+    if strings.HasPrefix(v,"flags") {
+      parts := strings.Split(v,":")
+      flags := make(map[string]string)
+      flags["key"] = "flags"
+      flags["label"] = "Flags:"
+      flags["value"] = strings.TrimSpace(parts[1])
+      self.AList["flags"] = flags
+    }
+  }
+  
+  if last_processor > 0 {
+    arm_cores := make(map[string]string)
+    arm_cores["key"]= "armcores"
+    arm_cores["label"] = "CPU cores:"
+    arm_cores["value"] = strconv.Itoa(last_processor + 1)
+    
+    self.AList["armcores"] = arm_cores
+  }
   
 }
 
@@ -167,9 +244,9 @@ func (self *AboutPage) MemInfo() {
     if strings.HasPrefix(line,"MemTotal") {
       parts := strings.Split(line,":")
       kb := strings.Replace(parts[1],"KB","",-1)
+      kb = strings.Replace(kb,"kB","",-1)
       kb = strings.TrimSpace(kb)
-      kb_int,_ := strconv.ParseInt(kb,10,0)
-      
+      kb_int,_ := strconv.ParseInt(kb,10,64)
       kb_float := float64(kb_int)/1000.0
       memory := make(map[string]string)
       memory["key"] = "memory" 
