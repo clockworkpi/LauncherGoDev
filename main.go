@@ -68,7 +68,7 @@ func run() int {
 			}else if ev.Data["Key"] == "D" {
 				time.Delay(1000)
 			}else if ev.Data["Key"] == "P" {				
-				event.Post(UI.RUNEVT,"GODEBUG=cgocheck=0 sucks") // just id and string, simpify the stuff
+				event.Post(UI.RUNEVT,"GODEBUG=cgocheck=0 sucks") // just id and string, simplify the stuff
 				
 			}else {
 				main_screen.KeyDown(ev)

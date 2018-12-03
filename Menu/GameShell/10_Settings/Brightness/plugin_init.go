@@ -24,7 +24,10 @@ type BrightnessPlugin struct {
 
 
 func (self *BrightnessPlugin) Init( main_screen *UI.MainScreen ) {
-  
+	self.BrightnessPage = NewBrightnessPage()
+	self.BrightnessPage.SetScreen( main_screen)
+	self.BrightnessPage.SetName("Brightness")
+	self.BrightnessPage.Init()  
 }
 
 func (self *BrightnessPlugin) Run( main_screen *UI.MainScreen ) {
