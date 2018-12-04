@@ -28,18 +28,6 @@ var (
 	plugin_flag   = "plugin.json"
 )
 
-type ActionConfig struct {
-	ROM string `json:"ROM"`
-	ROM_SO string `json:"ROM_SO"`
-	EXT []string   `json:"EXT"`
-	EXCLUDE []string `json:"EXCLUDE"`
-	FILETYPE string  `json:"FILETYPE"`   // defalut is file
-	LAUNCHER string  `json:"LAUNCHER"`
-	TITLE   string   `json:"TITLE"` // defaut is Game
-	SO_URL string    `json:"SO_URL"`
-	RETRO_CONFIG string `json:"RETRO_CONFIG"`
-}
-
 type PluginConfig struct {
 	NAME string    `json:"NAME"`  // plugin name,default could be the same as Plugin Folder's name
 	SO_FILE string `json:"SO_FILE"`

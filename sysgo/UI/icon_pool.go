@@ -55,5 +55,6 @@ func (self *IconPool) GetImgSurf(keyname string) *sdl.Surface {
 	}
 }
 
-var MyIconPool = NewIconPool()
+var MyIconPool *IconPool
+// = NewIconPool()
 

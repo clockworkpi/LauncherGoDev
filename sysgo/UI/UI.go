@@ -42,7 +42,7 @@ func (self *Widget) NewCoord(x,y int) {
 	self.PosY = y
 }
 
-
+//invoked in main.go
 func Init() {
 	font.Init()
 
@@ -77,4 +77,10 @@ func Init() {
 		keyname := fmt.Sprintf("notosanscjk%d",i)
 		Fonts[keyname] = font.Font(fonts_path["notocjk"],i)
 	}
+}
+
+func init() {
+  if MyIconPool == nil {
+    MyIconPool = NewIconPool()
+  }
 }

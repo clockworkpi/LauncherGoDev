@@ -9,7 +9,8 @@ import (
 	"bufio"
   "bytes"
   "io"
-	
+	"strconv"
+  
 	"github.com/cuu/gogame/display"
 
 	"github.com/cuu/LauncherGoDev/sysgo"
@@ -173,4 +174,54 @@ func WriteLines(lines [] string,path string)(err error){
 }
 
 
+func GetGid(path string) int {
+	s, err := os.Stat(path)
+	if err != nil {
+		return -1
+	}
+
+	sys_interface := s.(os.FileInfo).Sys()
+	if sys_interface == nil {
+		return -1
+	}
+
+	return int(sys_interface.(*syscall.Stat_t).Gid)
+}
+
+
+func GetUid(path string) int {
+	s, err := os.Stat(path)
+	if err != nil {
+		return -1
+	}
+
+	sys_interface := s.(os.FileInfo).Sys()
+	if sys_interface == nil {
+		return -1
+	}
+
+	return int(sys_interface.(*syscall.Stat_t).Uid)
+}
+
+func  CheckBattery() int {
+  batinfos,err := ReadLines(sysgo.Battery)
+  if err == nil {
+    for i,v := range batinfos {
+      if strings.HasPrefix(v,"POWER_SUPPLY_CAPACITY") {
+        parts := strings.Split(v,"=")
+        if len(parts) > 1 {
+          cur_cap,err := strconv.Atoi(parts[1])
+          if err == nil {
+            return cur_cap
+          }else {
+            return 0 
+          }
+        }
+      }
+    }
+  }else{
+    fmt.Println(err)
+  }
+  return 0  
+}
 
