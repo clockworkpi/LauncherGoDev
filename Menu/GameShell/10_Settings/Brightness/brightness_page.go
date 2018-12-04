@@ -3,6 +3,7 @@ package main
 import(
   "fmt"
   
+  "io/ioutil"
   "strconv"
   "github.com/cuu/gogame/event"
   "github.com/cuu/LauncherGoDev/sysgo"
@@ -17,22 +18,22 @@ type SliderIcon struct {
   
 }
 func NewSliderIcon() *SliderIcon {
- 	p := &UI.SliderIcon{}
-	p.MyType = ICON_TYPES["EXE"]
-	p.Align = ALIGN["VCenter"]
+ 	p := &SliderIcon{}
+	p.MyType = UI.ICON_TYPES["EXE"]
+	p.Align = UI.ALIGN["VCenter"]
   
   return p
 }
 
 type SliderMultiIcon struct {
   UI.MultiIconItem
-  Parent *SoundSlider
+  Parent *BSlider
 }
 
 func NewSliderMultiIcon() *SliderMultiIcon {
   p := &SliderMultiIcon{}
-	p.MyType = ICON_TYPES["EXE"]
-	p.Align = ALIGN["VCenter"]
+	p.MyType = UI.ICON_TYPES["EXE"]
+	p.Align = UI.ALIGN["VCenter"]
     
   p.IconIndex = 0
 	p.IconWidth = 18
@@ -47,7 +48,7 @@ type BSlider struct {
     BGpng *SliderIcon
     BGwidth   int
     BGheight  int
-    NeedleSurf 
+    //NeedleSurf 
     Scale  *SliderMultiIcon
     Parent *BrightnessPage
     
@@ -56,7 +57,7 @@ type BSlider struct {
 }
 
 func NewBSlider() *BSlider {
-  p := &SoundSlider{}
+  p := &BSlider{}
   p.Range = [2]int{0,255}
   p.Value = 0
   

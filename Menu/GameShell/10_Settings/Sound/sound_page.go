@@ -2,6 +2,7 @@ package main
 
 import(
   "fmt"
+  "github.com/veandco/go-sdl2/sdl"
   "github.com/cuu/gogame/event"
   "github.com/cuu/LauncherGoDev/sysgo/UI"
 )
@@ -15,8 +16,8 @@ type SliderIcon struct {
 }
 func NewSliderIcon() *SliderIcon {
  	p := &SliderIcon{}
-	p.MyType = ICON_TYPES["EXE"]
-	p.Align = ALIGN["VCenter"]
+	p.MyType = UI.ICON_TYPES["EXE"]
+	p.Align = UI.ALIGN["VCenter"]
   
   return p
 }
@@ -28,8 +29,8 @@ type SliderMultiIcon struct {
 
 func NewSliderMultiIcon() *SliderMultiIcon {
   p := &SliderMultiIcon{}
-	p.MyType = ICON_TYPES["EXE"]
-	p.Align = ALIGN["VCenter"]
+	p.MyType = UI.ICON_TYPES["EXE"]
+	p.Align = UI.ALIGN["VCenter"]
     
   p.IconIndex = 0
 	p.IconWidth = 18
@@ -44,7 +45,7 @@ type SoundSlider struct {
     BGpng *SliderIcon
     BGwidth   int
     BGheight  int
-    NeedleSurf 
+    //NeedleSurf 
     Scale  *SliderMultiIcon
     Parent *SoundPage
     
@@ -193,7 +194,7 @@ func (self *SoundPage) OnLoadCb() {
 }
 
 func (self *SoundPage) WhenSliderDrag(val int) { //value 0 - 100
-  if value <0 || value > 100 {
+  if val <0 || val > 100 {
     return 
   }
 

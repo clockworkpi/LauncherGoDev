@@ -21,11 +21,11 @@ go build -o  wifi.so -buildmode=plugin
 cd -
 
 cd Menu/GameShell/10_Settings/Sound
-go build --ldflags="-s -w" o  sound.so -buildmode=plugin
+go build -ldflags="-s -w" -o  sound.so -buildmode=plugin
 cd -
 
 cd Menu/GameShell/10_Settings/Brightness
-go build --ldflags="-s -w" o  brightness.so -buildmode=plugin
+go build -ldflags="-s -w" -o  brightness.so -buildmode=plugin
 cd -
 
 

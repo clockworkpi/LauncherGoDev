@@ -12,10 +12,10 @@ import (
 	"github.com/cuu/gogame/time"
 //	"github.com/cuu/gogame/surface"
   "github.com/cuu/gogame/event"
-  "github.com/cuu/gogame/rect"
-	"github.com/cuu/gogame/color"
+  //"github.com/cuu/gogame/rect"
+	//"github.com/cuu/gogame/color"
 //	"github.com/cuu/gogame/font"
-	"github.com/cuu/gogame/draw"
+	//"github.com/cuu/gogame/draw"
   
 	"github.com/cuu/LauncherGoDev/sysgo"
   "github.com/cuu/LauncherGoDev/sysgo/UI"
@@ -40,18 +40,18 @@ func NewUpdateConfirmPage() *UpdateConfirmPage {
   p.FootMsg = [5]string{"Nav","","","Cancel","Yes"}
   p.ConfirmText = "Confirm Update?"
 
-  
+  return p
 }
 
 func (self *UpdateConfirmPage) KeyDown(ev *event.Event) {
 
-	if ev.Data["Key"] == CurKeys["A"] || ev.Data["Key"] == CurKeys["Menu"] {
+	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
 	}
   
-  if ev.Data["Key"] == CurKeys["B"] {
+  if ev.Data["Key"] == UI.CurKeys["B"] {
     if self.GIT == true {
       cmdpath := fmt.Sprintf("feh --bg-center %s/sys.go/gameshell/wallpaper/updating.png; cd %s ;git pull; git reset --hard %s ; feh --bg-center %s/sys.py/gameshell/wallpaper/loading.png ",
       launchergo_path,
@@ -95,7 +95,7 @@ func NewUpdatePage() *UpdatePage {
 	p.SelectedIconTopOffset = 20
 	p.EasingDur = 10
 
-	p.Align = ALIGN["SLeft"]  
+	p.Align = UI.ALIGN["SLeft"]  
   p.ListFontObj = UI.Fonts["varela15"]
   
   return p
@@ -249,6 +249,8 @@ func (self *UpdatePage) KeyDown(ev *event.Event) {
 
 func (self *UpdatePage) Draw() {
   self.ClearCanvas()
-  for 
+  for _,v := range self.MyList {
+    v.Draw()
+  }
 
 }

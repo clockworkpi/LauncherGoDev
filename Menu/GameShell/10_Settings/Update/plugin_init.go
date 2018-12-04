@@ -1,5 +1,7 @@
 package main
-
+import (
+  "github.com/cuu/LauncherGoDev/sysgo/UI"
+)
 /******************************************************************************/
 type UpdatePlugin struct {
 	UI.Plugin
