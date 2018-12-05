@@ -10,6 +10,7 @@ import (
   "bytes"
   "io"
 	"strconv"
+  "syscall"
   
 	"github.com/cuu/gogame/display"
 
@@ -206,7 +207,7 @@ func GetUid(path string) int {
 func  CheckBattery() int {
   batinfos,err := ReadLines(sysgo.Battery)
   if err == nil {
-    for i,v := range batinfos {
+    for _,v := range batinfos {
       if strings.HasPrefix(v,"POWER_SUPPLY_CAPACITY") {
         parts := strings.Split(v,"=")
         if len(parts) > 1 {

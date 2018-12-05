@@ -1,15 +1,23 @@
 package UI
 
 import (
+  "fmt"
+  "os"
+  "strings"
+  "path/filepath"
+  "os/exec"
+  
   gotime "time"
   "net/url"
   
   "github.com/cuu/grab"
   "github.com/cuu/gogame/color"
+  "github.com/cuu/gogame/draw"
+
 )
 
 type DownloadProcessPage struct {
-  UI.Page
+  Page
     
   URL string
   DST_DIR string
@@ -64,7 +72,7 @@ func (self *DownloadProcessPage) Init() {
   bgpng.Adjust(0,0,self.PngSize["bg"][0],self.PngSize["bg"][1],0)
   self.Icons["bg"] = bgpng
   
-  needwifi_bg = NewIconItem()
+  needwifi_bg := NewIconItem()
   needwifi_bg.ImgSurf = MyIconPool.GetImgSurf("needwifi_bg")
   needwifi_bg.MyType = ICON_TYPES["STAT"]
   needwifi_bg.Parent = self
@@ -74,11 +82,11 @@ func (self *DownloadProcessPage) Init() {
 
   self.FileNameLabel = NewLabel()
   self.FileNameLabel.SetCanvasHWND(self.CanvasHWND)
-  self.FileNameLabel.Init("", Fonts["varela12"])
+  self.FileNameLabel.Init("", Fonts["varela12"],nil)
   
   self.SizeLabel = NewLabel()
   self.SizeLabel.SetCanvasHWND(self.CanvasHWND)
-  self.SizeLabel.Init("0/0Kb",Fonts["varela12"])
+  self.SizeLabel.Init("0/0Kb",Fonts["varela12"],nil)
   self.SizeLabel.SetColor( self.URLColor )
   
   self.Downloader = grab.NewClient()
@@ -178,7 +186,7 @@ func (self *DownloadProcessPage) StartDownload(_url,dst_dir string) {
   }
   
   _, err := url.ParseRequestURI(_url)
-  if err == nil && UI.IsDirectory(dst_dir) {
+  if err == nil && IsDirectory(dst_dir) {
     self.URL = _url
     self.DST_DIR = dst_dir
   }else{
@@ -190,7 +198,7 @@ func (self *DownloadProcessPage) StartDownload(_url,dst_dir string) {
     return
   }
 
-  self.req, _ := grab.NewRequest(self.DST_DIR, _url)
+  self.req, _ = grab.NewRequest(self.DST_DIR, _url)
   
   fmt.Printf("Downloading %v...\n", self.req.URL())
   
@@ -224,13 +232,13 @@ func (self *DownloadProcessPage) Draw() {
     percent = 10
   }
   
-  rect_ := draw.MidRect(self.Width/2,self.Height/2+33,170,17, UI.Width,UI.Height)
+  rect_ := draw.MidRect(self.Width/2,self.Height/2+33,170,17, Width,Height)
   
   draw.AARoundRect(self.CanvasHWND,rect_,
                   &color.Color{228,228,228,255},5,0,&color.Color{228,228,228,255})
   
   
-  rect2_ := draw.MidRect( self.Width/2,self.Height/2+33,int(170.0*((float64)percent/100.0)),17, UI.Width,UI.Height )
+  rect2_ := draw.MidRect( self.Width/2,self.Height/2+33,int(170.0*(float64(percent)/100.0)),17, Width,Height )
   
   rect2_.X = rect_.X
   rect2_.Y = rect_.Y
@@ -238,13 +246,13 @@ func (self *DownloadProcessPage) Draw() {
   draw.AARoundRect(self.CanvasHWND,rect2_,
                   &color.Color{131, 199, 219,255},5,0,&color.Color{131, 199, 219,255})
   
-  w,h: = self.FileNameLabel.Size()
+  w,h := self.FileNameLabel.Size()
   
-  rect3_ := draw.MidRect(self.Width/2,self.Height/2+53,w, h,UI.Width,UI.Height)
+  rect3_ := draw.MidRect(self.Width/2,self.Height/2+53,w, h,Width,Height)
 
   w, h = self.SizeLabel.Size()
   
-  rect4 := draw.MidRect(self.Width/2,self.Height/2+70,w, h,UI.Width,UI.Height)
+  rect4_ := draw.MidRect(self.Width/2,self.Height/2+70,w, h,Width,Height)
   
   self.FileNameLabel.NewCoord(int(rect3_.X),int(rect3_.Y))
   self.FileNameLabel.Draw()

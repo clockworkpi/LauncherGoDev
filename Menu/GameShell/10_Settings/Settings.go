@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/veandco/go-sdl2/ttf"
 
+  "path/filepath"
 //	"github.com/cuu/gogame/surface"
 	"github.com/cuu/gogame/event"
 	"github.com/cuu/gogame/rect"
@@ -10,6 +11,9 @@ import (
 	"github.com/cuu/gogame/draw"
 	
 	"github.com/cuu/LauncherGoDev/sysgo/UI"
+  
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/LauncherPy"
+  
 	
 )
 
@@ -49,6 +53,14 @@ func (self *SettingsPageSelector) Draw() {
 	}
 }
 
+
+type SettingPlugin struct{
+  Type int
+  SoFile string
+  FolderName string
+  LabelText  string
+  EmbInterface  UI.PluginInterface
+}
 //##############################################//
 
 type SettingsPage struct {
@@ -76,6 +88,16 @@ func NewSettingsPage() *SettingsPage {
 	return p
 }
 
+func (self *SettingsPage) GenList() []*SettingPlugin {
+  alist := []*SettingPlugin{
+    &SettingPlugin{0,"wifi.so",  "Wifi",      "Wi-Fi",nil},
+    &SettingPlugin{0,"about.so", "About",     "About",nil},
+    &SettingPlugin{1,"",         "LauncherPy","Switch to Launcher",&LauncherPy.APIOBJ},
+  }
+  
+  return alist
+}
+
 func (self *SettingsPage) Init() {
 	if self.Screen != nil {
 		
@@ -90,17 +112,12 @@ func (self *SettingsPage) Init() {
 		self.Ps = ps
 		self.PsIndex = 0
 		
-
-		alist := [][]string{ // "so file", "folder name", "label text"
-      {"wifi.so","Wifi","Wi-Fi"},
-			{"about.so","About","About"}, 
-      
-		}
-
-
+    
 		start_x := 0
 		start_y := 0
-
+    
+    alist := self.GenList()
+    
 		for i,v := range alist{
 			li := UI.NewListItem()
 			li.Parent = self
@@ -110,19 +127,25 @@ func (self *SettingsPage) Init() {
 
 			li.Fonts["normal"] = self.ListFontObj
 
-			if v[2] != "" {
-				li.Init(v[2])
+			if v.LabelText != "" {
+				li.Init(v.LabelText)
 			}else{
-				li.Init(v[1])
+				li.Init(v.FolderName)
 			}
 			
-			if UI.FileExists( self.MyPath+"/"+v[1]+"/"+v[0]) {
-				pi,err := UI.LoadPlugin(self.MyPath+"/"+v[1]+"/"+v[0] )
+			if v.SoFile!= "" && UI.FileExists( filepath.Join(self.MyPath,v.FolderName,v.SoFile )) {
+				pi,err := UI.LoadPlugin(filepath.Join(self.MyPath,v.FolderName,v.SoFile ))
 				UI.Assert(err)
 				li.LinkObj  = UI.InitPlugin(pi,self.Screen)
 				self.MyList = append(self.MyList,li)
 				
-			}
+			}else {
+        if v.EmbInterface != nil {
+          v.EmbInterface.Init(self.Screen)
+          li.LinkObj = v.EmbInterface
+          self.MyList = append(self.MyList,li)
+        }
+      }
 		}
 
 		self.Scroller = UI.NewListScroller()
