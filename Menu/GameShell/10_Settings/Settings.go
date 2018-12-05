@@ -90,9 +90,16 @@ func NewSettingsPage() *SettingsPage {
 
 func (self *SettingsPage) GenList() []*SettingPlugin {
   alist := []*SettingPlugin{
+    
     &SettingPlugin{0,"wifi.so",  "Wifi",      "Wi-Fi",nil},
-    &SettingPlugin{0,"about.so", "About",     "About",nil},
+    
+    &SettingPlugin{0,"sound.so",      "Sound",      "Sound Volume" ,         nil},
+    &SettingPlugin{0,"brightness.so", "Brightness", "BackLight Brightness", nil},
+    &SettingPlugin{0,"update.so",     "Update",     "Update",               nil},
+    &SettingPlugin{0,"about.so",      "About",      "About",                nil},
+    
     &SettingPlugin{1,"",         "LauncherPy","Switch to Launcher",&LauncherPy.APIOBJ},
+    
   }
   
   return alist

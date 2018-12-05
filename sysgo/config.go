@@ -1,7 +1,7 @@
 package sysgo
 
 var (
-	CurKeySet = "PC"
+	CurKeySet = "GameShell" // PC or GameShell
 	DontLeave = false
 	BackLight = "/proc/driver/backlight"
 	Battery   = "/sys/class/power_supply/axp20x-battery/uevent"
