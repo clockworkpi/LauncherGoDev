@@ -1,6 +1,7 @@
 package UI
 
 import (
+  "fmt"
 	"github.com/cuu/gogame/surface"
 	"github.com/cuu/gogame/image"
 	"github.com/cuu/gogame/draw"
@@ -31,6 +32,10 @@ func (self * MultiIconItem) CreateImgSurf() {
 }
 
 func (self *MultiIconItem) Draw() {
+  if self.Parent == nil {
+    fmt.Println("Error: MultiIconItem Draw Parent nil")
+    return
+  }  
 	parent_x,parent_y := self.Parent.Coord()
 	
 	if self.Label != nil {

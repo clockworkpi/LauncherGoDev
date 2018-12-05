@@ -1,7 +1,7 @@
 package UI
 
 import (
-//	"fmt"
+	"fmt"
 	
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -241,7 +241,10 @@ func (self *IconItem) GetCmdInvoke() PluginInterface {
 }
 
 func (self *IconItem) Draw() {
-	
+  if self.Parent == nil {
+    fmt.Println("Error: IconItem Draw Parent nil")
+    return
+  }
 	parent_x,parent_y := self.Parent.Coord()
 	
 	if self.Label != nil {

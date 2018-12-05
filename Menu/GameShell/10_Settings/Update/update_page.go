@@ -98,6 +98,8 @@ func NewUpdatePage() *UpdatePage {
 	p.Align = UI.ALIGN["SLeft"]  
   p.ListFontObj = UI.Fonts["varela15"]
   
+  p.AList = make( map[string]map[string]string )
+  
   return p
 }
 
@@ -124,7 +126,10 @@ func (self *UpdatePage) GenList() {
       li.Init(self.AList[k]["key"] )
     }
     
-    li.Flag = self.AList[k]["value"]
+    li.Flag = self.AList[k]["key"]
+    
+    li.SetSmallText( self.AList[k]["value"])
+    
     self.MyList = append(self.MyList,li)
     
     i+=1
