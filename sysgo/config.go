@@ -22,7 +22,7 @@ var (
 	SKIN="default"
   
   //load from dot files   
-  CurPowerLevel= "performance"
+  CurPowerLevel= "supersaving"//"performance"
   Lang        = "English"
   
 )

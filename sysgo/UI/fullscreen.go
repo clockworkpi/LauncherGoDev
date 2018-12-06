@@ -18,6 +18,8 @@ type FullScreen struct {
 
 func NewFullScreen() *FullScreen {
   p := &FullScreen{}
+  p.Width = Width
+  p.Height = Height
   
   return p
 

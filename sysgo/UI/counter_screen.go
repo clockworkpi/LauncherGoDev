@@ -39,6 +39,9 @@ type CounterScreen struct {
 
 func NewCounterScreen() *CounterScreen {
   p := &CounterScreen{}
+  p.Width = Width
+  p.Height = Height
+  
   p.Number = 10
   p.CounterFont = Fonts["varela120"]
   p.TextFont1 = Fonts["varela15"]
@@ -148,7 +151,7 @@ func (self *CounterScreen) Init() {
 }
 
 func (self *CounterScreen) Draw() {
-  surface.Fill(self.CanvasHWND, self.FGColor)
+  surface.Fill(self.CanvasHWND, self.BGColor)
   
   self.TopLabel.NewCoord(Width/2,15)
   self.TopLabel.DrawCenter(false)
