@@ -1,9 +1,16 @@
 package UI
 
 import (
-  
+  "fmt"
   gotime "time"
-  
+  "github.com/veandco/go-sdl2/ttf"
+
+  "github.com/cuu/gogame/color"
+  "github.com/cuu/gogame/event"
+  "github.com/cuu/gogame/surface"
+
+  "github.com/cuu/LauncherGoDev/sysgo"
+
 )
 type CounterScreen struct {
   FullScreen
@@ -97,7 +104,7 @@ func (self *CounterScreen) StartCounter() {
   
   self.Counting = true
   
-  self.TheTicker.Start()
+  self.TheTicker = gotime.NewTicker(500 * gotime.Millisecond)
   
   go self.Interval()
 
@@ -136,7 +143,6 @@ func (self *CounterScreen) Init() {
   number_str := fmt.Sprintf("%d",self.Number)
   self.NumberLabel.Init(number_str,self.CounterFont,self.FGColor)
   
-  self.TheTicker = gotime.NewTicker(500 * gotime.Millisecond)
   self.TickerStoped = make(chan bool,1)
   
 }

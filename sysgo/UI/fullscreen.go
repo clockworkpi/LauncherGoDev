@@ -2,7 +2,10 @@ package UI
 
 import (
 
+  "github.com/veandco/go-sdl2/sdl"
   "github.com/cuu/gogame/surface"
+
+  "github.com/cuu/gogame/rect"
 
 )
 

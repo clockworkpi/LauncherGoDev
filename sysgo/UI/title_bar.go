@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"bufio"
 	"strings"
+  "os/exec"
 	gotime "time"
 	
 	"github.com/veandco/go-sdl2/sdl"
@@ -140,7 +141,7 @@ func NewTitleBar() *TitleBar {
 	
 }
 
-func (t *TitleBar) RoundRobinCheck() {
+func (self *TitleBar) RoundRobinCheck() {
 	for {
     
     if self.InLowBackLight < 0 {
@@ -166,7 +167,7 @@ func (t *TitleBar) RoundRobinCheck() {
   }
 }
 
-func (t *TitleBar) UpdateWifiStrength() {
+func (self *TitleBar) UpdateWifiStrength() {
 	self.Draw(self.Title)
 }
 
@@ -213,7 +214,7 @@ func (self *TitleBar) SyncSoundVolume() {
 }
 
 // for outside widget to update sound icon
-func (t *TitleBar) SetSoundVolume(vol int) {
+func (self *TitleBar) SetSoundVolume(vol int) {
   
 	snd_segs := [][]int{ []int{0,10}, []int{10,30}, []int{30,70},[]int{70,100} }
 	ge := 0

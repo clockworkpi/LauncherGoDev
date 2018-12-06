@@ -9,6 +9,8 @@ import (
 	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/color"
 	"github.com/cuu/gogame/font"
+ 	"github.com/cuu/gogame/draw"
+ 
 )
 
 type LabelInterface interface {

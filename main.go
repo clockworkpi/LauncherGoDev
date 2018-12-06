@@ -4,6 +4,10 @@ import (
 
 	"os"
 	"fmt"
+  "io/ioutil"
+  "strconv"
+  "strings"
+  
 	gotime "time"
 	"github.com/veandco/go-sdl2/sdl"
 	
@@ -11,7 +15,7 @@ import (
 	"github.com/cuu/gogame/event"
 //	"github.com/cuu/gogame/color"
 	"github.com/cuu/gogame/font"
-	"github.com/cuu/gogame/time"
+	//"github.com/cuu/gogame/time"
 	
   "github.com/cuu/LauncherGoDev/sysgo"
   
@@ -132,7 +136,7 @@ func InspectionTeam(main_screen *UI.MainScreen) {
     time2 := sysgo.PowerLevels[sysgo.CurPowerLevel].Close
     time3 := sysgo.PowerLevels[sysgo.CurPowerLevel].PowerOff
     
-    if elapsed > gotime.Duration(time1) *gotime.Millisecond && passout_time_stage == 0 {
+    if elapsed > gotime.Duration(time1) *gotime.Second && passout_time_stage == 0 {
       fmt.Println("timeout, dim screen ",elapsed)
       
       if UI.FileExists(sysgo.BackLight) {
@@ -157,7 +161,7 @@ func InspectionTeam(main_screen *UI.MainScreen) {
         passout_time_stage = 1 // next 
       }
       everytime_keydown = cur_time
-    }else if elapsed > gotime.Duration(time2) *gotime.Millisecond && passout_time_stage == 1 {
+    }else if elapsed > gotime.Duration(time2) *gotime.Second && passout_time_stage == 1 {
       fmt.Println("timeout, close screen ", elapsed)
       
       if UI.FileExists(sysgo.BackLight) {
@@ -172,7 +176,7 @@ func InspectionTeam(main_screen *UI.MainScreen) {
       }
       
       everytime_keydown = cur_time
-    }else if elapsed > gotime.Duration(time3) * gotime.Millisecond && passout_time_stage  == 2{
+    }else if elapsed > gotime.Duration(time3) * gotime.Second && passout_time_stage  == 2{
       
       fmt.Println("Power Off counting down")
       
@@ -191,7 +195,7 @@ func InspectionTeam(main_screen *UI.MainScreen) {
       
     }
         
-    gotime.Sleep(UI.DT * gotime.Millisecond)
+    gotime.Sleep(gotime.Duration(UI.DT) * gotime.Millisecond)
   }
 }
 
@@ -245,7 +249,7 @@ func run() int {
 		if ev.Type == event.KEYDOWN {
       everytime_keydown = gotime.Now()
       if RestoreLastBackLightBrightness(main_screen) == false {
-        return
+        continue
       }
       
 			if ev.Data["Key"] == "Q" {
