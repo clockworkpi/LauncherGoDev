@@ -142,7 +142,7 @@ func (self *BSlider) Init() {
   self.Height = self.Parent.Height
   
   self.BGpng = NewSliderIcon()
-  self.BGpng.ImgSurf = UI.MyIconPool.GetImgSurf("vol")
+  self.BGpng.ImgSurf = UI.MyIconPool.GetImgSurf("light")
   self.BGpng.MyType = UI.ICON_TYPES["STAT"]
   self.BGpng.Parent = self
   self.BGpng.Adjust(0,0,self.BGwidth,self.BGheight,0)
