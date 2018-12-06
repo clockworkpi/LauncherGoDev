@@ -141,13 +141,11 @@ func (self *MessageBox) Draw() {
 }
 
 type MainScreen struct {
+  Widget
 	Pages []PageInterface
 	PageMax int
 	PageIndex int
-	PosX  int
-	PosY  int
-	Width int
-	Height int
+
 	MyPageStack *PageStack
 	CurrentPage PageInterface
 	CanvasHWND  *sdl.Surface
@@ -159,6 +157,8 @@ type MainScreen struct {
 	IconFont    *ttf.Font
 	SkinManager *SkinManager
 	DBusManager *DBUS.DBus
+  CounterScreen *CounterScreen
+  Closed      bool
 }
 
 
@@ -186,6 +186,12 @@ func (self *MainScreen) Init() {
 	self.SkinManager.Init()
 
   self.DBusManager = DBUS.DBusHandler
+  
+  self.CounterScreen = NewCounterScreen()
+  self.CounterScreen.HWND = self.HWND
+  self.CounterScreen.Init()
+  
+  
 }
 
 func (self *MainScreen) FartherPages() { // right after ReadTheDirIntoPages

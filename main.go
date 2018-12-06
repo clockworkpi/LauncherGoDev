@@ -4,7 +4,7 @@ import (
 
 	"os"
 	"fmt"
-	
+	gotime "time"
 	"github.com/veandco/go-sdl2/sdl"
 	
 	"github.com/cuu/gogame/display"
@@ -13,9 +13,187 @@ import (
 	"github.com/cuu/gogame/font"
 	"github.com/cuu/gogame/time"
 	
+  "github.com/cuu/LauncherGoDev/sysgo"
+  
 	"github.com/cuu/LauncherGoDev/sysgo/UI"
 )
 
+var (
+  flash_led1_counter  = 0
+  last_brt = 0
+  passout_time_stage = 0
+  led1_proc_file = "/proc/driver/led1"
+  
+  everytime_keydown = gotime.Now()
+  
+)
+// flash the Led1 on the GS back
+func FlashLed1(main_screen *UI.MainScreen) {
+  
+  for {
+    if UI.FileExists(led1_proc_file) {
+      if main_screen.Closed == false {
+        if flash_led1_counter > 0 {
+          d := []byte(fmt.Sprintf("%d",0))
+          err := ioutil.WriteFile(led1_proc_file, d, 0644) // turn off led1
+          if err != nil {
+            fmt.Println(err)
+          }
+          flash_led1_counter = 0
+        }
+      
+      } else {
+        flash_led1_counter +=1
+        if flash_led1_counter == 3 {
+          d := []byte(fmt.Sprintf("%d",1))
+          err := ioutil.WriteFile(led1_proc_file, d, 0644)
+          if err != nil {
+            fmt.Println(err)
+          }
+        }
+        
+        if flash_led1_counter == 5 {
+          d := []byte(fmt.Sprintf("%d",0))
+          err := ioutil.WriteFile(led1_proc_file, d, 0644)
+          if err != nil {
+            fmt.Println(err)
+          }
+        }
+        
+        if flash_led1_counter == 11 {
+          flash_led1_counter = 1
+        }
+      }
+    }
+    
+    gotime.Sleep(200 * gotime.Millisecond)
+  }
+}
+
+//happens everytime when KeyDown occurs
+func RestoreLastBackLightBrightness(main_screen *UI.MainScreen) bool {
+  
+  passout_time_stage = 0
+  main_screen.TitleBar.InLowBackLight = -1
+  main_screen.Closed = false
+  
+  if last_brt == -1 {
+    return true
+  }
+  
+  if UI.FileExists(sysgo.BackLight) {
+    lines,err := UI.ReadLines(sysgo.BackLight)
+    if err == nil {
+      brt,err2 := strconv.Atoi(strings.Trim(lines[0],"\r\n "))
+      if err2 == nil {
+        if brt < last_brt {
+          d := []byte(fmt.Sprintf("%d",last_brt))
+          ioutil.WriteFile(sysgo.BackLight,d,0644)
+          last_brt = -1
+        }
+      }
+    }else {
+      fmt.Println(err)
+    }
+    
+  }else {
+    
+  }
+  
+  if UI.FileExists(led1_proc_file) {
+    d := []byte(fmt.Sprintf("%d",0))
+    err := ioutil.WriteFile(led1_proc_file, d, 0644)
+    if err != nil {
+      fmt.Println(err)
+    }
+  }
+
+  //Stop CounterScreen here
+  
+  if main_screen.CounterScreen.Counting == true {
+    main_screen.CounterScreen.StopCounter()
+    main_screen.Draw()
+    main_screen.SwapAndShow()
+    return false
+  }
+  
+  return true
+  
+}
+
+//power stuff dealer
+func InspectionTeam(main_screen *UI.MainScreen) {
+
+  for {
+    cur_time := gotime.Now()
+    elapsed := cur_time.Sub(everytime_keydown)
+    
+    time1 := sysgo.PowerLevels[sysgo.CurPowerLevel].Dim
+    time2 := sysgo.PowerLevels[sysgo.CurPowerLevel].Close
+    time3 := sysgo.PowerLevels[sysgo.CurPowerLevel].PowerOff
+    
+    if elapsed > gotime.Duration(time1) *gotime.Millisecond && passout_time_stage == 0 {
+      fmt.Println("timeout, dim screen ",elapsed)
+      
+      if UI.FileExists(sysgo.BackLight) {
+        lines,err := UI.ReadLines(sysgo.BackLight) 
+        
+        if err == nil {
+          brt,err2 := strconv.Atoi(strings.Trim(lines[0],"\r\n "))
+          if err2 == nil {
+            if brt > 0 {
+              if last_brt < 0 {
+                last_brt = brt
+              }
+              d := []byte(fmt.Sprintf("%d",1))
+              ioutil.WriteFile(sysgo.BackLight,d,0644)
+            }
+          }
+        }
+      }
+      
+      main_screen.TitleBar.InLowBackLight = 0
+      if time2 != 0 {
+        passout_time_stage = 1 // next 
+      }
+      everytime_keydown = cur_time
+    }else if elapsed > gotime.Duration(time2) *gotime.Millisecond && passout_time_stage == 1 {
+      fmt.Println("timeout, close screen ", elapsed)
+      
+      if UI.FileExists(sysgo.BackLight) {
+        d := []byte(fmt.Sprintf("%d",0))
+        ioutil.WriteFile(sysgo.BackLight,d,0644)
+      }      
+      
+      main_screen.TitleBar.InLowBackLight = 0
+      main_screen.Closed = true
+      if time3 != 0 {
+        passout_time_stage = 2 // next
+      }
+      
+      everytime_keydown = cur_time
+    }else if elapsed > gotime.Duration(time3) * gotime.Millisecond && passout_time_stage  == 2{
+      
+      fmt.Println("Power Off counting down")
+      
+      main_screen.CounterScreen.Draw()
+      main_screen.CounterScreen.SwapAndShow()
+      main_screen.CounterScreen.StartCounter()
+      
+      if UI.FileExists(sysgo.BackLight) {
+        d := []byte(fmt.Sprintf("%d",last_brt))
+        ioutil.WriteFile(sysgo.BackLight,d,0644)
+      }
+      
+      main_screen.TitleBar.InLowBackLight = 0
+      
+      passout_time_stage = 4
+      
+    }
+        
+    gotime.Sleep(UI.DT * gotime.Millisecond)
+  }
+}
 
 func run() int {	
 	display.Init()
@@ -46,10 +224,13 @@ func run() int {
 
 	UI.SwapAndShow()
 	
-	fmt.Println(main_screen)
+	//fmt.Println(main_screen)
     
 	event.AddCustomEvent(UI.RUNEVT)
-
+  
+  go FlashLed1(main_screen)
+  go InspectionTeam(main_screen)
+  
 	running := true
 	for running {
 		ev := event.Wait()
@@ -62,11 +243,14 @@ func run() int {
 			fmt.Println("UserEvent: ",ev.Data["Msg"])
 		}
 		if ev.Type == event.KEYDOWN {
+      everytime_keydown = gotime.Now()
+      if RestoreLastBackLightBrightness(main_screen) == false {
+        return
+      }
+      
 			if ev.Data["Key"] == "Q" {
 				main_screen.OnExitCb()
 				return 0
-			}else if ev.Data["Key"] == "D" {
-				time.Delay(1000)
 			}else if ev.Data["Key"] == "P" {				
 				event.Post(UI.RUNEVT,"GODEBUG=cgocheck=0 sucks") // just id and string, simplify the stuff
 				

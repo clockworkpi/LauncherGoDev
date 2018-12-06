@@ -263,7 +263,9 @@ func (self *SoundPage) WhenSliderDrag(val int) { //value 0 - 100
   if val <0 || val > 100 {
     return 
   }
-
+  
+  self.Screen.TitleBar.SetSoundVolume(val)
+  
   SetVolume(val)
 }
 

@@ -22,6 +22,7 @@ type LabelInterface interface {
 	GetText() string
 	SetText(text string)
 	Draw()
+  DrawCenter(bold bool)
 }
 
 type Label struct {
@@ -85,6 +86,15 @@ func (self *Label) GetText() string {
 func (self *Label) SetText(text string) {
 	self.Text = text
 	self.Width,self.Height = font.Size(self.FontObj, self.Text)
+}
+
+func (self *Label) DrawCenter(bold bool) { // default bold is false
+  font.SetBold(self.FontObj,bold) 
+  my_text := font.Render(self.FontObj,self.Text, true, self.Color, nil)
+  
+  rect_ := draw.MidRect(self.PosX,self.PosY,self.Width,self.Height,Width,Height)
+  
+  surface.Blit(self.CanvasHWND,my_text,rect_,nil)
 }
 
 func (self *Label) Draw() {

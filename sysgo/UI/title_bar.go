@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"bufio"
 	"strings"
-	"time"
+	gotime "time"
 	
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -88,11 +88,7 @@ func (self *TitleBarIconItem) Draw() {
 
 
 type TitleBar struct {
-
-	PosX int
-	PosY int
-	Width int
-	Height int
+  Widget
 	BarHeight int
 	LOffset int
 	ROffset int
@@ -103,12 +99,16 @@ type TitleBar struct {
 	CanvasHWND *sdl.Surface
 	HWND       *sdl.Surface
 	Title string
+  
 	InLowBackLight int
+  InAirPlaneMode bool
+  
 	SkinManager *SkinManager //set by MainScreen
 	DBusManager DBUS.DBusInterface
 	
 	icon_base_path string /// SkinMap("gameshell/titlebar_icons/")
-
+  
+  
 	TitleFont *ttf.Font
 	TimeFont  *ttf.Font
 }
@@ -141,11 +141,33 @@ func NewTitleBar() *TitleBar {
 }
 
 func (t *TitleBar) RoundRobinCheck() {
-	
+	for {
+    
+    if self.InLowBackLight < 0 {
+      self.CheckBatteryStat()
+      ///self.CheckBluetooth()
+      self.UpdateWifiStrength()
+      
+    }else if self.InLowBackLight >= 0 {
+      self.InLowBackLight +=1
+      
+      if self.InLowBackLight > 10 {
+        self.CheckBatteryStat()
+        
+        self.UpdateWifiStrength()
+        
+        self.InLowBackLight = 0 // reset
+      }
+          
+    }
+
+    gotime.Sleep(3000 * gotime.Millisecond)
+    
+  }
 }
 
 func (t *TitleBar) UpdateWifiStrength() {
-	
+	self.Draw(self.Title)
 }
 
 func (t *TitleBar) GetWifiStrength(stren int) int {
@@ -170,10 +192,10 @@ func (self *TitleBar) SyncSoundVolume() {
 	
   vol, err := volume.GetVolume()
   if err != nil {
-    log.Fatalf("get volume failed: %+v", err)
+    log.Fatalf("TitleBar SyncSoundVolume get volume failed: %+v", err)
 		vol = 0
   }
-  fmt.Printf("current volume: %d\n", vol)
+  fmt.Printf("TitleBar SyncSoundVolume current volume: %d\n", vol)
 
 	snd_segs := [][]int{ []int{0,10}, []int{10,30}, []int{30,70},[]int{70,100} }
 	ge := 0
@@ -190,8 +212,22 @@ func (self *TitleBar) SyncSoundVolume() {
 	// 
 }
 
+// for outside widget to update sound icon
 func (t *TitleBar) SetSoundVolume(vol int) {
-	//pass
+  
+	snd_segs := [][]int{ []int{0,10}, []int{10,30}, []int{30,70},[]int{70,100} }
+	ge := 0
+
+	for i,v := range snd_segs {
+		if vol >= v[0] && vol <= v[1] {
+			ge = i
+			break
+		}
+	}
+
+	self.Icons["soundvolume"].SetIconIndex(ge)
+	self.Icons["sound"] = self.Icons["soundvolume"]  
+
 }
 
 func (self *TitleBar) CheckBatteryStat() {
@@ -322,7 +358,22 @@ func (self *TitleBar) Init(main_screen *MainScreen) {
 	if self.DBusManager.IsWifiConnectedNow() {
 		print("wifi is connected")
 		print( self.DBusManager.WifiStrength())
-	}
+	}else {
+  
+    cmd := "sudo rfkill list | grep yes | cut -d \" \" -f3" //make sure sudo rfkill needs no password
+    out, err := exec.Command("bash", "-c", cmd).Output()
+    if err != nil {
+      fmt.Printf("Failed to execute command: %s\n", cmd)
+    }else {
+      outs := strings.Split(string(out),"\n")
+      if len(outs) > 0 && outs[0] == "yes" {
+        self.InAirPlaneMode = true
+      }else{
+        self.InAirPlaneMode = false
+      }
+    }
+
+  }
 }
 
 func (self *TitleBar) ClearCanvas() {
@@ -343,7 +394,7 @@ func (self *TitleBar) Draw(title string) {
 	self.ClearCanvas()
 	self.Title = title
 
-	cur_time := jodaTime.Format("HH:mm", time.Now())
+	cur_time := jodaTime.Format("HH:mm", gotime.Now())
 	
 	time_text_w,  time_text_h  := font.Size(self.TimeFont, cur_time)
 	title_text_w, title_text_h := font.Size(self.TitleFont, self.Title)

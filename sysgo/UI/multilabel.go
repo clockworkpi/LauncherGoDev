@@ -66,6 +66,10 @@ func (self *MultiLabel) SetText(text string) {
 	
 }
 
+func (self *MultiLabel) DrawCenter(bold bool) {
+
+}
+
 func (self *MultiLabel) Draw() {
 	font.SetBold(self.FontObj,false) // avoing same font tangling set_bold to others
 	self.blit_text(self.CanvasHWND, self.Text,self.PosX,self.PosY,self.FontObj)	

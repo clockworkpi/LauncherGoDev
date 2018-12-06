@@ -76,11 +76,7 @@ func (self *FootBarIconItem) Draw() {
 }
 
 type FootBar struct {
-
-	PosX int
-	PosY int
-	Width int
-	Height int
+  Widget
 	BarHeight int
 	BorderWidth int
 	CanvasHWND *sdl.Surface
