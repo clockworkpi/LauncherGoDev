@@ -4,10 +4,12 @@ import (
 
 	"os"
 	"fmt"
+  "log"
   "io/ioutil"
   "strconv"
   "strings"
   "runtime"
+  "path/filepath"
   
 	gotime "time"
 	"github.com/veandco/go-sdl2/sdl"
