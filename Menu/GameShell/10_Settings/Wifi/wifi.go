@@ -902,7 +902,9 @@ func (self *WifiList) AbortedAndReturnToUpLevel() {
 
 func (self *WifiList) OnReturnBackCb() {
   password_inputed := strings.Join(APIOBJ.PasswordPage.Textarea.MyWords,"")
-  self.ConfigWireless(password_inputed)
+  if self.Screen.DBusManager.IsWifiConnectedNow() == false {
+    self.ConfigWireless(password_inputed)
+  }
 }
 
 func (self *WifiList) KeyDown( ev *event.Event  ) {
