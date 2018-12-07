@@ -7,10 +7,11 @@ import (
   "io/ioutil"
   "strconv"
   "strings"
+  "runtime"
   
 	gotime "time"
 	"github.com/veandco/go-sdl2/sdl"
-	
+	"github.com/cuu/gogame"
 	"github.com/cuu/gogame/display"
 	"github.com/cuu/gogame/event"
 //	"github.com/cuu/gogame/color"
@@ -199,6 +200,33 @@ func InspectionTeam(main_screen *UI.MainScreen) {
   }
 }
 
+func PreparationInAdv(){
+  
+  if strings.Contains(runtime.GOARCH,"arm") == false {
+    return
+  }
+  
+  if UI.FileExists("sysgo/.powerlevel") == false {
+    UI.System("touch sysgo/.powerlevel")
+    UI.System("sudo iw wlan0 set power_save off >/dev/null")
+    
+  }else{
+    b, err := ioutil.ReadFile("sysgo/.powerlevel")
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    pwl := strings.Trim(string(b),"\r\n ")
+    
+    if pwl == "supersaving" {
+      UI.System("sudo iw wlan0 set power_save on >/dev/null")
+    }else{
+      UI.System("sudo iw wlan0 set power_save off >/dev/null")
+    }
+  }
+  
+}
+
 func run() int {	
 	display.Init()
 	font.Init()
@@ -206,7 +234,9 @@ func run() int {
     
 	UI.Init()
 	UI.MyIconPool.Init()
-
+  
+  PreparationInAdv()
+  
 	main_screen := UI.NewMainScreen()
 	main_screen.HWND = screen
 	main_screen.Init()
@@ -243,8 +273,25 @@ func run() int {
 			break
 		}
 		if ev.Type == event.USEREVENT {
-			
+
+      
 			fmt.Println("UserEvent: ",ev.Data["Msg"])
+      
+      switch ev.Code {
+        case UI.RUNEVT:
+          main_screen.OnExitCb()      
+          gogame.Quit()          
+          
+          fmt.Println("RUNEVT")
+          exec_app_cmd := "cd " + filepath.Dir(ev.Data["Msg"])+";"
+          exec_app_cmd += ev.Data["Msg"]
+          exec_app_cmd +="; sync & cd "+UI.GetExePath()+"; "+os.Args[0]
+          fmt.Println(exec_app_cmd)
+          
+          
+      }
+      
+      
 		}
 		if ev.Type == event.KEYDOWN {
       everytime_keydown = gotime.Now()

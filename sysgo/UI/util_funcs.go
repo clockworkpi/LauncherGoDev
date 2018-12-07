@@ -111,6 +111,15 @@ func MakeExecutable(path string) {
 	os.Chmod(path,mode)
 }
 
+func GetExePath() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+  return dir
+  
+}
+
 func ReplaceSuffix(orig_file_str string, new_ext string) string {
 	orig_ext := filepath.Ext(orig_file_str)
 	if orig_ext!= "" {
@@ -226,3 +235,14 @@ func  CheckBattery() int {
   return 0  
 }
 
+func System(cmd string) string {
+  ret := ""
+  out,err := exec.Command("bash","-c",cmd).Output()
+  if err != nil {
+    fmt.Println(err)
+  }else {
+    ret = string(out)
+  }
+
+  return ret
+}
