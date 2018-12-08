@@ -53,13 +53,8 @@ func (self *UpdateConfirmPage) KeyDown(ev *event.Event) {
   
   if ev.Data["Key"] == UI.CurKeys["B"] {
     if self.GIT == true {
-      cmdpath := fmt.Sprintf("feh --bg-center %s/sysgo/gameshell/wallpaper/updating.png; cd %s ;git pull; git reset --hard %s ; feh --bg-center %s/sysgo/gameshell/wallpaper/loading.png ",
-      launchergo_path,
-      launchergo_path,
-      self.Version,
-      launchergo_path )
-      
-      event.Post(UI.RUNEVT,cmdpath)
+      cmdpath := fmt.Sprintf("update.sh %s ",self.Version)
+      event.Post(UI.RUNSH,cmdpath)
       return
     }
   }

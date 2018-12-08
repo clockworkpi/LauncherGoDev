@@ -264,6 +264,7 @@ func run() int {
 	//fmt.Println(main_screen)
     
 	event.AddCustomEvent(UI.RUNEVT)
+  event.AddCustomEvent(UI.RUNSH)
   
   go FlashLed1(main_screen)
   go InspectionTeam(main_screen)
@@ -300,6 +301,25 @@ func run() int {
             fmt.Println(err)
           }
           os.Exit(0)
+        
+        case UI.RUNSH:
+          main_screen.OnExitCb()      
+          gogame.Quit()          
+          
+          fmt.Println("RUNSH")
+          exec_app_cmd := ev.Data["Msg"]
+          fmt.Println(exec_app_cmd)
+          cmd := exec.Command("/bin/sh",exec_app_cmd)
+          err := cmd.Start()
+          if err != nil {
+            fmt.Println(err)
+          }
+          err = cmd.Process.Release()
+          if err != nil {
+            fmt.Println(err)
+          }
+          os.Exit(0)          
+      
       }
       
       
