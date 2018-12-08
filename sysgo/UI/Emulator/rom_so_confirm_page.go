@@ -80,9 +80,10 @@ func (self *RomSoConfirmPage) KeyDown(ev *event.Event) {
   }
   
   if ev.Data["Key"] == UI.CurKeys["B"] {
-    if UI.CheckBattery < 5 {
+    bat := UI.CheckBattery()
+    if bat < 5 && bat >= 0 {
       self.SnapMsg("Battery must over 5%")
-    }else {
+    }else { // -1 or something else,
       if self.DownloadPage == nil {
         self.DownloadPage = UI.NewDownloadProcessPage()
         self.DownloadPage.Screen = self.Screen

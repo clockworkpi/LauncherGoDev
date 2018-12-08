@@ -215,8 +215,8 @@ func GetUid(path string) int {
 }
 
 func  CheckBattery() int {
-  if UI.FileExists(sysgo.Battery) == false {
-    return
+  if FileExists(sysgo.Battery) == false {
+    return -1
   }
   batinfos,err := ReadLines(sysgo.Battery)
   if err == nil {
