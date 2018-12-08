@@ -231,7 +231,7 @@ func (self *UpdatePage) KeyDown(ev *event.Event) {
   }
   
   if ev.Data["Key"] == UI.CurKeys["X"] {
-    if self.Screen.DBusManager.IsWifiConnectedNow() == false {
+    if self.Screen.DBusManager.IsWifiConnectedNow() == true {
       if self.CheckUpdate() == true {
         self.Screen.Draw()
         self.Screen.SwapAndShow()
