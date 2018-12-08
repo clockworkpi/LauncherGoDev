@@ -10,6 +10,7 @@ import (
   "strings"
   "runtime"
   "path/filepath"
+  "os/exec"
   
 	gotime "time"
 	"github.com/veandco/go-sdl2/sdl"
@@ -289,8 +290,16 @@ func run() int {
           exec_app_cmd += ev.Data["Msg"]
           exec_app_cmd +="; sync & cd "+UI.GetExePath()+"; "+os.Args[0]
           fmt.Println(exec_app_cmd)
-          
-          
+          cmd := exec.Command("/bin/sh","-c",exec_app_cmd)
+          err := cmd.Start()
+          if err != nil {
+            fmt.Println(err)
+          }
+          err = cmd.Process.Release()
+          if err != nil {
+            fmt.Println(err)
+          }
+          os.Exit(0)
       }
       
       

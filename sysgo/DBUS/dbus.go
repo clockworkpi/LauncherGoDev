@@ -214,9 +214,11 @@ func (self *DBus) ListenSignal() {
 var DBusHandler *DBus //global 
 
 func init() {
-  DBusHandler = NewDBus()
-  DBusHandler.Init()
+  if DBusHandler == nil {
+    DBusHandler = NewDBus()
+    DBusHandler.Init()
   
-  go DBusHandler.ListenSignal()
+    go DBusHandler.ListenSignal()
+  }
   
 }

@@ -1,6 +1,7 @@
 package main 
 
 import (
+  gotime "time"
 /*
 	"github.com/veandco/go-sdl2/ttf"
 
@@ -35,20 +36,25 @@ func (self *WifiPlugin) Init( main_screen *UI.MainScreen ) {
   self.ScanPage.Screen = main_screen
   
   self.ScanPage.Init()
- 
-  if self.ScanPage.Daemon != nil {
-    self.ScanPage.Daemon.EnableSignal("StatusChanged")
-    self.ScanPage.Daemon.EnableSignal("ConnectResultsSent")
-    self.ScanPage.Wireless.EnableSignal("SendStartScanSignal")
-    self.ScanPage.Wireless.EnableSignal("SendEndScanSignal")
+  
+  go func() {
+    gotime.Sleep(2000 * gotime.Millisecond)
     
-    self.ScanPage.Daemon.SigFuncs["StatusChanged"] = self.ScanPage.DbusDaemonStatusChangedSig
-    self.ScanPage.Daemon.SigFuncs["ConnectResultSent"] = self.ScanPage.DbusConnectResultsSent
+    if self.ScanPage.Daemon != nil {
     
-    self.ScanPage.Wireless.SigFuncs["SendStartScanSignal"] = self.ScanPage.WifiDbusScanStarted
-    self.ScanPage.Wireless.SigFuncs["SendEndScanSignal"]   = self.ScanPage.WifiDbusScanFinishedSig
+      self.ScanPage.Daemon.EnableSignal("StatusChanged")
+      self.ScanPage.Daemon.EnableSignal("ConnectResultsSent")
+      self.ScanPage.Wireless.EnableSignal("SendStartScanSignal")
+      self.ScanPage.Wireless.EnableSignal("SendEndScanSignal")
     
-  }
+      self.ScanPage.Daemon.SigFuncs["StatusChanged"] = self.ScanPage.DbusDaemonStatusChangedSig
+      self.ScanPage.Daemon.SigFuncs["ConnectResultSent"] = self.ScanPage.DbusConnectResultsSent
+    
+      self.ScanPage.Wireless.SigFuncs["SendStartScanSignal"] = self.ScanPage.WifiDbusScanStarted
+      self.ScanPage.Wireless.SigFuncs["SendEndScanSignal"]   = self.ScanPage.WifiDbusScanFinishedSig
+    }
+  }()
+  
 }
 
 func (self *WifiPlugin) Run( main_screen *UI.MainScreen ) {
