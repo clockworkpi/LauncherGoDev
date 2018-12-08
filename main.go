@@ -262,8 +262,8 @@ func run() int {
 	UI.SwapAndShow()
 	
 	//fmt.Println(main_screen)
-    
-	event.AddCustomEvent(UI.RUNEVT)
+  event.AllocEvents(3)
+  event.AddCustomEvent(UI.RUNEVT)
   event.AddCustomEvent(UI.RUNSH)
   
   go FlashLed1(main_screen)
@@ -307,9 +307,9 @@ func run() int {
           gogame.Quit()          
           
           fmt.Println("RUNSH")
-          exec_app_cmd := ev.Data["Msg"]
+          exec_app_cmd := ev.Data["Msg"]+";"
           fmt.Println(exec_app_cmd)
-          cmd := exec.Command("/bin/sh",exec_app_cmd)
+          cmd := exec.Command("/bin/sh","-c",exec_app_cmd)
           err := cmd.Start()
           if err != nil {
             fmt.Println(err)

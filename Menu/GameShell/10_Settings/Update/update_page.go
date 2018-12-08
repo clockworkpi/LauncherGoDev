@@ -52,8 +52,10 @@ func (self *UpdateConfirmPage) KeyDown(ev *event.Event) {
 	}
   
   if ev.Data["Key"] == UI.CurKeys["B"] {
+    fmt.Println("Update Confirm Page B",self.GIT)
     if self.GIT == true {
-      cmdpath := fmt.Sprintf("update.sh %s ",self.Version)
+      //go exec requires FullPath of script filename 
+      cmdpath := fmt.Sprintf("%s/update.sh %s",UI.GetExePath(),self.Version)
       event.Post(UI.RUNSH,cmdpath)
       return
     }
@@ -229,7 +231,7 @@ func (self *UpdatePage) KeyDown(ev *event.Event) {
   }
   
   if ev.Data["Key"] == UI.CurKeys["X"] {
-    if self.Screen.DBusManager.IsWifiConnectedNow() == true {
+    if self.Screen.DBusManager.IsWifiConnectedNow() == false {
       if self.CheckUpdate() == true {
         self.Screen.Draw()
         self.Screen.SwapAndShow()
