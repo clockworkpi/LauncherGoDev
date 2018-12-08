@@ -415,7 +415,7 @@ func (self *TitleBar) Draw(title string) {
 
 	if self.DBusManager.IsWifiConnectedNow() == true {
 		ge := self.GetWifiStrength( self.DBusManager.WifiStrength() )
-		fmt.Println("wifi ge: ",ge)
+		//fmt.Println("wifi ge: ",ge)
 		if ge > 0 {
 			self.Icons["wifistatus"].SetIconIndex(ge)
 			self.Icons["wifistatus"].NewCoord(start_x+self.IconWidth+5, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2 )

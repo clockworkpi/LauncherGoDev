@@ -1,4 +1,4 @@
-package main
+package Wifi
 //wifi_list.py
 
 import (

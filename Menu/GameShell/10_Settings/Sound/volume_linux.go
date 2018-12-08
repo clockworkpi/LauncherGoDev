@@ -2,7 +2,7 @@
 /*
  * Copied from https://github.com/itchyny/volume-go,  MIT License
  */
-package main
+package Sound
 
 import (
 	"errors"

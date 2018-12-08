@@ -1,4 +1,4 @@
-package main
+package Update
 import (
   "github.com/cuu/LauncherGoDev/sysgo/UI"
 )

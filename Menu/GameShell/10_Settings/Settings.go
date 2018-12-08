@@ -12,8 +12,13 @@ import (
 	
 	"github.com/cuu/LauncherGoDev/sysgo/UI"
   
+  //child packages
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/About"
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Sound"
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Brightness"
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Wifi"
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/LauncherPy"
-  
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Update"
 	
 )
 
@@ -91,14 +96,14 @@ func NewSettingsPage() *SettingsPage {
 func (self *SettingsPage) GenList() []*SettingPlugin {
   alist := []*SettingPlugin{
     
-    &SettingPlugin{0,"wifi.so",  "Wifi",      "Wi-Fi",nil},
+    &SettingPlugin{0,"",  "Wifi",      "Wi-Fi",&Wifi.APIOBJ},
     
-    &SettingPlugin{0,"sound.so",      "Sound",      "Sound Volume" ,         nil},
-    &SettingPlugin{0,"brightness.so", "Brightness", "BackLight Brightness", nil},
-    &SettingPlugin{0,"update.so",     "Update",     "Update",               nil},
-    &SettingPlugin{0,"about.so",      "About",      "About",                nil},
+    &SettingPlugin{0,"",      "Sound",     "Sound Volume" ,          &Sound.APIOBJ},
+    &SettingPlugin{0,"", "Brightness",     "BackLight Brightness",   &Brightness.APIOBJ},
+    &SettingPlugin{0,"",     "Update",     "Update",                 &Update.APIOBJ},
+    &SettingPlugin{0,"",      "About",     "About",                  &About.APIOBJ},
     
-    &SettingPlugin{1,"",         "LauncherPy","Switch to Launcher",&LauncherPy.APIOBJ},
+    &SettingPlugin{1,"", "LauncherPy",     "Switch to Launcher",     &LauncherPy.APIOBJ},
     
   }
   
