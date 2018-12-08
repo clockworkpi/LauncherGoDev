@@ -1,5 +1,9 @@
 package main
-
+/*
+ * Creating functionality in this way is not recommended
+ * cause every .so file is about the size of an executable file(like main)
+ * Referring to the Settings code, write all the functions directly into main
+ */
 import (
 	"github.com/veandco/go-sdl2/ttf"
 

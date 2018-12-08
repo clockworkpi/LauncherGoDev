@@ -14,3 +14,8 @@ var (
 	DT   = 50
 	
 )
+
+var (
+	Emulator_flag = "action.json"
+	Plugin_flag   = "plugin.json"
+)

@@ -11,7 +11,7 @@ import (
   "runtime"
   "path/filepath"
   "os/exec"
-  
+  //"encoding/json"
 	gotime "time"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/cuu/gogame"
@@ -24,6 +24,8 @@ import (
   "github.com/cuu/LauncherGoDev/sysgo"
   
 	"github.com/cuu/LauncherGoDev/sysgo/UI"
+
+  
 )
 
 var (
@@ -35,6 +37,7 @@ var (
   everytime_keydown = gotime.Now()
   
 )
+
 // flash the Led1 on the GS back
 func FlashLed1(main_screen *UI.MainScreen) {
   
@@ -253,7 +256,8 @@ func run() int {
 	main_screen.TitleBar = title_bar
 	main_screen.FootBar  = foot_bar
 
-	main_screen.ReadTheDirIntoPages("Menu",0,nil)
+	ReadTheDirIntoPages(main_screen,"Menu",0,nil)
+  
 	main_screen.FartherPages()
 
 	main_screen.Draw()

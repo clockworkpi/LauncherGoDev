@@ -4,6 +4,7 @@ import (
 	"log"
 	goplugin "plugin"
 )
+
 var PluginPool = NewPluginPool()
 
 type PluginInterface interface {
@@ -90,3 +91,10 @@ func RunPlugin(p *goplugin.Plugin, main_screen *MainScreen) {
 	pi.Run(main_screen)
 }
 
+type UIPlugin struct{ //Loadable and injectable
+  Type int
+  SoFile string
+  FolderName string
+  LabelText  string
+  EmbInterface  PluginInterface
+}

@@ -1,4 +1,4 @@
-package main
+package Settings
 
 import (
 	"github.com/veandco/go-sdl2/ttf"
@@ -58,14 +58,6 @@ func (self *SettingsPageSelector) Draw() {
 	}
 }
 
-
-type SettingPlugin struct{
-  Type int
-  SoFile string
-  FolderName string
-  LabelText  string
-  EmbInterface  UI.PluginInterface
-}
 //##############################################//
 
 type SettingsPage struct {
@@ -93,17 +85,17 @@ func NewSettingsPage() *SettingsPage {
 	return p
 }
 
-func (self *SettingsPage) GenList() []*SettingPlugin {
-  alist := []*SettingPlugin{
+func (self *SettingsPage) GenList() []*UI.UIPlugin {
+  alist := []*UI.UIPlugin{
     
-    &SettingPlugin{0,"",  "Wifi",      "Wi-Fi",&Wifi.APIOBJ},
+    &UI.UIPlugin{0,"",  "Wifi",      "Wi-Fi",&Wifi.APIOBJ},
     
-    &SettingPlugin{0,"",      "Sound",     "Sound Volume" ,          &Sound.APIOBJ},
-    &SettingPlugin{0,"", "Brightness",     "BackLight Brightness",   &Brightness.APIOBJ},
-    &SettingPlugin{0,"",     "Update",     "Update",                 &Update.APIOBJ},
-    &SettingPlugin{0,"",      "About",     "About",                  &About.APIOBJ},
+    &UI.UIPlugin{0,"",      "Sound",     "Sound Volume" ,          &Sound.APIOBJ},
+    &UI.UIPlugin{0,"", "Brightness",     "BackLight Brightness",   &Brightness.APIOBJ},
+    &UI.UIPlugin{0,"",     "Update",     "Update",                 &Update.APIOBJ},
+    &UI.UIPlugin{0,"",      "About",     "About",                  &About.APIOBJ},
     
-    &SettingPlugin{1,"", "LauncherPy",     "Switch to Launcher",     &LauncherPy.APIOBJ},
+    &UI.UIPlugin{1,"", "LauncherPy",     "Switch to Launcher",     &LauncherPy.APIOBJ},
     
   }
   
