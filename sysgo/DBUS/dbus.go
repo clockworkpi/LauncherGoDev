@@ -202,8 +202,8 @@ func (self *DBus) ListenSignal() {
 	self.Conn.Signal(c)
   
   for v := range c {
-    fmt.Printf("%+v %#v\n",v,v)
-    fmt.Printf("body len:%d \n\n",len(v.Body)) 
+    //fmt.Printf("%+v %#v\n",v,v)
+    //fmt.Printf("body len:%d \n\n",len(v.Body)) 
     
     self.Wifi.HandleSignal(v)
     self.Daemon.HandleSignal(v)
