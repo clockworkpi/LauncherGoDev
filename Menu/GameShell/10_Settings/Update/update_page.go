@@ -202,6 +202,7 @@ func (self *UpdatePage) CheckUpdate() bool {
   
   if git_revision_short_hash != ret.GitVersion {
     self.ConfirmPage.Version = ret.GitVersion
+    self.ConfirmPage.GIT = true
     self.Screen.PushCurPage()
     self.Screen.SetCurPage(self.ConfirmPage)
     

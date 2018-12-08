@@ -84,7 +84,7 @@ func (self *ConfirmPage) Reset() {
   x,y := self.MyList[0].Coord()
   w,h := self.MyList[0].Size()
   
-  self.MyList[0].NewCoord( (self.Width - w)/2, (self.Width - h)/2) 
+  self.MyList[0].NewCoord( (self.Width - w)/2, (self.Height - h)/2) 
   
   x,y = self.MyList[0].Coord()
   
