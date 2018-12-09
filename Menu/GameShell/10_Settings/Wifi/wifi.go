@@ -55,7 +55,8 @@ func (self *WifiDisconnectConfirmPage) KeyDown(ev *event.Event ) {
     self.Screen.Draw()
     self.Screen.SwapAndShow()
     
-    DBUS.DBusHandler.Daemon.Method("Disconnect")
+    //DBUS.DBusHandler.Daemon.Method("Disconnect")
+    self.Parent.Daemon.Method("Disconnect")
     
     time.BlockDelay(400)
     
@@ -609,7 +610,7 @@ func (self *WifiList) UpdateNetList(state int,info []string ,force_check bool,fi
       _id,_ := strconv.Atoi(info[3])
       if _id < len(self.MyList) {
         var strength_str string 
-        strength,err  := strconv.Atoi(info[2])
+        strength,err  := strconv.Atoi(strings.Replace(info[2],"\"","",-1))
         if err == nil {
           self.Daemon.Get(self.Daemon.Method("FormatSignalForPrinting",strength),&strength_str)
           self.MyList[_id].UpdateStrenLabel(strength_str)
@@ -801,9 +802,9 @@ func (self *WifiList) GetWirelessEncrypt(network_id int) []map[string]string {
   
   activeID := -1
   var enc_type string 
-  
   for i,v := range self.EncMethods {
     enc_type = ""
+    fmt.Println(i,v)
     self.Wireless.Get(self.Wireless.Method("GetWirelessProperty",network_id,"enctype"),&enc_type)
     enc_type = strings.ToLower(enc_type)
     if enc_type != "" && v.Type == enc_type {
@@ -813,6 +814,7 @@ func (self *WifiList) GetWirelessEncrypt(network_id int) []map[string]string {
   }
   
   if activeID == -1 {
+    fmt.Println("GetWirelessEncrypt activeID == -1")
     return results
   }
   

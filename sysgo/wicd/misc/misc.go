@@ -125,7 +125,7 @@ func LoadEncryptionMethods(wired bool) []*CurType {
 	for _, v := range enctypes {
 
 		c := parse_enc_templat(v)
-
+    c.Type = v
 		encryptionTypes = append(encryptionTypes, c)
 	}
 
