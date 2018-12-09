@@ -89,7 +89,7 @@ type Keyboard struct {
 	Textarea *Textarea
 	Selector *KeyboardSelector
 
-	
+	Caller PageInterface
 }
 
 func NewKeyboard() *Keyboard {
@@ -466,6 +466,9 @@ func (self *Keyboard) KeyDown( ev *event.Event) {
 		fmt.Println(strings.Join(self.Textarea.MyWords,""))
 		self.ReturnToUpLevelPage()
 		self.Screen.SwapAndShow()
+    if self.Caller != nil {
+      self.Caller.OnKbdReturnBackCb()
+    }
 		//Uplevel/Parent page invoke OnReturnBackCb,eg: ConfigWireless
 		
 	}

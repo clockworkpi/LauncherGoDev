@@ -42,13 +42,15 @@ func NewWifiDisconnectConfirmPage() *WifiDisconnectConfirmPage {
 
 func (self *WifiDisconnectConfirmPage) KeyDown(ev *event.Event ) {
 
+  
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
 	}
   
-  if ev.Data["key"] == UI.CurKeys["B"] {
+  if ev.Data["Key"] == UI.CurKeys["B"] {
+    fmt.Println("Disconnecting..")
     self.SnapMsg("Disconnecting...")
     self.Screen.Draw()
     self.Screen.SwapAndShow()
@@ -248,6 +250,7 @@ func (self *WifiInfoPage) TryDisconnect() {
     self.Screen.Draw()
     self.Screen.SwapAndShow()
   }else {
+    fmt.Println("WifiInfoPage TryDisconnect cur_network_id != self.NetworkId ")
     return
   }
 }
@@ -605,7 +608,14 @@ func (self *WifiList) UpdateNetList(state int,info []string ,force_check bool,fi
     if len(info) > 3 {
       _id,_ := strconv.Atoi(info[3])
       if _id < len(self.MyList) {
-        self.MyList[_id].UpdateStrenLabel(info[2])
+        var strength_str string 
+        strength,err  := strconv.Atoi(info[2])
+        if err == nil {
+          self.Daemon.Get(self.Daemon.Method("FormatSignalForPrinting",strength),&strength_str)
+          self.MyList[_id].UpdateStrenLabel(strength_str)
+        }else {
+          fmt.Println(err)
+        }
       }
     }
   }
@@ -900,11 +910,15 @@ func (self *WifiList) AbortedAndReturnToUpLevel() {
   self.Screen.SwapAndShow()
 }
 
-func (self *WifiList) OnReturnBackCb() {
+func (self *WifiList) OnKbdReturnBackCb() {
   password_inputed := strings.Join(APIOBJ.PasswordPage.Textarea.MyWords,"")
   if self.Screen.DBusManager.IsWifiConnectedNow() == false {
     self.ConfigWireless(password_inputed)
   }
+}
+
+func (self *WifiList) OnReturnBackCb() {
+  
 }
 
 func (self *WifiList) KeyDown( ev *event.Event  ) {

@@ -23,6 +23,7 @@ type WifiPlugin struct {
 
 
 func (self *WifiPlugin) Init( main_screen *UI.MainScreen ) {
+
   self.PasswordPage = UI.NewKeyboard()
   self.PasswordPage.Name = "Enter wifi password"
   self.PasswordPage.Screen= main_screen
@@ -34,6 +35,8 @@ func (self *WifiPlugin) Init( main_screen *UI.MainScreen ) {
   self.ScanPage.Daemon   = main_screen.DBusManager.Daemon
   
   self.ScanPage.Screen = main_screen
+  
+  self.PasswordPage.Caller = self.ScanPage
   
   self.ScanPage.Init()
   

@@ -207,6 +207,7 @@ type PageInterface interface {
 	
 	OnLoadCb()
 	OnReturnBackCb()
+  OnKbdReturnBackCb()
 	OnExitCb()
 
 //	IconClick()
@@ -918,6 +919,10 @@ func (self *Page) KeyDown( ev *event.Event) {
 
 
 func (self *Page) OnLoadCb() {
+	
+}
+
+func (self *Page) OnKbdReturnBackCb() {
 	
 }
 

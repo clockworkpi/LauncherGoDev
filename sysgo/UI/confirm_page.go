@@ -1,7 +1,7 @@
 package UI
 
 import (
-	
+	//"fmt"
 	"github.com/veandco/go-sdl2/ttf"
 	
 //	"github.com/cuu/gogame/surface"
@@ -144,7 +144,7 @@ func (self *ConfirmPage) Init() {
 
 
 func (self *ConfirmPage) KeyDown( ev *event.Event ) {
-
+ 
 	if ev.Data["Key"] == CurKeys["A"] || ev.Data["Key"] == CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
 		self.Screen.Draw()
