@@ -804,7 +804,7 @@ func (self *WifiList) GetWirelessEncrypt(network_id int) []map[string]string {
   
   for i,v := range self.EncMethods {
     enc_type = ""
-    self.Wireless.Get(self.Wireless.Method("GetWirelessProperty",network_id,"encryption_method"),&enc_type)
+    self.Wireless.Get(self.Wireless.Method("GetWirelessProperty",network_id,"enctype"),&enc_type)
     enc_type = strings.ToLower(enc_type)
     if enc_type != "" && v.Type == enc_type {
       activeID = i
