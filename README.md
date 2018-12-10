@@ -16,7 +16,7 @@ sudo adduser cpi cpifav
 # Directory structure
 ```
 /home/cpi/
-├── LauncherGoDev <- Here we are
+├── launchergo <- Here we are
 ├── apps
 │   ├── emulators
 │   └── Menu
@@ -37,6 +37,12 @@ mkdir -p /home/cpi/music
 ```
 go get -u -v github.com/cuu/LauncherGoDev
 ```
+
+## Relevant opensource packages 
+* https://github.com/godbus/dbus
+* https://github.com/veandco/go-sdl2
+* https://github.com/itchyny/volume-go
+* https://github.com/go-ini/ini
 
 # Create “.mpd_cpi.conf” config
 
