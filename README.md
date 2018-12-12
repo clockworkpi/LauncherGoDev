@@ -43,6 +43,7 @@ go get -u -v github.com/cuu/LauncherGoDev
 * https://github.com/veandco/go-sdl2
 * https://github.com/itchyny/volume-go
 * https://github.com/go-ini/ini
+* github.com/cavaliercoder/grab
 
 # Create “.mpd_cpi.conf” config
 

@@ -12,6 +12,7 @@ import (
   
   "github.com/cuu/grab"
   "github.com/cuu/gogame/color"
+  "github.com/cuu/gogame/event"
   "github.com/cuu/gogame/draw"
 
 )
@@ -112,7 +113,7 @@ func (self *DownloadProcessPage) UpdateProcessInterval() {
     return
   }
   
-  
+Loop:  
   for {
 		select {
 		case <-self.TheTicker.C:
@@ -120,21 +121,36 @@ func (self *DownloadProcessPage) UpdateProcessInterval() {
 				self.resp.BytesComplete(),
 				self.resp.Size,
 				100*self.resp.Progress())
-    self.Value = int(100*self.resp.Progress())
+    self.Value = int(100.0*self.resp.Progress())
+    total := float64(self.resp.Size)/1000.0/1000.0
+    downloaded := float64(self.resp.BytesComplete())/1000.0/1000.0
+    
+    lb_str := fmt.Sprintf("%.2f/%.2fMb",downloaded,total)
+    self.SizeLabel.SetText(lb_str)
+    
+    self.FileNameLabel.SetText(filepath.Base(self.resp.Filename))
+    
+    
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
     
 		case <-self.resp.Done:
 			// download is complete
       fmt.Println("download is complete ",self.Value)
       self.Value = 0 
       self.TheTicker.Stop()
-      goto OUT
-			break
+      
+			break Loop
 		}
   }
-  OUT:
+  
 	if err := self.resp.Err(); err != nil {
     self.DownloadErr()
 		fmt.Fprintf(os.Stderr, "Download failed: %v\n", err)
+    
+    cmd := exec.Command("rm","-rf",self.resp.Filename)
+    cmd.Dir= self.DST_DIR
+    cmd.Run()
 	}
 
   fmt.Printf("Download saved to %s/%v \n",self.DST_DIR, self.resp.Filename)
@@ -212,6 +228,31 @@ func (self *DownloadProcessPage) StartDownload(_url,dst_dir string) {
   
 }
 
+func (self *DownloadProcessPage) StopDownload() {
+  
+  if self.TheTicker != nil {
+    self.TheTicker.Stop()
+    
+  }
+
+  if self.resp != nil {
+    self.resp.Cancel()
+  }
+  
+  
+}
+func (self *DownloadProcessPage) KeyDown( ev *event.Event) {
+
+ 	if ev.Data["Key"] == CurKeys["A"] || ev.Data["Key"] == CurKeys["Menu"] {
+    
+    self.StopDownload()
+    
+		self.ReturnToUpLevelPage()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}  
+
+}
 
 func (self *DownloadProcessPage) Draw() {
 
@@ -224,7 +265,7 @@ func (self *DownloadProcessPage) Draw() {
     
   }
   
-  self.Icons["bg"].NewCoord(self.Width/2,self.Height/2)
+  self.Icons["bg"].NewCoord(self.Width/2,self.Height/2-20)
   self.Icons["bg"].Draw()
   
   percent := self.Value
