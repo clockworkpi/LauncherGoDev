@@ -1,12 +1,13 @@
 package Emulator
 
 import (
-  "strconv"
+  "fmt"
+  //"strconv"
   "strings"
   
   "path/filepath"
   
-	"github.com/cuu/gogame/surface"
+	"github.com/cuu/gogame/event"
   "github.com/cuu/LauncherGoDev/sysgo"
   "github.com/cuu/LauncherGoDev/sysgo/UI"
 
@@ -14,7 +15,7 @@ import (
 
 type RomSoConfirmPage struct {
   UI.ConfirmPage
-  
+  Parent EmulatorPageInterface
   DownloadPage *UI.DownloadProcessPage
   
 }
@@ -24,7 +25,7 @@ func NewRomSoConfirmPage() *RomSoConfirmPage {
   p.PageIconMargin = 20
 	p.SelectedIconTopOffset = 20
 	p.EasingDur = 10
-	p.Align = ALIGN["SLeft"]
+	p.Align = UI.ALIGN["SLeft"]
   
   p.ListFont = UI.Fonts["veramono18"]
   p.FootMsg = [5]string{"Nav","","","Cancel","Yes"}
@@ -44,7 +45,7 @@ func (self *RomSoConfirmPage) Init() {
   li := UI.NewMultiLabel()
   li.SetCanvasHWND(self.CanvasHWND)
   li.Width = 160
-  li.Init(self.ConfirmText,self.ListFont)
+  li.Init(self.ConfirmText,self.ListFont,nil)
   
   li.PosX = (self.Width - li.Width)/2
   li.PosY = (self.Height - li.Height)/2
@@ -94,16 +95,17 @@ func (self *RomSoConfirmPage) KeyDown(ev *event.Event) {
       self.Screen.PushPage(self.DownloadPage)
       self.Screen.Draw()
       self.Screen.SwapAndShow()
-      
+      ec := self.Parent.GetEmulatorConfig()
       if sysgo.CurKeySet == "PC" {
-        so_url := self.Parent.EmulatorConfig.SO_URL
+        
+        so_url := ec.SO_URL
         so_url = strings.Replace(so_url,"armhf","x86_64",-1)
         fmt.Println(so_url)
-        self.DownloadPage.StartDownload(so_url,filepath.Dir(self.Parent.EmulatorConfig.ROM_SO))
+        self.DownloadPage.StartDownload(so_url,filepath.Dir(ec.ROM_SO))
         
       }else{
-        so_url := self.Parent.EmulatorConfig.SO_URL
-        self.DownloadPage.StartDownload(so_url,filepath.Dir(self.Parent.EmulatorConfig.ROM_SO))
+        so_url := ec.SO_URL
+        self.DownloadPage.StartDownload(so_url,filepath.Dir(ec.ROM_SO))
       }
     }
   }

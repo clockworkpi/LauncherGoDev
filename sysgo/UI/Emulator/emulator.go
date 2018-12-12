@@ -29,6 +29,8 @@ type MyEmulator struct { // as leader of RomListPage and FavListPage, it's a Plu
   Name string
   RomPage *RomListPage
   FavPage *FavListPage
+  DeleteConfirmPage *UI.DeleteConfirmPage
+  EmulatorConfig *ActionConfig
 }
 
 func NewMyEmulator() *MyEmulator{
@@ -42,11 +44,36 @@ func (self *MyEmulator) GetName() string {
 }
 
 func (self *MyEmulator) Init(main_screen  *UI.MainScreen) {
+  self.DeleteConfirmPage = UI.NewDeleteConfirmPage()
+  self.DeleteConfirmPage.Screen = main_screen
+  self.DeleteConfirmPage.Name  = "Delete Confirm"
+  self.DeleteConfirmPage.Init()
+
+  self.RomPage = NewRomListPage()
+  self.RomPage.Screen = main_screen
+  self.RomPage.Name  = self.EmulatorConfig.TITLE
+  self.RomPage.EmulatorConfig = self.EmulatorConfig
+  self.RomPage.Leader = self
+  self.RomPage.Init()
+  
+  self.FavPage = NewFavListPage()
+  self.FavPage.Screen = main_screen
+  self.FavPage.Name = "FavouriteGames"
+  self.FavPage.EmulatorConfig = self.EmulatorConfig
+  self.FavPage.Leader = self
+  self.FavPage.Init()
+  
+  
   
 }
 
-func (self *MyEmulator) API(main_screen *UI.MainScreen) {
-  
+func (self *MyEmulator) Run(main_screen *UI.MainScreen) {
+	if main_screen != nil {
+    main_screen.PushCurPage()
+    main_screen.SetCurPage(self.RomPage)
+		main_screen.Draw()
+		main_screen.SwapAndShow()
+	}
 }
 
 

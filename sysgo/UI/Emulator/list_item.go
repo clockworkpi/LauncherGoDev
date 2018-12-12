@@ -1,21 +1,32 @@
 package Emulator
 
 import (
+  "fmt"
+  "strings"
+  "io/ioutil"
   "path/filepath"
+  "github.com/veandco/go-sdl2/ttf"
   
+  //"github.com/veandco/go-sdl2/sdl"
 	"github.com/cuu/gogame/surface"
+  "github.com/cuu/gogame/rect"
+ 	"github.com/cuu/gogame/color"
+
+	"github.com/cuu/gogame/draw"
   "github.com/cuu/LauncherGoDev/sysgo/UI"
 
 )
 
-type EmulatorPageInterface {
+type EmulatorPageInterface interface {  
   UI.PageInterface
-  GetIcons() map[string]UI.IconItemInterface
+  GetMapIcons() map[string]UI.IconItemInterface
+  GetEmulatorConfig() *ActionConfig
 }
 
 
 type ListItemIcon struct {
   UI.IconItem
+  
 
 }
 
@@ -36,7 +47,7 @@ func (self *ListItemIcon) Draw() {
   
   rect_ := rect.Rect(self.PosX,self.PosY+(h-self.Height)/2,self.Width,self.Height)
   
-  surface.Blit(self.CanvasHWND, self.ImgSurf,&rect_,nil)
+  surface.Blit(self.Parent.GetCanvasHWND(), self.ImgSurf,&rect_,nil)
 }
 
 /// [..] [.] 
@@ -52,8 +63,8 @@ var HierListItemDefaultHeight = 32
 
 func NewHierListItem() *HierListItem {
   p := &HierListItem{}
-  p.Labels = make(map[string]LabelInterface)
-	p.Icons  = make( map[string]IconItemInterface)
+  p.Labels = make(map[string]UI.LabelInterface)
+	p.Icons  = make( map[string]UI.IconItemInterface)
 	p.Fonts  = make(map[string]*ttf.Font)
   
   p.MyType = UI.ICON_TYPES["EXE"]
@@ -107,9 +118,9 @@ func (self *HierListItem) Init(text string) {
   }
   
   if self.IsDir() == true {
-    l.Init(label_text, self.Fonts["normal"])
+    l.Init(label_text, self.Fonts["normal"],nil)
   }else {
-    l.Init(label_text,self.Fonts["normal"])
+    l.Init(label_text,self.Fonts["normal"],nil)
   }
   
   self.Labels["Text"] = l
@@ -161,8 +172,8 @@ type EmulatorListItem struct {
 
 func NewEmulatorListItem() *EmulatorListItem {
   p := &EmulatorListItem{}
-  p.Labels = make(map[string]LabelInterface)
-	p.Icons  = make( map[string]IconItemInterface)
+  p.Labels = make(map[string]UI.LabelInterface)
+	p.Icons  = make( map[string]UI.IconItemInterface)
 	p.Fonts  = make(map[string]*ttf.Font)
   
   p.MyType = UI.ICON_TYPES["EXE"]
@@ -187,17 +198,17 @@ func (self *EmulatorListItem) Draw() {
   
   self.Labels["Text"].Draw()
   
-  parent_icons := self.Parent.GetIcons()
-  w,h := parent_cons["sys"].Size()
+  parent_icons := self.Parent.GetMapIcons()
+  _,h = parent_icons["sys"].Size()
   
   if self.IsDir() == true && self.Path != "[..]" {
-    parent_icons["sys"].IconIndex = 0
+    parent_icons["sys"].SetIconIndex (0)
     parent_icons["sys"].NewCoord(self.PosX+12,self.PosY+(self.Height-h)/2+h/2)
     parent_icons["sys"].Draw()
   }
   
   if self.IsFile() == true {
-    parent_icons["sys"].IconIndex = 1
+    parent_icons["sys"].SetIconIndex(1)
     parent_icons["sys"].NewCoord(self.PosX+12,self.PosY+(self.Height-h)/2+h/2)
     parent_icons["sys"].Draw()
   }

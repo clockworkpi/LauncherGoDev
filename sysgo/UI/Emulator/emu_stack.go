@@ -2,7 +2,7 @@ package Emulator
 
 import (
   "sync"
-  "github.com/cuu/LauncherGoDev/sysgo/UI"
+  //"github.com/cuu/LauncherGoDev/sysgo/UI"
 
 )
 

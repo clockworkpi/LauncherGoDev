@@ -13,6 +13,7 @@ import (
   "encoding/json"
 
   "github.com/cuu/LauncherGoDev/sysgo/UI"
+  "github.com/cuu/LauncherGoDev/sysgo/UI/Emulator"
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings"
 )
 
@@ -101,7 +102,33 @@ func ReadTheDirIntoPages(self *UI.MainScreen, _dir string, pglevel int, cur_page
             }
           }
 					//Init it 
-				}else {
+				}else if self.IsEmulatorPackage(_dir+"/"+f.Name()) {
+          a_c := Emulator.ActionConfig{}
+          dat, err := ioutil.ReadFile(_dir+"/"+f.Name()+"/" +UI.Emulator_flag)
+					UI.ShowErr(err)
+
+					err = json.Unmarshal(dat, &a_c)
+					if err == nil {          
+            if UI.FileExists(filepath.Join(_dir,f.Name(),"retroarch-local.cfg")) {
+              a_c.RETRO_CONFIG = UI.CmdClean( filepath.Join(_dir,f.Name(),"retroarch-local.cfg") )
+              fmt.Println("a local retroarch cfg: ",a_c.RETRO_CONFIG)
+            }
+            
+            em := Emulator.NewMyEmulator()
+            em.EmulatorConfig = &a_c
+            em.Init(self)
+            
+            iconitem.CmdInvoke = em
+            if iconitem.CmdInvoke != nil {
+              iconitem.MyType = UI.ICON_TYPES["Emulator"]
+              iconitem.CmdPath = f.Name()
+              cur_page.AppendIcon(iconitem)
+            }
+          }else {
+            fmt.Println("ReadTheDirIntoPages EmulatorConfig ",err)
+          }
+        
+        }else {
 					iconitem.MyType = UI.ICON_TYPES["DIR"]
 					linkpage := UI.NewPage()
 					linkpage.Name = i2					

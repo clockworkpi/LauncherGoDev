@@ -807,7 +807,7 @@ func (self *Page) IconClick() {
 		return
 	}
 
-	if cur_icon.GetMyType() == ICON_TYPES["FUNC"] {
+	if cur_icon.GetMyType() == ICON_TYPES["FUNC"]  || cur_icon.GetMyType() == ICON_TYPES["Emulator"] {
 		invoker := cur_icon.GetCmdInvoke()
 		if invoker != nil {
 			invoker.Run(self.Screen)

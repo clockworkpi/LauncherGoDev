@@ -1,11 +1,18 @@
 package Emulator
 
 import (
+  "fmt"
+  "os"
+  "strings"
+  "regexp"
   "path/filepath"
+  "os/exec"
+  "errors"
   
-  
+  "github.com/veandco/go-sdl2/ttf"
+  "github.com/cuu/gogame/time"
   "github.com/cuu/gogame/color"
-	"github.com/cuu/gogame/surface"
+	"github.com/cuu/gogame/event"
   "github.com/cuu/LauncherGoDev/sysgo/UI"
 
 )
@@ -21,7 +28,9 @@ type RomListPage struct {
   
   MyList []*EmulatorListItem
   BGwidth int
-  BGheight 70
+  BGheight int //70
+  Scroller *UI.ListScroller
+  Scrolled int 
   
   Leader *MyEmulator
   
@@ -33,7 +42,7 @@ func NewRomListPage() *RomListPage {
 	p.SelectedIconTopOffset = 20
 	p.EasingDur = 10
 
-	p.Align = ALIGN["SLeft"]
+	p.Align = UI.ALIGN["SLeft"]
 	
 	p.FootMsg = [5]string{ "Nav","Scan","Del","AddFav","Run" }
   
@@ -48,10 +57,18 @@ func NewRomListPage() *RomListPage {
   return p
 }
 
+func (self *RomListPage) GetMapIcons() map[string]UI.IconItemInterface {
+  return self.Icons
+}
 
-func (self *RomListPage) GeneratePathList(path string) []map[string]string {
+func (self *RomListPage) GetEmulatorConfig() *ActionConfig {
+  return self.EmulatorConfig
+}
+
+
+func (self *RomListPage) GeneratePathList(path string) ([]map[string]string,error) {
   if UI.IsDirectory(path) == false {
-    return nil
+    return nil,errors.New("Path is not a folder")
   }
   dirmap := make(map[string]string)
   var ret []map[string]string
@@ -59,10 +76,10 @@ func (self *RomListPage) GeneratePathList(path string) []map[string]string {
   file_paths,err := filepath.Glob(path+"/*")//sorted
   if err != nil {
     fmt.Println(err)
-    return false
+    return ret,err
   }
   
-  for i,v := range file_paths {
+  for _,v := range file_paths {
     if UI.IsDirectory(v) && self.EmulatorConfig.FILETYPE == "dir" { // like DOSBOX
       gameshell_bat := self.EmulatorConfig.EXT[0]
       if UI.GetGid(v) == FavGID { // skip fav roms
@@ -75,7 +92,7 @@ func (self *RomListPage) GeneratePathList(path string) []map[string]string {
       }
     }
     
-    if UI.IsFile(v) && self.EmulatorConfig.FILETYPE == "file" {
+    if UI.IsAFile(v) && self.EmulatorConfig.FILETYPE == "file" {
       if UI.GetGid(v) == FavGID {
         continue
       }
@@ -109,16 +126,16 @@ func (self *RomListPage) GeneratePathList(path string) []map[string]string {
     }
   }
   
-  return ret
+  return ret,nil
   
 }
 
 func (self *RomListPage) SyncList( path string ) {
   
-  alist := self.GeneratePathList(path) 
+  alist,err := self.GeneratePathList(path) 
 
-  if alist == nil {
-    fmt.Println("listfiles return false")
+  if err != nil {
+    fmt.Println(err)
     return
   }
   
@@ -151,7 +168,7 @@ func (self *RomListPage) SyncList( path string ) {
     li.Fonts["normal"] = self.ListFont
     li.MyType = UI.ICON_TYPES["FILE"]
     
-    init_val = "NoName"
+    init_val := "NoName"
     
     if val, ok := v["directory"]; ok {
       li.MyType = UI.ICON_TYPES["DIR"]
@@ -177,7 +194,7 @@ func (self *RomListPage) Init() {
   self.Width = self.Screen.Width
   self.Height = self.Screen.Height
   
-  sefl.CanvasHWND = self.Screen.CanvasHWND
+  self.CanvasHWND = self.Screen.CanvasHWND
   
   ps := UI.NewInfoPageSelector()
   ps.Width  = UI.Width - 12
@@ -215,16 +232,16 @@ func (self *RomListPage) Init() {
   bgpng.MyType = UI.ICON_TYPES["STAT"]
   bgpng.Parent = self
   bgpng.AddLabel("Please upload data over Wi-Fi",UI.Fonts["varela22"])
-  bgpng.SetLableColor(&color.Color{204,204,204,255}  )
+  bgpng.SetLabelColor(&color.Color{204,204,204,255}  )
   bgpng.Adjust(0,0,self.BGwidth,self.BGheight,0)
 
   self.Icons["bg"] = bgpng
   
-  self._Scroller = UI.NewListScroller()
-  self._Scroller.Parent = self
-  self._Scroller.PosX = self.Width - 10
-  self._Scroller.PosY = 2
-  self._Scroller.Init()
+  self.Scroller = UI.NewListScroller()
+  self.Scroller.Parent = self
+  self.Scroller.PosX = self.Width - 10
+  self.Scroller.PosY = 2
+  self.Scroller.Init()
   
   rom_so_confirm_page := NewRomSoConfirmPage()
   rom_so_confirm_page.Screen = self.Screen
@@ -294,7 +311,7 @@ func (self *RomListPage) SyncScroll() {
           self.MyList[i].PosY += self.Scrolled*self.MyList[i].Height
         }
       }
-    } if self.Scrolled < 0 {
+    }else if self.Scrolled < 0 {
       if cur_li.PosY + cur_li.Height > self.Height{
         for i,_ := range self.MyList{
           self.MyList[i].PosY += self.Scrolled*self.MyList[i].Height
@@ -307,7 +324,6 @@ func (self *RomListPage) SyncScroll() {
 
 
 func (self *RomListPage) Click() {
-
   if len(self.MyList) == 0 {
     return
   }
@@ -321,7 +337,7 @@ func (self *RomListPage) Click() {
   cur_li := self.MyList[self.PsIndex]
   
   if cur_li.MyType == UI.ICON_TYPES["DIR"] {
-    if cur_li.Path = "[..]"{
+    if cur_li.Path == "[..]"{
       self.MyStack.Pop()
       self.SyncList(self.MyStack.Last())
       self.PsIndex = 0
@@ -354,7 +370,7 @@ func (self *RomListPage) Click() {
     
     custom_config := ""
     
-    if self.EmulatorConfig.RETRO_CONFIG != "" && len(self.EmulatorConfig.RETRO_CONFIG) 5 {
+    if self.EmulatorConfig.RETRO_CONFIG != "" && len(self.EmulatorConfig.RETRO_CONFIG) > 5 {
       custom_config = " -c " + self.EmulatorConfig.RETRO_CONFIG
     }
     
@@ -363,11 +379,11 @@ func (self *RomListPage) Click() {
     cmdpath := strings.Join( partsofpath," ")
     
     if self.EmulatorConfig.ROM_SO =="" { //empty means No needs for rom so 
-      event.POST(UI.RUNEVT,cmdpath)
+      event.Post(UI.RUNEVT,cmdpath)
     }else{
       
       if UI.FileExists(self.EmulatorConfig.ROM_SO) == true {
-        event.POST(UI.RUNEVT,cmdpath)
+        event.Post(UI.RUNEVT,cmdpath)
       } else {
         self.Screen.PushCurPage()
         self.Screen.SetCurPage( self.RomSoConfirmDownloadPage)
@@ -429,7 +445,8 @@ func (self *RomListPage) KeyDown(ev *event.Event) {
     self.Screen.SetCurPage(self.Leader.FavPage)
     self.Screen.Draw()
     self.Screen.SwapAndShow()
-        
+  }
+  
   if ev.Data["Key"] == UI.CurKeys["Up"]{
     self.ScrollUp()
     self.Screen.Draw()
@@ -503,13 +520,13 @@ func (self *RomListPage) Draw() {
     self.Icons["bg"].NewCoord(self.Width/2,self.Height/2)
     self.Icons["bg"].Draw()
   }else{
-    
+    _,h := self.Ps.Size()
     if len(self.MyList) * HierListItemDefaultHeight > self.Height {
-      self.Ps.Width  = self.Width - 10
+      self.Ps.NewSize(self.Width - 10,h)
       self.Ps.Draw()
       
       
-      for i,v := range self.MyList {
+      for _,v := range self.MyList {
         if v.PosY > self.Height + self.Height/2 {
           break
         }
@@ -527,7 +544,7 @@ func (self *RomListPage) Draw() {
       
       
     }else {
-      self.Ps.Width = self.Width
+      self.Ps.NewSize(self.Width,h)
       self.Ps.Draw()
       for _,v := range self.MyList {
         v.Draw()
