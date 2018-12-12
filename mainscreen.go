@@ -11,6 +11,7 @@ import (
   "path/filepath"
   //os/exec"
   "encoding/json"
+  "sort"
   
   "github.com/yookoala/realpath"
 
@@ -25,6 +26,42 @@ var (
     &UI.UIPlugin{1,"", "Menu/GameShell/10_Settings",     "Settings",  &Settings.APIOBJ},
   }
 )
+
+func ReunionPagesIcons(self *UI.MainScreen) {
+    type Tup struct {
+      FileName string
+      OrigIdx  int
+    }
+    
+    var tmp []Tup
+    
+    for i,p := range self.Pages {
+      p_icons := p.GetIcons()
+      for i,x := range p_icons {
+        var t Tup
+        if x.GetFileName() != ""{
+          if strings.Contains(x.GetFileName(),"_") == false {
+            t = Tup{"98_"+x.GetFileName(),i}
+          }else {
+            t = Tup{x.GetFileName(),i}
+          }
+        }else{
+          t = Tup{"",i}
+        }
+        
+        tmp = append(tmp,t)
+      }
+      
+      sort.Slice(tmp, func(i, j int) bool { return tmp[i].FileName < tmp[j].FileName })
+      //fmt.Println(tmp)
+      var new_icons []UI.IconItemInterface
+      for _,x := range tmp {
+        new_icons = append(new_icons, p_icons[x.OrigIdx])
+      }
+      self.Pages[i].(*UI.Page).Icons = new_icons
+    }
+
+}
 
 
 func ReadTheDirIntoPages(self *UI.MainScreen, _dir string, pglevel int, cur_page UI.PageInterface) {
@@ -49,11 +86,12 @@ func ReadTheDirIntoPages(self *UI.MainScreen, _dir string, pglevel int, cur_page
 			}else{ // on cur_page now
 				i2:= self.ExtraName(f.Name())
 				iconitem := UI.NewIconItem()
+        iconitem.FileName = f.Name()
 				iconitem.AddLabel(i2,self.IconFont)
 				if UI.FileExists( UI.SkinMap(_dir+"/"+i2+".png")) {
 					iconitem.ImageName = UI.SkinMap(_dir+"/"+i2+".png")
 				}else {
-					fmt.Println(  UI.SkinMap(_dir+"/"+i2+".png") )
+					//fmt.Println(  UI.SkinMap(_dir+"/"+i2+".png") )
 					untitled := UI.NewUntitledIcon()
 					untitled.Init()
 					if len(i2) > 1 {
@@ -134,6 +172,15 @@ func ReadTheDirIntoPages(self *UI.MainScreen, _dir string, pglevel int, cur_page
             fmt.Println("ReadTheDirIntoPages EmulatorConfig ",err)
           }
         
+        }else if self.IsExecPackage(_dir+"/"+f.Name()) {
+          iconitem.MyType = UI.ICON_TYPES["EXE"]
+          rel_path,err := realpath.Realpath( filepath.Join(_dir,f.Name(),i2+".sh"))
+          if err != nil {
+            rel_path,_ = filepath.Abs(filepath.Join(_dir,f.Name(),i2+".sh"))
+          }
+          iconitem.CmdPath = rel_path
+          UI.MakeExecutable( iconitem.CmdPath )
+          cur_page.AppendIcon(iconitem)
         }else {
 					iconitem.MyType = UI.ICON_TYPES["DIR"]
 					linkpage := UI.NewPage()
@@ -154,6 +201,8 @@ func ReadTheDirIntoPages(self *UI.MainScreen, _dir string, pglevel int, cur_page
         }
         
 				iconitem.CmdPath = rel_path
+        iconitem.FileName = f.Name()
+        
 				UI.MakeExecutable( iconitem.CmdPath )
 				iconitem.MyType = UI.ICON_TYPES["EXE"]
 				if UI.FileExists( UI.SkinMap( _dir+"/"+ UI.ReplaceSuffix(i2,"png"))) {

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"log"
 	//"encoding/json"
-	//"path/filepath"
+	"path/filepath"
   
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -262,6 +262,27 @@ func (self *MainScreen) ExtraName(name string) string {
 	}else {
 		return name
 	}	
+}
+
+
+//ExecPackage is all-in-one folder ,Name.sh,Name.png,etc
+func (self *MainScreen) IsExecPackage(dirname string ) bool {
+	files,err := ioutil.ReadDir(dirname)
+	if err != nil {
+		log.Fatal(err)
+		return false
+	}
+  
+  bname := filepath.Base(dirname)
+  bname = self.ExtraName(bname)
+  
+  for _,v := range files {
+    if v.Name() == bname+".sh" {
+      return true
+    }
+  }
+  
+  return false
 }
 
 func (self *MainScreen) IsPluginPackage(dirname string ) bool {

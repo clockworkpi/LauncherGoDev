@@ -257,6 +257,8 @@ func run() int {
 	main_screen.FootBar  = foot_bar
 
 	ReadTheDirIntoPages(main_screen,"Menu",0,nil)
+  ReadTheDirIntoPages(main_screen,"/home/cpi/apps/Menu",1,main_screen.Pages[len(main_screen.Pages)-1])
+  ReunionPagesIcons(main_screen)
   
 	main_screen.FartherPages()
 

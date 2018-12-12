@@ -54,7 +54,7 @@ type IconItemInterface interface {
 
 	GetCmdInvoke() PluginInterface
 
-	
+	GetFileName() string
 	Draw() 
 }
 
@@ -72,6 +72,7 @@ type IconItem struct {
 	Label  LabelInterface
 	Align  int
 	AnimationTime int
+  FileName string
 }
 
 
@@ -240,6 +241,9 @@ func (self *IconItem) GetCmdInvoke() PluginInterface {
 	return self.CmdInvoke
 }
 
+func (self *IconItem) GetFileName() string {
+  return self.FileName
+}
 func (self *IconItem) Draw() {
   if self.Parent == nil {
     fmt.Println("Error: IconItem Draw Parent nil")
