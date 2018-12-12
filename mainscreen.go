@@ -145,7 +145,8 @@ func ReadTheDirIntoPages(self *UI.MainScreen, _dir string, pglevel int, cur_page
 			if strings.HasSuffix(strings.ToLower(f.Name()),UI.IconExt) {
 				i2 := self.ExtraName(f.Name())
 				iconitem := UI.NewIconItem()
-				iconitem.CmdPath = _dir+"/"+f.Name()
+        abs_path,_ := filepath.Abs(_dir+"/"+f.Name())
+				iconitem.CmdPath = abs_path
 				UI.MakeExecutable( iconitem.CmdPath )
 				iconitem.MyType = UI.ICON_TYPES["EXE"]
 				if UI.FileExists( UI.SkinMap( _dir+"/"+ UI.ReplaceSuffix(i2,"png"))) {
