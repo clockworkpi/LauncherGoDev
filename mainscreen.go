@@ -11,6 +11,9 @@ import (
   "path/filepath"
   //os/exec"
   "encoding/json"
+  
+  "github.com/yookoala/realpath"
+
 
   "github.com/cuu/LauncherGoDev/sysgo/UI"
   "github.com/cuu/LauncherGoDev/sysgo/UI/Emulator"
@@ -145,8 +148,12 @@ func ReadTheDirIntoPages(self *UI.MainScreen, _dir string, pglevel int, cur_page
 			if strings.HasSuffix(strings.ToLower(f.Name()),UI.IconExt) {
 				i2 := self.ExtraName(f.Name())
 				iconitem := UI.NewIconItem()
-        abs_path,_ := filepath.Abs(_dir+"/"+f.Name())
-				iconitem.CmdPath = abs_path
+        rel_path,err := realpath.Realpath( _dir+"/"+f.Name() )
+        if err != nil {
+          rel_path,_ = filepath.Abs(_dir+"/"+f.Name())
+        }
+        
+				iconitem.CmdPath = rel_path
 				UI.MakeExecutable( iconitem.CmdPath )
 				iconitem.MyType = UI.ICON_TYPES["EXE"]
 				if UI.FileExists( UI.SkinMap( _dir+"/"+ UI.ReplaceSuffix(i2,"png"))) {
