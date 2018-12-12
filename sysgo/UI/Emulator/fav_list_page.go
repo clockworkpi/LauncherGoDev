@@ -55,6 +55,11 @@ func NewFavListPage() *FavListPage {
   
   return p
 }
+
+func (self *FavListPage) GetMyList() []UI.ListItemInterface {
+  return self.MyList
+}
+
 func (self *FavListPage) GetMapIcons() map[string]UI.IconItemInterface {
   return self.Icons
 }
@@ -385,6 +390,7 @@ func (self *FavListPage) Click() {
 }
 
 func (self *FavListPage) ReScan() {
+  //fmt.Println("FavListPage ReScan ",self.EmulatorConfig.ROM)
   if self.MyStack.Length() == 0 {
     self.SyncList(self.EmulatorConfig.ROM)
   }else{

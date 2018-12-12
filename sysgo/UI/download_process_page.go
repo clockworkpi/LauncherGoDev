@@ -126,12 +126,12 @@ func (self *DownloadProcessPage) UpdateProcessInterval() {
 			// download is complete
       fmt.Println("download is complete ",self.Value)
       self.Value = 0 
-      
-      
+      self.TheTicker.Stop()
+      goto OUT
 			break
 		}
   }
-  
+  OUT:
 	if err := self.resp.Err(); err != nil {
     self.DownloadErr()
 		fmt.Fprintf(os.Stderr, "Download failed: %v\n", err)

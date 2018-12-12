@@ -416,7 +416,7 @@ func (self *RomListPage) Click() {
 }
 
 func (self *RomListPage) ReScan() {
-  fmt.Println("RomListPage ReScan ",self.EmulatorConfig.ROM)
+  //fmt.Println("RomListPage ReScan ",self.EmulatorConfig.ROM)
   if self.MyStack.Length() == 0 {
     self.SyncList(self.EmulatorConfig.ROM)
   }else{
