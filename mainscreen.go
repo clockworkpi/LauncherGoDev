@@ -104,11 +104,14 @@ func ReadTheDirIntoPages(self *UI.MainScreen, _dir string, pglevel int, cur_page
 					//Init it 
 				}else if self.IsEmulatorPackage(_dir+"/"+f.Name()) {
           a_c := Emulator.ActionConfig{}
+          a_c.FILETYPE="file"
+          a_c.TITLE = "Game"
           dat, err := ioutil.ReadFile(_dir+"/"+f.Name()+"/" +UI.Emulator_flag)
 					UI.ShowErr(err)
 
 					err = json.Unmarshal(dat, &a_c)
-					if err == nil {          
+					if err == nil {
+            //fmt.Println(a_c)
             if UI.FileExists(filepath.Join(_dir,f.Name(),"retroarch-local.cfg")) {
               a_c.RETRO_CONFIG = UI.CmdClean( filepath.Join(_dir,f.Name(),"retroarch-local.cfg") )
               fmt.Println("a local retroarch cfg: ",a_c.RETRO_CONFIG)

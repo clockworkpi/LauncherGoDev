@@ -1,6 +1,7 @@
 package UI
 
 import (
+  //"fmt"
 //	"github.com/veandco/go-sdl2/ttf"
 
 //	"github.com/cuu/gogame/surface"
@@ -33,10 +34,11 @@ func (self *InfoPageSelector) AnimateDraw(x2, y2 int) {
 func (self *InfoPageSelector) Draw() {
   idx := self.Parent.GetPsIndex()
   mylist := self.Parent.GetMyList()
-  
+ 
   if idx < len(mylist) {
     _,y := mylist[idx].Coord()
     _,h := mylist[idx].Size()
+    
     
     self.PosY = y+1
     self.Height = h-3

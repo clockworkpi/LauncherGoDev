@@ -26,7 +26,7 @@ type RomListPage struct {
   
   RomSoConfirmDownloadPage *RomSoConfirmPage
   
-  MyList []*EmulatorListItem
+  MyList []UI.ListItemInterface
   BGwidth int
   BGheight int //70
   Scroller *UI.ListScroller
@@ -55,6 +55,10 @@ func NewRomListPage() *RomListPage {
   p.BGheight = 70
   
   return p
+}
+
+func (self *RomListPage) GetMyList() []UI.ListItemInterface {
+  return self.MyList
 }
 
 func (self *RomListPage) GetMapIcons() map[string]UI.IconItemInterface {
@@ -98,6 +102,7 @@ func (self *RomListPage) GeneratePathList(path string) ([]map[string]string,erro
       }
       
       bname := filepath.Base(v)
+
       if len(bname) > 1 {
         is_excluded := false
         for _,exclude_pattern := range self.EmulatorConfig.EXCLUDE {
@@ -111,10 +116,11 @@ func (self *RomListPage) GeneratePathList(path string) ([]map[string]string,erro
         
         if is_excluded == false {
           pieces := strings.Split(bname,".")
+
           if len(pieces) > 1 {
             pieces_ext := strings.ToLower( pieces[len(pieces)-1])
-            for _,v := range self.EmulatorConfig.EXT {
-              if pieces_ext == v {
+            for _,u := range self.EmulatorConfig.EXT {
+              if pieces_ext == u {
                 dirmap["file"] = v
                 ret = append(ret,dirmap)
                 break
@@ -133,7 +139,7 @@ func (self *RomListPage) GeneratePathList(path string) ([]map[string]string,erro
 func (self *RomListPage) SyncList( path string ) {
   
   alist,err := self.GeneratePathList(path) 
-
+  //fmt.Println(alist)
   if err != nil {
     fmt.Println(err)
     return
@@ -165,6 +171,7 @@ func (self *RomListPage) SyncList( path string ) {
     li.Parent = self
     li.PosX   = start_x
     li.PosY   = start_y + (i+hasparent)*li.Height
+    li.Width  = UI.Width
     li.Fonts["normal"] = self.ListFont
     li.MyType = UI.ICON_TYPES["FILE"]
     
@@ -265,10 +272,11 @@ func (self *RomListPage) ScrollUp() {
   }
   
   cur_li := self.MyList[self.PsIndex]
-  
-  if cur_li.PosY < 0 {
+  x,y := cur_li.Coord()
+  _,h := cur_li.Size()
+  if y < 0 {
     for i,_ := range self.MyList{
-      self.MyList[i].PosY += self.MyList[i].Height
+      self.MyList[i].NewCoord(x,y + h)
     }
     
     self.Scrolled +=1
@@ -287,10 +295,12 @@ func (self *RomListPage) ScrollDown(){
   }
   
   cur_li := self.MyList[self.PsIndex]
+  x,y := cur_li.Coord()
+  _,h := cur_li.Size()
   
-  if cur_li.PosY + cur_li.Height > self.Height { 
+  if y+ h > self.Height { 
     for i,_ := range self.MyList{
-      self.MyList[i].PosY -= self.MyList[i].Height
+      self.MyList[i].NewCoord(x,y - h)
     }
     self.Scrolled -=1    
   }
@@ -305,16 +315,21 @@ func (self *RomListPage) SyncScroll() {
   
   if self.PsIndex < len(self.MyList) {
     cur_li := self.MyList[self.PsIndex]
+    x, y := cur_li.Coord()
+    _, h := cur_li.Size()
+    
     if self.Scrolled > 0 {
-      if cur_li.PosY < 0 {
+      if y < 0 {
         for i,_ := range self.MyList{
-          self.MyList[i].PosY += self.Scrolled*self.MyList[i].Height
+          _, h = self.MyList[i].Size()
+          self.MyList[i].NewCoord(x, y +  self.Scrolled*h)
         }
       }
     }else if self.Scrolled < 0 {
-      if cur_li.PosY + cur_li.Height > self.Height{
+      if y + h > self.Height{
         for i,_ := range self.MyList{
-          self.MyList[i].PosY += self.Scrolled*self.MyList[i].Height
+          _, h = self.MyList[i].Size()
+          self.MyList[i].NewCoord(x, y +  self.Scrolled*h)
         }
       }
     }
@@ -336,28 +351,28 @@ func (self *RomListPage) Click() {
   
   cur_li := self.MyList[self.PsIndex]
   
-  if cur_li.MyType == UI.ICON_TYPES["DIR"] {
-    if cur_li.Path == "[..]"{
+  if cur_li.(*EmulatorListItem).MyType == UI.ICON_TYPES["DIR"] {
+    if cur_li.(*EmulatorListItem).Path == "[..]"{
       self.MyStack.Pop()
       self.SyncList(self.MyStack.Last())
       self.PsIndex = 0
     }else{
-      self.MyStack.Push(self.MyList[self.PsIndex].Path)
+      self.MyStack.Push(self.MyList[self.PsIndex].(*EmulatorListItem).Path)
       self.SyncList(self.MyStack.Last())
       self.PsIndex = 0
     }
   }
   
-  if cur_li.MyType == UI.ICON_TYPES["FILE"] {
+  if cur_li.(*EmulatorListItem).MyType == UI.ICON_TYPES["FILE"] {
     self.Screen.MsgBox.SetText("Launching")
     self.Screen.MsgBox.Draw()
     self.Screen.SwapAndShow()
     
     path := ""
     if self.EmulatorConfig.FILETYPE == "dir" {
-      path = filepath.Join(cur_li.Path,self.EmulatorConfig.EXT[0])
+      path = filepath.Join(cur_li.(*EmulatorListItem).Path,self.EmulatorConfig.EXT[0])
     }else{
-      path  = cur_li.Path
+      path  = cur_li.(*EmulatorListItem).Path
     }
     
     fmt.Println("Run ",path)
@@ -401,6 +416,7 @@ func (self *RomListPage) Click() {
 }
 
 func (self *RomListPage) ReScan() {
+  fmt.Println("RomListPage ReScan ",self.EmulatorConfig.ROM)
   if self.MyStack.Length() == 0 {
     self.SyncList(self.EmulatorConfig.ROM)
   }else{
@@ -470,8 +486,8 @@ func (self *RomListPage) KeyDown(ev *event.Event) {
     
     cur_li := self.MyList[self.PsIndex]
     
-    if cur_li.IsFile() {
-      cmd := exec.Command("chgrp", FavGname, UI.CmdClean(cur_li.Path))
+    if cur_li.(*EmulatorListItem).IsFile() {
+      cmd := exec.Command("chgrp", FavGname, UI.CmdClean(cur_li.(*EmulatorListItem).Path))
       err := cmd.Run()
       if err != nil {
         fmt.Println(err)
@@ -500,8 +516,8 @@ func (self *RomListPage) KeyDown(ev *event.Event) {
     }
     
     cur_li := self.MyList[self.PsIndex] 
-    if cur_li.IsFile() {
-      self.Leader.DeleteConfirmPage.SetFileName(cur_li.Path)
+    if cur_li.(*EmulatorListItem).IsFile() {
+      self.Leader.DeleteConfirmPage.SetFileName(cur_li.(*EmulatorListItem).Path)
       self.Leader.DeleteConfirmPage.SetTrashDir(filepath.Join(self.EmulatorConfig.ROM,"/.Trash") )
       
       self.Screen.PushCurPage()
@@ -527,11 +543,12 @@ func (self *RomListPage) Draw() {
       
       
       for _,v := range self.MyList {
-        if v.PosY > self.Height + self.Height/2 {
+        _,y := v.Coord()
+        if y > self.Height + self.Height/2 {
           break
         }
         
-        if v.PosY < 0 {
+        if y < 0 {
           continue
         }
         

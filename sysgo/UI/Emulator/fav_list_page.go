@@ -26,7 +26,7 @@ type FavListPage struct {
   
   RomSoConfirmDownloadPage *RomSoConfirmPage
   
-  MyList []*EmulatorListItem
+  MyList []UI.ListItemInterface
   BGwidth int
   BGheight int //70
   Scroller *UI.ListScroller
@@ -99,8 +99,8 @@ func (self *FavListPage) GeneratePathList(path string) ([]map[string]string,erro
         pieces := strings.Split(bname,".")
         if len(pieces) > 1 {
           pieces_ext := strings.ToLower( pieces[len(pieces)-1])
-          for _,v := range self.EmulatorConfig.EXT {
-            if pieces_ext == v {
+          for _,u := range self.EmulatorConfig.EXT {
+            if pieces_ext == u {
               dirmap["file"] = v
               ret = append(ret,dirmap)
               break
@@ -240,10 +240,12 @@ func (self *FavListPage) ScrollUp() {
   }
   
   cur_li := self.MyList[self.PsIndex]
+  x,y := cur_li.Coord()
+  _,h := cur_li.Size()
   
-  if cur_li.PosY < 0 {
+  if y < 0 {
     for i,_ := range self.MyList{
-      self.MyList[i].PosY += self.MyList[i].Height
+      self.MyList[i].NewCoord(x, y + h)
     }
     
     self.Scrolled +=1
@@ -262,10 +264,11 @@ func (self *FavListPage) ScrollDown(){
   }
   
   cur_li := self.MyList[self.PsIndex]
-  
-  if cur_li.PosY + cur_li.Height > self.Height { 
+  x,y := cur_li.Coord()
+  _,h := cur_li.Size()
+  if y + h > self.Height { 
     for i,_ := range self.MyList{
-      self.MyList[i].PosY -= self.MyList[i].Height
+      self.MyList[i].NewCoord(x,y-h)
     }
     self.Scrolled -=1    
   }
@@ -280,16 +283,21 @@ func (self *FavListPage) SyncScroll() {
   
   if self.PsIndex < len(self.MyList) {
     cur_li := self.MyList[self.PsIndex]
+    x,y := cur_li.Coord()
+    _,h := cur_li.Size()
+    
     if self.Scrolled > 0 {
-      if cur_li.PosY < 0 {
+      if y < 0 {
         for i,_ := range self.MyList{
-          self.MyList[i].PosY += self.Scrolled*self.MyList[i].Height
+          _,h = self.MyList[i].Size()
+          self.MyList[i].NewCoord(x, y + self.Scrolled*h)
         }
       }
     }else if self.Scrolled < 0 {
-      if cur_li.PosY + cur_li.Height > self.Height {
+      if y  + h > self.Height {
         for i,_ := range self.MyList {
-          self.MyList[i].PosY += self.Scrolled*self.MyList[i].Height
+          _,h = self.MyList[i].Size()
+          self.MyList[i].NewCoord(x,y +  self.Scrolled*h)
         }
       }
     }
@@ -312,28 +320,28 @@ func (self *FavListPage) Click() {
   
   cur_li := self.MyList[self.PsIndex]
   
-  if cur_li.MyType == UI.ICON_TYPES["DIR"] {
-    if cur_li.Path ==  "[..]" {
+  if cur_li.(*EmulatorListItem).MyType == UI.ICON_TYPES["DIR"] {
+    if cur_li.(*EmulatorListItem).Path ==  "[..]" {
       self.MyStack.Pop()
       self.SyncList(self.MyStack.Last())
       self.PsIndex = 0
     }else{
-      self.MyStack.Push(self.MyList[self.PsIndex].Path)
+      self.MyStack.Push(self.MyList[self.PsIndex].(*EmulatorListItem).Path)
       self.SyncList(self.MyStack.Last())
       self.PsIndex = 0
     }
   }
   
-  if cur_li.MyType == UI.ICON_TYPES["FILE"] {
+  if cur_li.(*EmulatorListItem).MyType == UI.ICON_TYPES["FILE"] {
     self.Screen.MsgBox.SetText("Launching")
     self.Screen.MsgBox.Draw()
     self.Screen.SwapAndShow()
     
     path := ""
     if self.EmulatorConfig.FILETYPE == "dir" {
-      path = filepath.Join(cur_li.Path,self.EmulatorConfig.EXT[0])
+      path = filepath.Join(cur_li.(*EmulatorListItem).Path,self.EmulatorConfig.EXT[0])
     }else{
-      path  = cur_li.Path
+      path  = cur_li.(*EmulatorListItem).Path
     }
     
     fmt.Println("Run ",path)
@@ -449,9 +457,9 @@ func (self *FavListPage) KeyDown(ev *event.Event) {
     }
     
     cur_li := self.MyList[self.PsIndex] 
-    if cur_li.IsFile() {
-      uid := UI.GetUid(cur_li.Path)
-      os.Chown(cur_li.Path,uid ,uid)
+    if cur_li.(*EmulatorListItem).IsFile() {
+      uid := UI.GetUid(cur_li.(*EmulatorListItem).Path)
+      os.Chown(cur_li.(*EmulatorListItem).Path,uid ,uid)
       self.Screen.MsgBox.SetText("Deleting")
       self.Screen.MsgBox.Draw()
       self.Screen.SwapAndShow()
@@ -478,11 +486,12 @@ func (self *FavListPage) Draw() {
       
       
       for _,v := range self.MyList {
-        if v.PosY > self.Height + self.Height/2 {
+        _, y := v.Coord()
+        if y > self.Height + self.Height/2 {
           break
         }
         
-        if v.PosY < 0 {
+        if y < 0 {
           continue
         }
         

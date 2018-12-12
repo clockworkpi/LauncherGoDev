@@ -95,6 +95,10 @@ func (self *HierListItem) IsDir() bool {
 func (self *HierListItem) Init(text string) {
   l := UI.NewLabel()
   l.PosX = 20
+  if self.Parent == nil {
+    fmt.Println("Parent nil")
+    return
+  }
   l.SetCanvasHWND(self.Parent.GetCanvasHWND())
   
   if self.IsDir() == true || self.IsFile() == true {
@@ -178,8 +182,45 @@ func NewEmulatorListItem() *EmulatorListItem {
   
   p.MyType = UI.ICON_TYPES["EXE"]
 	p.Height = 32
-	p.Width  = 0  
+	p.Width  = 0
+ 
+  
   return p
+}
+
+func (self *EmulatorListItem) Init(text string) {
+  l := UI.NewLabel()
+  l.PosX = 20
+
+  l.SetCanvasHWND(self.Parent.GetCanvasHWND())
+  
+  if self.IsDir() == true || self.IsFile() == true {
+    self.Path = text
+  }
+  
+  label_text := filepath.Base(text)
+  ext:= filepath.Ext(text)
+  if ext != "" {
+    alias_file := strings.Replace(text,ext,"",-1) + ".alias"
+    
+    if UI.FileExists(alias_file) == true {
+      b, err := ioutil.ReadFile(alias_file) 
+      if err != nil {
+        fmt.Print(err)
+      }else {
+        label_text = string(b)
+      }
+    }
+    
+  }
+  
+  if self.IsDir() == true {
+    l.Init(label_text, self.Fonts["normal"],nil)
+  }else {
+    l.Init(label_text,self.Fonts["normal"],nil)
+  }
+  
+  self.Labels["Text"] = l
 }
 
 func (self *EmulatorListItem) Draw() {
