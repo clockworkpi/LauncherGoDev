@@ -88,7 +88,10 @@ func ReadTheDirIntoPages(self *UI.MainScreen, _dir string, pglevel int, cur_page
 				iconitem := UI.NewIconItem()
         iconitem.FileName = f.Name()
 				iconitem.AddLabel(i2,self.IconFont)
-				if UI.FileExists( UI.SkinMap(_dir+"/"+i2+".png")) {
+        if UI.FileExists(filepath.Join(_dir,f.Name(),i2+".png")) { //eg: 20_Prog/Prog.png , cut 20_ 
+          iconitem.ImageName = filepath.Join(_dir,f.Name(),i2+".png")
+          
+        }else if UI.FileExists( UI.SkinMap(_dir+"/"+i2+".png")) {
 					iconitem.ImageName = UI.SkinMap(_dir+"/"+i2+".png")
 				}else {
 					//fmt.Println(  UI.SkinMap(_dir+"/"+i2+".png") )
