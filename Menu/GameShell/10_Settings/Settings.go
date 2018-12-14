@@ -175,7 +175,7 @@ func (self *SettingsPage) ScrollUp() {
   }
   cur_li := self.MyList[self.PsIndex]
   x,y := cur_li.Coord()
-  if x < 0 {
+  if y < 0 {
     for i:=0;i<len(self.MyList);i++ {
       _,h := self.MyList[i].Size()
       x,y  = self.MyList[i].Coord()
