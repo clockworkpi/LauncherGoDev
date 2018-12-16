@@ -7,6 +7,7 @@ import (
 	"github.com/cuu/gogame/color"
 	
 )
+var DefaultInfoPageListItemHeight = 30
 
 type InfoPageListItem struct {
   ListItem

@@ -1,5 +1,10 @@
 package Bluetooth
 
+import (
+
+  "github.com/muka/go-bluetooth/bluez/profile"
+  
+)
 var NetItemDefaultHeight = 30
 
 type NetItemMultiIcon struct {
@@ -64,7 +69,7 @@ type NetItem struct {
   MacAddr  string // 
   
   Path string ///org/bluez/hci0/dev_34_88_5D_97_FF_26
-  
+  Props *profile.Device1Properties
 }
 
 

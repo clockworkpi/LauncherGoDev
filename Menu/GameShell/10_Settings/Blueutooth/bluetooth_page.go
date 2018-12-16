@@ -1,5 +1,31 @@
 package Bluetooth
 
+import (
+  "github.com/veandco/go-sdl2/ttf"
+
+  "github.com/cuu/gogame/draw"
+  "github.com/cuu/gogame/surface"
+  "github.com/cuu/gogame/rect"
+  "github.com/cuu/gogame/event"
+	bleapi "github.com/muka/go-bluetooth/api"
+  
+  "github.com/muka/go-bluetooth/bluez/profile"
+
+)
+
+func showDeviceInfo(dev *bleapi.Device) {
+	if dev == nil {
+		return
+	}
+	props, err := dev.GetProperties()
+	if err != nil {
+		fmt.Printf("%s: Failed to get properties: %s\n", dev.Path, err.Error())
+		return
+	}
+	fmt.Printf("name=%s addr=%s rssi=%d\n", props.Name, props.Address, props.RSSI)
+}
+
+
 type BleForgetConfirmPage struct {
   
   UI.ConfirmPage
@@ -85,8 +111,13 @@ type BleInfoPage struct {
   
   MyList []UI.ListItemInterface
   
-  ConfirmPage1 *BleForgetConfirmPage
+  AList map[string]interface{}
   
+  Scroller *UI.ListScroller
+  ConfirmPage1 *BleForgetConfirmPage
+  //MyDevice  *bleapi.Device // from BluetoothPage
+  
+  Props    *profile.Device1Properties
 }
 
 
@@ -120,7 +151,7 @@ func (self *BleInfoPage) Init() {
   self.Ps = ps
   self.PsIndex = 0  
   
-  self.GenList()
+  //self.GenList()
   
   self.Scroller = UI.NewListScroller()
   self.Scroller.Parent = self
@@ -137,10 +168,8 @@ func (self *BleInfoPage) Init() {
 }
 
 func (self *BleInfoPage) GenList() {
-  if len(self.AList) == 0 {
-    return
-  }
   
+  self.AList = structs.Map(self.Props) //map[string]interface{}
   
   self.MyList = nil
   
@@ -166,6 +195,26 @@ func (self *BleInfoPage) GenList() {
     
     li.Init(k)
     li.Flag = k
+    
+    sm_text := ""
+    if k == "UUIDs" {
+      if len(v)> 1 {
+        sm_text = v[0]
+      }else{
+        sm_text = "<empty>"
+      }
+    }else {
+      sm_text = fmt.Sprintf("%v",v)
+    }
+    
+    if sm_text == "0" {
+      sm_text = "No"
+    }else if sm_text == "1" {
+      sm_text = "Yes"
+    }
+    li.SetSmallText(sm_text)
+    li.PosX = 2
+    self.MyList = append(self.MyList,li)
     
   }
 
@@ -197,7 +246,470 @@ func (self *BleInfoPage) ScrollUp() {
 }
 
 func (self *BleInfoPage) ScrollDown() {
+  if len(self.MyList) == 0 {
+    return
+  }
+  
+  self.PsIndex -= 1
+  
+  if self.PsIndex < 0 {
+    self.PsIndex = 0
+  }
+  
+  cur_li = self.MyList[self.PsIndex]
+  
+  x,y := cur_li.Coord()
+  
+  if y < 0 {
+    for i,v := range self.MyList {
+      x,y = v.Coord()
+      _,h := v.Size()
+      self.MyList[i].NewCoord(x,y-h)
+    }
+  } 
+
+}
+
+
+func (self *BleInfoPage) TryToForget() {
+
+}
+
+func (self *BleInfoPage) TryToDisconnect() {
+
+
+}
+
+func (self *BleInfoPage) Click() {
+  if self.PsIndex >= len(self.MyList) {
+    return
+  }
+  
+  
+  cur_li := self.MyList[self.PsIndex]
+  
+  fmt.Println(cur_li.(*UI.InfoPageListItem).Flag)
   
 
 }
 
+func (self *BleInfoPage) OnLoadCb() {
+
+  self.GenList()
+}
+
+
+func (self *BleInfoPage) KeyDown(ev *event.Event) {
+
+	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+		self.ReturnToUpLevelPage()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	} 
+  
+  if ev.Data["Key"] == UI.CurKeys["Up"] {
+  
+    self.ScrollUp()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+  }
+  
+  if ev.Data["Key"] == UI.CurKeys["Down"] {
+  
+    self.ScrollDown()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+  }  
+  if ev.Data["Key"] == UI.CurKeys["Enter"]{
+    self.Click()
+  }
+  if ev.Data["Key"] == UI.CurKeys["X"] {
+    self.TryToDisconnect()
+  }
+  if ev.Data["Key"] == UI.CurKeys["Y"] {
+    self.TryToForget()
+  }
+  
+}
+
+func (self *BleInfoPage) Draw() {
+  if len(self.MyList) == 0 {
+    return
+  }
+
+  self.ClearCanvas()
+  
+  if len(self.MyList) * UI.DefaultInfoPageListItemHeight > self.Height {
+    self.Ps.(*BleInfoPageSelector).Width = self.Width - 10
+    self.Ps.(*BleInfoPageSelector).PosX = 9
+    self.Ps.Draw()
+    
+    for _,v := range self.MyList {
+      v.Draw()
+    }
+    
+    self.Scroller.UpdateSize(len(self.MyList)*UI.DefaultInfoPageListItemHeight, 
+                            self.PsIndex*UI.DefaultInfoPageListItemHeight)
+    self._Scroller.Draw()
+    
+  }else {
+    self.Ps.(*BleInfoPageSelector).Width = self.Width 
+    self.Ps.Draw()
+    for _,v := range self.MyList {
+      v.Draw()
+    }
+  }
+}
+
+type BleListSelector BleInfoPageSelector
+
+type BleListMessageBox struct {
+  UI.Label
+  Parent UI.PageInterface
+}
+
+func NewBleListMessageBox() *BleListMessageBox {
+  p := &BleListMessageBox{}
+  p.Color = &color.Color{83,83,83,255}
+  
+  return p
+}
+
+func (self *BleListMessageBox) Draw() {
+  
+	my_text := font.Render(self.FontObj,self.Text, true, self.Color, nil)
+  w := surface.GetWidth(my_text)
+  h := surface.GetHeight(my_text)
+  
+  pw,ph := self.Parent.Size()
+  
+  x := (pw-w)/2
+  y := (ph-h)/2
+  
+  padding := 10
+  
+  rect_ := rect.Rect(x-padding,y-padding,w+padding*2,h+padding*2)
+  
+  draw.Rect(self.CanvasHWND,&color.Color{255,255,255,255}, &rect_,0)
+  draw.Rect(self.CanvasHWND,&color.Color{0,  0,  0,  255}, &rect_,1)
+  
+  rect2_ := rect.Rect(x,y,w,h)
+  surface.Blit(self.CanvasHWND,my_text,&rect2_,nil)
+  
+
+}
+
+type BluetoothPage struct{
+  UI.Page
+  
+  Devices []api.Device 
+  
+  BlePassword string 
+  Connecting bool
+  Scanning  bool
+  
+  
+  ListFontObj *ttf.Font
+  Scroller *UI.ListScroller
+  InfoPage *BleInfoPage
+  
+  PrevState  int
+  
+  ShowingMessageBox bool
+  MsgBox  *BleListMessageBox
+  ConnectTry int
+  
+  BlockCb ??
+  
+  LastStatusMsg string
+  ADAPTER_DEV string // == adapterID
+  
+  
+  MyList []*NetItem
+}
+
+func NewBluetoothPage() *BluetoothPage {
+  p := &BluetoothPage{}
+  
+  p.PageIconMargin = 20
+	p.SelectedIconTopOffset = 20
+	p.EasingDur = 10
+	p.Align = UI.ALIGN["SLeft"]
+  
+  p.ADAPTER_DEV = adapterID
+  
+  p.FootMsg = [5]string { "Nav","Scan","Info","Back","TryConnect" }
+  
+  p.ListFontObj = UI.Fonts["notosanscjk15"]
+  
+  return p 
+}
+
+func (self *BluetoothPage) ShowBox(msg string) {
+  self.MsgBox.Text = msg
+  self.ShowingMessageBox = true
+  self.Screen.Draw()
+  self.MsgBox.Draw()
+  self.Screen.SwapAndShow()  
+}
+
+func (self *BluetoothPage) HideBox() {
+  self.Draw()
+  self.ShowingMessageBox = false
+  self.Screen.SwapAndShow()
+}
+
+func (self *BluetoothPage) Init() {
+  self.PosX = self.Index * self.Screen.Width
+  self.Width = self.Screen.Width
+  self.Height = self.Screen.Height  
+    
+  self.CanvasHWND = self.Screen.CanvasHWND
+
+  ps = &BleListSelector{}
+  ps.Parent = self
+  ps.Width = Width - 12
+        
+  self.Ps = ps
+  self.PsIndex = 0
+        
+  msgbox := NewBleListMessageBox()
+  msgbox.CanvasHWND = self.CanvasHWND
+  msgbox.Init(" ",UI.Fonts["veramono12"])
+  msgbox.Parent = self
+        
+  self.MsgBox = msgbox     
+
+  self.Scroller = UI.NewListScroller()
+  self.Scroller.Parent = self
+  self.Scroller.PosX = 2
+  self.Scroller.PosY = 2
+  self.Scroller.Init()
+        
+  self.GenNetworkList()
+        
+  self.InfoPage = NewBleInfoPage()
+  self.InfoPage.Screen = self.Screen
+  self.InfoPage.Name   = "BluetoothInfo"
+  self.InfoPage.Init()
+
+}
+
+
+func (self *BluetoothPage) AbortedAndReturnToUpLevel() {
+
+  self.HideBox()
+  self.Screen.FootBar.ResetNavText()
+  self.ReturnToUpLevelPage()
+  self.Screen.Draw()
+  self.Screen.SwapAndShow()
+
+}
+
+func (self *BluetoothPage) TryConnect() {
+
+
+}
+
+func (self *BluetoothPage) RefreshDevices() {
+  
+  // sync the cached devices 
+  self.Devices = nil
+  
+  devices, err := bleapi.GetDevices()
+	if err != nil {
+		panic(err)
+		os.Exit(1)
+	}
+  
+  self.Devices  = devices
+  
+}
+
+
+func (self *BluetoothPage) GenNetworkList() {
+  self.MyList = nil
+  
+  start_x := 0 
+  start_y := 0 
+  
+  
+  for i v := range self.Devices {
+  
+  	props, err := v.GetProperties()
+    if err != nil {
+      log.Fatalf("%s: Failed to get properties: %s", v.Path, err.Error())
+      return
+    }
+
+    ni := NewNetItem()
+    ni.Parent = self
+    
+    ni.PosX = start_x
+    ni.PosY  = start_y + i*NetItemDefaultHeight
+    ni.Width  = UI.Width
+    ni.FontObj = self.ListFontObj
+    ni.Path = v.Path
+    ni.Props  = props
+    
+    if props.Name != "" {
+      ni.Init(props.Name)
+    }else {
+      ni.Init(props.Address)
+    }
+    
+    self.MyList = append(self.MyList,ni)
+    
+  }
+  
+  self.PsIndex = 0
+}
+
+
+
+func (self *BluetoothPage) Rescan() {
+
+  self.Scanning = True
+  self.ShowBox("Bluetooth scanning")
+  self.Screen.FootBar.UpdateNavText("Scanning")
+  
+  err := bleapi.StopDiscovery()
+	if err != nil {
+		fmt.Println(err)
+	}
+  
+	err := bleapi.StartDiscovery()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println("Started discovery")
+  
+}
+
+
+func (self *BluetoothPage) OnLoadCb() {
+  self.RefreshDevices()
+  self.GenNetworkList()
+}
+
+func (self *BluetoothPage) ScrollUp() {
+
+  if len(self.MyList) == 0 {
+    return
+  }
+  
+  self.PsIndex -= 1
+  if self.PsIndex < 0 {
+    self.PsIndex=0
+  }
+  
+  cur_ni := self.MyList[self.PsIndex]//*NetItem
+  if cur_ni.PosY < 0 {
+    for i:=0;i<len(self.MyList);i++ {
+      self.MyList[i].PosY += self.MyList[i].Height
+    }
+  }
+}
+
+func (self *BluetoothPage) ScrollDown() {
+  if len(self.MyList) == 0 {
+    return 
+  }
+  
+  self.PsIndex += 1
+  if self.PsIndex >= len(self.MyList) {
+    self.PsIndex = len(self.MyList) - 1
+  }
+  
+  cur_ni := self.MyList[self.PsIndex]
+  if cur_ni.PosY + cur_ni.Height > self.Height {
+    for i:=0;i<len(self.MyList);i++ {
+      self.MyList[i].PosY -= self.MyList[i].Height
+    }
+  }
+}
+
+func (self *BluetoothPage) KeyDown(ev *event.Event) {
+
+  if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+    err := bleapi.StopDiscovery()
+    if err != nil {
+      fmt.Println(err)
+    }
+    
+    self.HideBox()
+    self.ReturnToUpLevelPage()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()  
+    
+    self.Screen.FootBar.ResetNavText()
+  }
+  
+  if ev.Data["Key"]  == UI.CurKeys["Up"] {
+  
+    self.ScrollUp()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+  }
+  
+  if ev.Data["Key"]  == UI.CurKeys["Down"] {
+  
+    self.ScrollDown()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+  }
+  
+  if ev.Data["Key"]  == UI.CurKeys["X"] {
+    self.Rescan()
+  }
+  
+  if ev.Data["Key"]  == UI.CurKeys["Y"] {
+    if len(self.MyList) == 0 {
+      return
+    }
+    
+    self.InfoPage.Props = self.MyList[self.PsIndex].Props
+    self.InfoPage.Path  = self.MyList[self.PsIndex].Path
+    
+    self.Screen.PushPage(self.InfoPage)
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()        
+  }
+  
+  if ev.Data["Key"] == UI.CurKeys["B"] {
+    
+    self.TryConnect()
+  
+  }
+}
+
+func (self *BluetoothPage) Draw() {
+  self.ClearCanvas()
+  
+  if len(self.MyList) == 0 {
+    return
+  }
+  
+  
+  if len(self.MyList) * NetItemDefaultHeight > self.Height {
+    self.Ps.Width  = self.Width - 11
+    self.Ps.Draw()
+    
+    for _,v := range self.MyList {
+      v.Draw()
+    }
+    
+    self.Scroller.UpdateSize(len(self.MyList)*NetItemDefaultHeight,self.PsIndex*NetItemDefaultHeight)
+    self.Scroller.Draw()
+    
+  }else {
+    self.Ps.Width = self.Width
+    self.Ps.Draw()
+    for _,v := range self.MyList {
+      v.Draw()
+    }    
+  
+  }
+
+}
