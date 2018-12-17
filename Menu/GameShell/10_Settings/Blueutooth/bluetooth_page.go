@@ -10,7 +10,8 @@ import (
 	bleapi "github.com/muka/go-bluetooth/api"
   
   "github.com/muka/go-bluetooth/bluez/profile"
-
+  
+  "github.com/cuu/LauncherGoDev/sysgo/UI"
 )
 
 func showDeviceInfo(dev *bleapi.Device) {
@@ -534,7 +535,7 @@ func (self *BluetoothPage) GenNetworkList() {
   start_y := 0 
   
   
-  for i v := range self.Devices {
+  for i v := range self.Devices { // v == bleapi.Device
   
   	props, err := v.GetProperties()
     if err != nil {
@@ -551,7 +552,8 @@ func (self *BluetoothPage) GenNetworkList() {
     ni.FontObj = self.ListFontObj
     ni.Path = v.Path
     ni.Props  = props
-    
+    ni.Parent = self
+    ni.Device = &v
     if props.Name != "" {
       ni.Init(props.Name)
     }else {
