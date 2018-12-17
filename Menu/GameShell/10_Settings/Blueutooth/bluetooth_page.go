@@ -116,9 +116,9 @@ type BleInfoPage struct {
   
   Scroller *UI.ListScroller
   ConfirmPage1 *BleForgetConfirmPage
-  //MyDevice  *bleapi.Device // from BluetoothPage
-  
+  MyDevice  *bleapi.Device // from NetItem-> from BluetoothPage
   Props    *profile.Device1Properties
+  Path      string
 }
 
 
@@ -273,11 +273,52 @@ func (self *BleInfoPage) ScrollDown() {
 
 
 func (self *BleInfoPage) TryToForget() {
-
+  //muka Adapter1 RemoveDevice  Path
+  
+  adapter,err := bleapi.GetAdapter(adapterID)
+  if err == nil {
+    self.Screen.MsgBox.SetText("Forgeting")
+    self.Screen.MsgBox.Draw()
+    self.Screen.SwapAndShow()    
+  
+  
+    err = adapter.RemoveDevice(self.Path)
+    if err != nil {
+      fmt.Println("BleInfoPage TryToForget: ",err)
+    }
+    
+    time.BlockDelay(400)
+    
+    self.ReturnToUpLevelPage()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()  
+    
+  }else {
+  
+    fmt.Println("BleInfoPage TryToForget GetAdapter: ",err)
+  }
+  
 }
 
 func (self *BleInfoPage) TryToDisconnect() {
-
+  
+  if self.MyDevice.IsConnected() {
+  
+    self.Screen.FootBar.UpdateNavText("Disconnecting")
+    self.Screen.MsgBox.SetText("Disconnecting")
+    self.Screen.MsgBox.Draw()
+    self.Screen.SwapAndShow()
+    
+    self.MyDevice.Disconnect()
+    
+    time.BlockDelay(350)
+    
+    self.ReturnToUpLevelPage()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+  
+    self.Screen.FootBar.ResetNavText()
+  }
 
 }
 
@@ -671,8 +712,9 @@ func (self *BluetoothPage) KeyDown(ev *event.Event) {
       return
     }
     
-    self.InfoPage.Props = self.MyList[self.PsIndex].Props
-    self.InfoPage.Path  = self.MyList[self.PsIndex].Path
+    self.InfoPage.Props    = self.MyList[self.PsIndex].Props
+    self.InfoPage.Path     = self.MyList[self.PsIndex].Path
+    self.InfoPage.MyDevice = self.MyList[self.PsIndex].Device
     
     self.Screen.PushPage(self.InfoPage)
     self.Screen.Draw()
