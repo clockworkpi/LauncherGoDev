@@ -146,7 +146,7 @@ func (self *TitleBar) RoundRobinCheck() {
     
     if self.InLowBackLight < 0 {
       self.CheckBatteryStat()
-      ///self.CheckBluetooth()
+      self.CheckBluetooth()
       self.UpdateWifiStrength()
       SwapAndShow()
       
@@ -155,7 +155,7 @@ func (self *TitleBar) RoundRobinCheck() {
       
       if self.InLowBackLight > 10 {
         self.CheckBatteryStat()
-        
+        self.CheckBluetooth()
         self.UpdateWifiStrength()
         
         self.InLowBackLight = 0 // reset
