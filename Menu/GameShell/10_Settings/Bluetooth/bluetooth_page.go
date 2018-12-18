@@ -577,8 +577,27 @@ func (self *BluetoothPage) AbortedAndReturnToUpLevel() {
 }
 
 func (self *BluetoothPage) TryConnect() {
-
-
+  
+  if self.PsIndex >= len(self.MyList) {
+    return
+  }
+  
+  cur_li := self.MyList[self.PsIndex]
+  
+  if cur_li.(*NetItem).Props.Connected {
+  
+    return
+  }
+  
+  self.Screen.FootBar.UpdateNavText("Connecting")
+  self.ShowBox("Connecting")
+  
+  cur_li.(*NetItem).Device.Connect()
+  
+  self.HideBox()
+  
+  
+  self.Screen.FootBar.ResetNavText()
 }
 
 func (self *BluetoothPage) RefreshDevices() {
@@ -669,9 +688,7 @@ func (self *BluetoothPage) ScrollUp() {
   if len(self.MyList) == 0 {
     return
   }
-  
-  fmt.Println("Scroll Up")
-  
+
   self.PsIndex -= 1
   if self.PsIndex < 0 {
     self.PsIndex=0

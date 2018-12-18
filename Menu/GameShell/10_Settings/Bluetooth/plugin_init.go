@@ -45,21 +45,29 @@ func (self *BluetoothPlugin) Init( main_screen *UI.MainScreen ) {
 		os.Exit(1)
 	}
 	
-  err = api.On("discovery", emitter.NewCallback(func(ev emitter.Event) {
-		discoveryEvent := ev.GetData().(api.DiscoveredDeviceEvent)
-		dev := discoveryEvent.Device
-		showDeviceInfo(dev)
-	}))
-  
-  if err != nil {
-    fmt.Println(err)
-  }
+
     
 
 	self.BluetoothPage = NewBluetoothPage()
 	self.BluetoothPage.SetScreen( main_screen)
 	self.BluetoothPage.SetName("Bluetooth")
 	self.BluetoothPage.Init()  
+  
+  err = api.On("discovery", emitter.NewCallback(func(ev emitter.Event) {
+		//discoveryEvent := ev.GetData().(api.DiscoveredDeviceEvent)
+		//dev := discoveryEvent.Device
+		//showDeviceInfo(dev)
+    self.BluetoothPage.RefreshDevices()
+    self.BluetoothPage.GenNetworkList()
+    main_screen.Draw()
+    main_screen.SwapAndShow()
+    
+	}))
+  
+  if err != nil {
+    fmt.Println(err)
+  }  
+  
 }
 
 func (self *BluetoothPlugin) Run( main_screen *UI.MainScreen ) {
