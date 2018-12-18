@@ -298,13 +298,16 @@ func (self *FavListPage) SyncScroll() {
     if self.Scrolled > 0 {
       if y < 0 {
         for i,_ := range self.MyList{
+          x,y = self.MyList[i].Coord()
           _,h = self.MyList[i].Size()
+          
           self.MyList[i].NewCoord(x, y + self.Scrolled*h)
         }
       }
     }else if self.Scrolled < 0 {
       if y  + h > self.Height {
         for i,_ := range self.MyList {
+          x,y = self.MyList[i].Coord()
           _,h = self.MyList[i].Size()
           self.MyList[i].NewCoord(x,y +  self.Scrolled*h)
         }
