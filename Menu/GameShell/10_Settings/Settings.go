@@ -17,6 +17,8 @@ import (
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Sound"
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Brightness"
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Wifi"
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Bluetooth"
+  
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/LauncherPy"
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Update"
 	"github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Storage"
@@ -90,7 +92,8 @@ func (self *SettingsPage) GenList() []*UI.UIPlugin {
   alist := []*UI.UIPlugin{
     
     &UI.UIPlugin{0,"",  "Wifi",      "Wi-Fi",&Wifi.APIOBJ},
-    
+    &UI.UIPlugin{0,"",  "Bluetooth", "Bluetooth",&Bluetooth.APIOBJ},
+
     &UI.UIPlugin{0,"",      "Sound",     "Sound Volume" ,          &Sound.APIOBJ},
     &UI.UIPlugin{0,"", "Brightness",     "BackLight Brightness",   &Brightness.APIOBJ},
     &UI.UIPlugin{0,"", "Storage",        "",                       &Storage.APIOBJ},

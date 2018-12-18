@@ -1,11 +1,12 @@
 package Bluetooth
 
 import (
+  "fmt"
   "log"
   "os"
   
 	"github.com/muka/go-bluetooth/api"
-	//"github.com/muka/go-bluetooth/emitter"
+	"github.com/muka/go-bluetooth/emitter"
 	"github.com/muka/go-bluetooth/linux"
 
 

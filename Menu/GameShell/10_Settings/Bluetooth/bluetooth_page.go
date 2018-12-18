@@ -1,12 +1,21 @@
 package Bluetooth
 
 import (
+  "fmt"
+  "os"
+  "log"
+  "github.com/fatih/structs"
+  
   "github.com/veandco/go-sdl2/ttf"
 
   "github.com/cuu/gogame/draw"
   "github.com/cuu/gogame/surface"
   "github.com/cuu/gogame/rect"
   "github.com/cuu/gogame/event"
+  "github.com/cuu/gogame/time"
+  "github.com/cuu/gogame/color"
+  "github.com/cuu/gogame/font"
+
 	bleapi "github.com/muka/go-bluetooth/api"
   
   "github.com/muka/go-bluetooth/bluez/profile"
@@ -38,20 +47,20 @@ func NewBleForgetConfirmPage() *BleForgetConfirmPage {
   p := &BleForgetConfirmPage{}
   
   p.ConfirmText = "Confirm Forget?"
-  p.UI.ConfirmPage.ConfirmText = p.ConfirmText
+  p.ConfirmPage.ConfirmText = p.ConfirmText
   
   return p
 }
 
 func (self *BleForgetConfirmPage) KeyDown(ev *event.Event) {
 
-	if ev.Data["Key"] == CurKeys["A"] || ev.Data["Key"] == CurKeys["Menu"] {
+	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
 	} 
   
-  if ev.Data["Key"] == CurKeys["B"] {
+  if ev.Data["Key"] == UI.CurKeys["B"] {
     self.SnapMsg("Deleting")
     self.Screen.Draw()
     self.Screen.SwapAndShow()
@@ -160,10 +169,9 @@ func (self *BleInfoPage) Init() {
   self.Scroller.PosY = 2
   self.Scroller.Init()
         
-  self.ConfirmPage1 = BleForgetConfirmPage()
+  self.ConfirmPage1 = NewBleForgetConfirmPage()
   self.ConfirmPage1.Screen = self.Screen
   self.ConfirmPage1.Name   = "Confirm Forget"
-  self.ConfirmPage1.Parent = self
   self.ConfirmPage1.Init()   
 
 }
@@ -199,8 +207,8 @@ func (self *BleInfoPage) GenList() {
     
     sm_text := ""
     if k == "UUIDs" {
-      if len(v)> 1 {
-        sm_text = v[0]
+      if len(v.([]string))> 1 {
+        sm_text = v.([]string)[0]
       }else{
         sm_text = "<empty>"
       }
@@ -232,7 +240,7 @@ func (self *BleInfoPage) ScrollUp() {
     self.PsIndex = 0
   }
   
-  cur_li = self.MyList[self.PsIndex]
+  cur_li := self.MyList[self.PsIndex]
   
   x,y := cur_li.Coord()
   
@@ -257,7 +265,7 @@ func (self *BleInfoPage) ScrollDown() {
     self.PsIndex = 0
   }
   
-  cur_li = self.MyList[self.PsIndex]
+  cur_li := self.MyList[self.PsIndex]
   
   x,y := cur_li.Coord()
   
@@ -392,7 +400,7 @@ func (self *BleInfoPage) Draw() {
     
     self.Scroller.UpdateSize(len(self.MyList)*UI.DefaultInfoPageListItemHeight, 
                             self.PsIndex*UI.DefaultInfoPageListItemHeight)
-    self._Scroller.Draw()
+    self.Scroller.Draw()
     
   }else {
     self.Ps.(*BleInfoPageSelector).Width = self.Width 
@@ -444,7 +452,7 @@ func (self *BleListMessageBox) Draw() {
 type BluetoothPage struct{
   UI.Page
   
-  Devices []api.Device 
+  Devices []bleapi.Device 
   
   BlePassword string 
   Connecting bool
@@ -461,7 +469,7 @@ type BluetoothPage struct{
   MsgBox  *BleListMessageBox
   ConnectTry int
   
-  BlockCb ??
+  //BlockCb ??
   
   LastStatusMsg string
   ADAPTER_DEV string // == adapterID
@@ -508,16 +516,16 @@ func (self *BluetoothPage) Init() {
     
   self.CanvasHWND = self.Screen.CanvasHWND
 
-  ps = &BleListSelector{}
+  ps := &BleListSelector{}
   ps.Parent = self
-  ps.Width = Width - 12
+  ps.Width = UI.Width - 12
         
   self.Ps = ps
   self.PsIndex = 0
         
   msgbox := NewBleListMessageBox()
   msgbox.CanvasHWND = self.CanvasHWND
-  msgbox.Init(" ",UI.Fonts["veramono12"])
+  msgbox.Init(" ",UI.Fonts["veramono12"],nil)
   msgbox.Parent = self
         
   self.MsgBox = msgbox     
@@ -576,7 +584,7 @@ func (self *BluetoothPage) GenNetworkList() {
   start_y := 0 
   
   
-  for i v := range self.Devices { // v == bleapi.Device
+  for i, v := range self.Devices { // v == bleapi.Device
   
   	props, err := v.GetProperties()
     if err != nil {
@@ -612,7 +620,7 @@ func (self *BluetoothPage) GenNetworkList() {
 
 func (self *BluetoothPage) Rescan() {
 
-  self.Scanning = True
+  self.Scanning = true
   self.ShowBox("Bluetooth scanning")
   self.Screen.FootBar.UpdateNavText("Scanning")
   
@@ -621,7 +629,7 @@ func (self *BluetoothPage) Rescan() {
 		fmt.Println(err)
 	}
   
-	err := bleapi.StartDiscovery()
+	err = bleapi.StartDiscovery()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -737,7 +745,7 @@ func (self *BluetoothPage) Draw() {
   
   
   if len(self.MyList) * NetItemDefaultHeight > self.Height {
-    self.Ps.Width  = self.Width - 11
+    self.Ps.(*BleListSelector).Width  = self.Width - 11
     self.Ps.Draw()
     
     for _,v := range self.MyList {
@@ -748,7 +756,7 @@ func (self *BluetoothPage) Draw() {
     self.Scroller.Draw()
     
   }else {
-    self.Ps.Width = self.Width
+    self.Ps.(*BleListSelector).Width = self.Width
     self.Ps.Draw()
     for _,v := range self.MyList {
       v.Draw()

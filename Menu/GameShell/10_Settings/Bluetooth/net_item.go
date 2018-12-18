@@ -1,10 +1,23 @@
 package Bluetooth
 
 import (
-
+  //"fmt"
+  
   bleapi "github.com/muka/go-bluetooth/api"
   "github.com/muka/go-bluetooth/bluez/profile"
+  //"github.com/muka/go-bluetooth/emitter"
+
+  "github.com/veandco/go-sdl2/ttf"
+	"github.com/veandco/go-sdl2/sdl"
+
+  "github.com/cuu/gogame/rect"
+  "github.com/cuu/gogame/surface"
+  "github.com/cuu/gogame/color"
+  "github.com/cuu/gogame/draw"
+
   "github.com/cuu/LauncherGoDev/sysgo/UI"
+  
+  
 )
 var NetItemDefaultHeight = 30
 
@@ -135,7 +148,7 @@ func (self *NetItem) Connect() {
 
 func (self *NetItem) Draw() {
   for k,v := range self.Labels {
-    x,y := v.Coord()
+    x,_ := v.Coord()
     _,h := v.Size()
     self.Labels[k].NewCoord(x, self.PosY+(self.Height - h)/2)
     self.Labels[k].Draw()
