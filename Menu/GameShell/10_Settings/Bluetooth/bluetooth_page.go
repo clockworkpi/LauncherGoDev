@@ -46,6 +46,9 @@ type BleForgetConfirmPage struct {
 func NewBleForgetConfirmPage() *BleForgetConfirmPage {
   p := &BleForgetConfirmPage{}
   
+  p.ListFont = UI.Fonts["veramono20"]
+  p.FootMsg = [5]string{"Nav","","","Cancel","Yes"}
+  
   p.ConfirmText = "Confirm Forget?"
   p.ConfirmPage.ConfirmText = p.ConfirmText
   
