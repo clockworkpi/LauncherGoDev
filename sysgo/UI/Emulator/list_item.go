@@ -227,6 +227,7 @@ func (self *EmulatorListItem) Draw() {
   x,y := self.Labels["Text"].Coord()
   _,h := self.Labels["Text"].Size()
   
+  
   if self.Path != "[..]" {
     self.Labels["Text"].NewCoord(23,y)
     

@@ -74,7 +74,7 @@ func (self *RomListPage) GeneratePathList(path string) ([]map[string]string,erro
   if UI.IsDirectory(path) == false {
     return nil,errors.New("Path is not a folder")
   }
-  dirmap := make(map[string]string)
+  
   var ret []map[string]string
   
   file_paths,err := filepath.Glob(path+"/*")//sorted
@@ -82,8 +82,9 @@ func (self *RomListPage) GeneratePathList(path string) ([]map[string]string,erro
     fmt.Println(err)
     return ret,err
   }
-  
+ 
   for _,v := range file_paths {
+    dirmap := make(map[string]string)
     if UI.IsDirectory(v) && self.EmulatorConfig.FILETYPE == "dir" { // like DOSBOX
       gameshell_bat := self.EmulatorConfig.EXT[0]
       if UI.GetGid(v) == FavGID { // skip fav roms
@@ -139,7 +140,7 @@ func (self *RomListPage) GeneratePathList(path string) ([]map[string]string,erro
 func (self *RomListPage) SyncList( path string ) {
   
   alist,err := self.GeneratePathList(path) 
-  //fmt.Println(alist)
+  
   if err != nil {
     fmt.Println(err)
     return
@@ -191,7 +192,6 @@ func (self *RomListPage) SyncList( path string ) {
     }
     
     li.Init(init_val)
-    
     self.MyList = append(self.MyList,li)
   }
 }
@@ -276,6 +276,8 @@ func (self *RomListPage) ScrollUp() {
   _,h := cur_li.Size()
   if y < 0 {
     for i,_ := range self.MyList{
+      x,y = self.MyList[i].Coord()
+      _, h = self.MyList[i].Size()
       self.MyList[i].NewCoord(x,y + h)
     }
     
@@ -300,6 +302,8 @@ func (self *RomListPage) ScrollDown(){
   
   if y+ h > self.Height { 
     for i,_ := range self.MyList{
+      x,y = self.MyList[i].Coord()
+      _, h = self.MyList[i].Size()
       self.MyList[i].NewCoord(x,y - h)
     }
     self.Scrolled -=1    
@@ -538,27 +542,19 @@ func (self *RomListPage) Draw() {
   }else{
     _,h := self.Ps.Size()
     if len(self.MyList) * HierListItemDefaultHeight > self.Height {
+
       self.Ps.NewSize(self.Width - 10,h)
       self.Ps.Draw()
-      
-      
       for _,v := range self.MyList {
         _,y := v.Coord()
-        if y > self.Height + self.Height/2 {
+        if y > (self.Height + self.Height/2) {
           break
         }
-        
-        if y < 0 {
-          continue
-        }
-        
         v.Draw()
       }
       
       self.Scroller.UpdateSize( len(self.MyList)*HierListItemDefaultHeight, self.PsIndex*HierListItemDefaultHeight)
       self.Scroller.Draw()
-      
-      
       
     }else {
       self.Ps.NewSize(self.Width,h)

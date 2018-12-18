@@ -291,6 +291,25 @@ func (self *TitleBar) SetBatteryStat( bat int) {
 	
 }
 
+func (self *TitleBar) CheckBluetooth() {
+  
+  out := System("hcitool dev | grep hci0 |cut -f3")
+  if len(out) < 17 {
+    fmt.Println("Titlebar CheckBluetooth: no bluetooth",out)
+    self.Icons["bluetooth"].SetIconIndex(2)
+    return
+  }else {
+    out  = System("sudo rfkill list | grep hci0 -A 2 | grep yes")
+    if len(out) > 10 {
+      self.Icons["bluetooth"].SetIconIndex(1)
+      return
+    }
+  }
+  
+  self.Icons["bluetooth"].SetIconIndex(0)
+  
+}
+
 func (self *TitleBar) Init(main_screen *MainScreen) {
 
 	start_x := 0
@@ -345,6 +364,16 @@ func (self *TitleBar) Init(main_screen *MainScreen) {
 	self.Icons["soundvolume"] = sound_volume
 
 	self.SyncSoundVolume()
+
+  bluetooth   := NewTitleBarIconItem()  
+  bluetooth.MyType = ICON_TYPES["STAT"]
+  bluetooth.Parent = self
+  bluetooth.ImageName = self.icon_base_path+"bluetooth.png"
+  bluetooth.Adjust(start_x+self.IconWidth+self.IconWidth+8,self.IconHeight/2+(self.BarHeight-self.IconHeight)/2,self.IconWidth,self.IconHeight,0)  
+        
+  self.Icons["bluetooth"] = bluetooth
+  self.CheckBluetooth()
+
 
 	round_corners := NewTitleBarIconItem()
 	round_corners.IconWidth = 10
@@ -410,6 +439,8 @@ func (self *TitleBar) Draw(title string) {
 	surface.Blit(self.CanvasHWND, time_text_surf, draw.MidRect(Width-time_text_w/2-self.ROffset, time_text_h/2+(self.BarHeight-time_text_h)/2, time_text_w,time_text_h,Width,Height),nil)
 
 	start_x := Width - time_text_w - self.ROffset - self.IconWidth*3 // close to the time_text
+  
+  self.Icons["bluetooth"].NewCoord(start_x - self.IconWidth,self.IconHeight/2+(self.BarHeight-self.IconHeight)/2)
 	self.Icons["sound"].NewCoord( start_x, self.IconHeight/2+ (self.BarHeight-self.IconHeight)/2)
 	self.Icons["battery"].NewCoord(start_x+self.IconWidth+self.IconWidth+8, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2)
 
@@ -435,7 +466,8 @@ func (self *TitleBar) Draw(title string) {
 
 	self.Icons["sound"].Draw()
 	self.Icons["battery"].Draw()
-
+  
+  self.Icons["bluetooth"].Draw()
 	
 	draw.Line(self.CanvasHWND,self.SkinManager.GiveColor("Line"), 0,self.BarHeight,self.Width,self.BarHeight, self.BorderWidth)
 

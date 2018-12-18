@@ -145,6 +145,9 @@ func (self *NetItem) Connect() {
   }
 }
 
+func (self *NetItem) GetLinkObj() UI.PluginInterface {
+  return nil
+}
 
 func (self *NetItem) Draw() {
   for k,v := range self.Labels {

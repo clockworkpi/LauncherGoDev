@@ -4,6 +4,7 @@ import (
   "fmt"
   "os"
   "log"
+  "strings"
   "github.com/fatih/structs"
   
   "github.com/veandco/go-sdl2/ttf"
@@ -87,18 +88,22 @@ func (self *BleForgetConfirmPage) Draw() {
 
 type BleInfoPageSelector struct {
   UI.InfoPageSelector
+  
 }
 
 func NewBleInfoPageSelector() *BleInfoPageSelector{
   p := &BleInfoPageSelector{}
-
+  p.Width = UI.Width
+  p.BackgroundColor = &color.Color{131,199,219,255} //SkinManager().GiveColor('Front')
+  
   return p 
 }
 
 func (self *BleInfoPageSelector) Draw() {
+  
   idx := self.Parent.GetPsIndex()
   mylist := self.Parent.GetMyList()
- 
+
   if idx < len(mylist) {
     _,y := mylist[idx].Coord()
     _,h := mylist[idx].Size()
@@ -109,7 +114,7 @@ func (self *BleInfoPageSelector) Draw() {
     
     canvas_ := self.Parent.GetCanvasHWND()
     rect_   := rect.Rect(x,self.PosY,self.Width-4, self.Height)
-    
+
     draw.AARoundRect(canvas_,&rect_,self.BackgroundColor,4,0,self.BackgroundColor)
   }
 }
@@ -121,9 +126,7 @@ type BleInfoPage struct {
   ListFontObj *ttf.Font
   ListSmFontObj *ttf.Font
   ListSm2FontObj *ttf.Font
-  
-  MyList []UI.ListItemInterface
-  
+    
   AList map[string]interface{}
   
   Scroller *UI.ListScroller
@@ -145,7 +148,6 @@ func NewBleInfoPage() *BleInfoPage {
   
   return p
 }
-
 
 func (self *BleInfoPage) Init() {
   
@@ -191,7 +193,23 @@ func (self *BleInfoPage) GenList() {
   start_y := 0
   
   i := 0
+  skip_arrays := []string{"ManufacturerData","AdvertisingFlags","ServiceData"}
+  
   for k,v := range self.AList {
+    
+    skip2 := false
+    for _,u := range skip_arrays {
+      if strings.HasPrefix(k,u) {
+        skip2 = true
+        break
+      }
+    }
+    if skip2 {
+      continue
+    }
+      
+      
+      
     li := UI.NewInfoPageListItem()
     li.Parent = self
     li.PosX   = start_x
@@ -219,15 +237,12 @@ func (self *BleInfoPage) GenList() {
       sm_text = fmt.Sprintf("%v",v)
     }
     
-    if sm_text == "0" {
-      sm_text = "No"
-    }else if sm_text == "1" {
-      sm_text = "Yes"
-    }
+
     li.SetSmallText(sm_text)
     li.PosX = 2
-    self.MyList = append(self.MyList,li)
     
+    self.MyList = append(self.MyList,li)
+    i+=1
   }
 
 }
@@ -261,21 +276,22 @@ func (self *BleInfoPage) ScrollDown() {
   if len(self.MyList) == 0 {
     return
   }
+
+  self.PsIndex += 1
   
-  self.PsIndex -= 1
-  
-  if self.PsIndex < 0 {
-    self.PsIndex = 0
+  if self.PsIndex >= len(self.MyList) {
+    self.PsIndex = len(self.MyList)-1
   }
   
   cur_li := self.MyList[self.PsIndex]
   
   x,y := cur_li.Coord()
+  _,h := cur_li.Size()
   
-  if y < 0 {
+  if y + h >  self.Height {
     for i,v := range self.MyList {
       x,y = v.Coord()
-      _,h := v.Size()
+      _,h = v.Size()
       self.MyList[i].NewCoord(x,y-h)
     }
   } 
@@ -347,7 +363,12 @@ func (self *BleInfoPage) Click() {
 }
 
 func (self *BleInfoPage) OnLoadCb() {
-
+  if self.Props.Connected == true {
+    self.FootMsg[1] = "Disconnect"
+  }else {
+    self.FootMsg[1] = ""
+  }
+  
   self.GenList()
 }
 
@@ -414,8 +435,6 @@ func (self *BleInfoPage) Draw() {
   }
 }
 
-type BleListSelector BleInfoPageSelector
-
 type BleListMessageBox struct {
   UI.Label
   Parent UI.PageInterface
@@ -476,9 +495,7 @@ type BluetoothPage struct{
   
   LastStatusMsg string
   ADAPTER_DEV string // == adapterID
-  
-  
-  MyList []*NetItem
+    
 }
 
 func NewBluetoothPage() *BluetoothPage {
@@ -519,7 +536,7 @@ func (self *BluetoothPage) Init() {
     
   self.CanvasHWND = self.Screen.CanvasHWND
 
-  ps := &BleListSelector{}
+  ps := NewBleInfoPageSelector()
   ps.Parent = self
   ps.Width = UI.Width - 12
         
@@ -653,15 +670,17 @@ func (self *BluetoothPage) ScrollUp() {
     return
   }
   
+  fmt.Println("Scroll Up")
+  
   self.PsIndex -= 1
   if self.PsIndex < 0 {
     self.PsIndex=0
   }
   
   cur_ni := self.MyList[self.PsIndex]//*NetItem
-  if cur_ni.PosY < 0 {
+  if cur_ni.(*NetItem).PosY < 0 {
     for i:=0;i<len(self.MyList);i++ {
-      self.MyList[i].PosY += self.MyList[i].Height
+      self.MyList[i].(*NetItem).PosY += self.MyList[i].(*NetItem).Height
     }
   }
 }
@@ -677,9 +696,9 @@ func (self *BluetoothPage) ScrollDown() {
   }
   
   cur_ni := self.MyList[self.PsIndex]
-  if cur_ni.PosY + cur_ni.Height > self.Height {
+  if cur_ni.(*NetItem).PosY + cur_ni.(*NetItem).Height > self.Height {
     for i:=0;i<len(self.MyList);i++ {
-      self.MyList[i].PosY -= self.MyList[i].Height
+      self.MyList[i].(*NetItem).PosY -= self.MyList[i].(*NetItem).Height
     }
   }
 }
@@ -723,9 +742,9 @@ func (self *BluetoothPage) KeyDown(ev *event.Event) {
       return
     }
     
-    self.InfoPage.Props    = self.MyList[self.PsIndex].Props
-    self.InfoPage.Path     = self.MyList[self.PsIndex].Path
-    self.InfoPage.MyDevice = self.MyList[self.PsIndex].Device
+    self.InfoPage.Props    = self.MyList[self.PsIndex].(*NetItem).Props
+    self.InfoPage.Path     = self.MyList[self.PsIndex].(*NetItem).Path
+    self.InfoPage.MyDevice = self.MyList[self.PsIndex].(*NetItem).Device
     
     self.Screen.PushPage(self.InfoPage)
     self.Screen.Draw()
@@ -748,7 +767,7 @@ func (self *BluetoothPage) Draw() {
   
   
   if len(self.MyList) * NetItemDefaultHeight > self.Height {
-    self.Ps.(*BleListSelector).Width  = self.Width - 11
+    self.Ps.(*BleInfoPageSelector).Width  = self.Width - 11
     self.Ps.Draw()
     
     for _,v := range self.MyList {
@@ -759,8 +778,9 @@ func (self *BluetoothPage) Draw() {
     self.Scroller.Draw()
     
   }else {
-    self.Ps.(*BleListSelector).Width = self.Width
+    self.Ps.(*BleInfoPageSelector).Width = self.Width
     self.Ps.Draw()
+
     for _,v := range self.MyList {
       v.Draw()
     }    
