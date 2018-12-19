@@ -275,7 +275,8 @@ func run() int {
   event.AddCustomEvent(UI.RUNEVT)
   event.AddCustomEvent(UI.RUNSH)
   event.AddCustomEvent(UI.RUNSYS)
-
+  event.AddCustomEvent(UI.RESTARTUI)
+  
   go FlashLed1(main_screen)
   go InspectionTeam(main_screen)
   
@@ -344,7 +345,22 @@ func run() int {
             fmt.Println(err)
           }
           os.Exit(0)          
-      
+        
+        case UI.RESTARTUI:
+          main_screen.OnExitCb()      
+          gogame.Quit()
+          exec_app_cmd :=" sync & cd "+UI.GetExePath()+"; "+os.Args[0]+";"
+          fmt.Println(exec_app_cmd)
+          cmd := exec.Command("/bin/sh","-c",exec_app_cmd)
+          err := cmd.Start()
+          if err != nil {
+            fmt.Println(err)
+          }
+          err = cmd.Process.Release()
+          if err != nil {
+            fmt.Println(err)
+          }
+          os.Exit(0)                    
       }
       
       
