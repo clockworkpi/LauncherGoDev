@@ -22,7 +22,8 @@ import (
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/LauncherPy"
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Update"
 	"github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Storage"
-
+  
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/PowerOFF"
 )
 
 type SettingsPageSelector struct {
@@ -99,7 +100,7 @@ func (self *SettingsPage) GenList() []*UI.UIPlugin {
     &UI.UIPlugin{0,"", "Storage",        "",                       &Storage.APIOBJ},
     &UI.UIPlugin{0,"",     "Update",     "Update",                 &Update.APIOBJ},
     &UI.UIPlugin{0,"",      "About",     "About",                  &About.APIOBJ},
-    
+    &UI.UIPlugin{0,"",      "PowerOFF",     "Power off",                  &PowerOFF.APIOBJ},
     &UI.UIPlugin{1,"", "LauncherPy",     "Switch to Launcher",     &LauncherPy.APIOBJ},
     
   }
