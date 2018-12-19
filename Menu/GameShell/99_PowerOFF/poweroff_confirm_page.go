@@ -54,7 +54,7 @@ func (self *PowerOFFConfirmPage) KeyDown(ev *event.Event) {
   }
   
   if ev.Data["Key"] == UI.CurKeys["X"] {
-    cmdpath := "feh --bg-center gameshell/wallpaper/seeyou.png;"
+    cmdpath := "feh --bg-center sysgo/gameshell/wallpaper/seeyou.png;"
     cmdpath += "sleep 3;"
     cmdpath += "sudo reboot"
     
