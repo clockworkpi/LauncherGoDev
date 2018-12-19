@@ -25,6 +25,7 @@ type LabelInterface interface {
 	SetText(text string)
 	Draw()
   DrawCenter(bold bool)
+  SetBold(b bool)
 }
 
 type Label struct {
@@ -33,12 +34,14 @@ type Label struct {
 	FontObj *ttf.Font
 	Color  *color.Color
 	CanvasHWND *sdl.Surface
+  Bold bool
 //	TextSurf *sdl.Surface
 }
 
 func NewLabel() *Label {
 	l := &Label{}
 	l.Color = &color.Color{83,83,83,255}
+  l.Bold = false
 	return l
 }
 
@@ -90,6 +93,10 @@ func (self *Label) SetText(text string) {
 	self.Width,self.Height = font.Size(self.FontObj, self.Text)
 }
 
+func (self *Label) SetBold(b bool) {
+  self.Bold = b 
+}
+
 func (self *Label) DrawCenter(bold bool) { // default bold is false
   font.SetBold(self.FontObj,bold) 
   my_text := font.Render(self.FontObj,self.Text, true, self.Color, nil)
@@ -100,7 +107,7 @@ func (self *Label) DrawCenter(bold bool) { // default bold is false
 }
 
 func (self *Label) Draw() {
-	font.SetBold(self.FontObj,false) // avoing same font tangling set_bold to others
+	font.SetBold(self.FontObj,self.Bold) // avoing same font tangling set_bold to others
   
 	my_text := font.Render(self.FontObj,self.Text, true, self.Color, nil)
 

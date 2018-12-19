@@ -17,7 +17,7 @@ type InfoPageListItem struct {
 
 func NewInfoPageListItem() *InfoPageListItem {
   p := &InfoPageListItem{}
-  p.Height = 30
+  p.Height = DefaultInfoPageListItemHeight
   p.ReadOnly = false
 	p.Labels = make(map[string]LabelInterface)
 	p.Icons  = make( map[string]IconItemInterface)

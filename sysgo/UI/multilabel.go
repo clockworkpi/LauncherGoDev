@@ -21,6 +21,7 @@ type MultiLabel struct {
 	CanvasHWND *sdl.Surface
 	//TextSurf *sdl.Surface
 	MaxWidth   int
+  Bold       bool
 }
 
 func NewMultiLabel() *MultiLabel{
@@ -28,7 +29,7 @@ func NewMultiLabel() *MultiLabel{
 	l.Color = &color.Color{83,83,83,255}
 	l.Width = 135
 	l.Height = 100
-
+  l.Bold = false
 	return l
 }
 
@@ -66,12 +67,17 @@ func (self *MultiLabel) SetText(text string) {
 	
 }
 
+func (self *MultiLabel) SetBold(b bool) {
+  self.Bold = b
+
+}
+
 func (self *MultiLabel) DrawCenter(bold bool) {
 
 }
 
 func (self *MultiLabel) Draw() {
-	font.SetBold(self.FontObj,false) // avoing same font tangling set_bold to others
+	font.SetBold(self.FontObj,self.Bold) // avoing same font tangling set_bold to others
 	self.blit_text(self.CanvasHWND, self.Text,self.PosX,self.PosY,self.FontObj)	
 }
 

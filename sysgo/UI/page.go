@@ -174,6 +174,9 @@ type PageInterface interface {
 	GetAlign() int
 	SetAlign(al int)
 	
+  ScrollUp()
+  ScrollDown()
+  
 	
 	SetIconIndex(idx int)
 	GetIconIndex() int
@@ -1013,3 +1016,52 @@ func (self *Page) GetAlign() int {
 	return self.Align
 }
 
+func (self *Page) ScrollUp() {
+  if len(self.MyList) == 0 {
+    return
+  }
+  
+  self.PsIndex -=1
+  
+  if self.PsIndex < 0 {
+    self.PsIndex = 0
+  }
+  
+  cur_li := self.MyList[self.PsIndex]
+  x,y := cur_li.Coord()
+  _,h := cur_li.Size()
+  if y < 0 {
+    for i,_ := range self.MyList{
+      x,y = self.MyList[i].Coord()
+      _, h = self.MyList[i].Size()
+      self.MyList[i].NewCoord(x,y + h)
+    }
+    
+    //self.Scrolled +=1
+  }
+
+}
+
+func (self *Page) ScrollDown() {
+  if len(self.MyList) == 0 {
+    return
+  }
+  self.PsIndex +=1
+  
+  if self.PsIndex >= len(self.MyList) {
+    self.PsIndex = len(self.MyList) - 1
+  }
+  
+  cur_li := self.MyList[self.PsIndex]
+  x,y := cur_li.Coord()
+  _,h := cur_li.Size()
+  
+  if y+ h > self.Height { 
+    for i,_ := range self.MyList{
+      x,y = self.MyList[i].Coord()
+      _, h = self.MyList[i].Size()
+      self.MyList[i].NewCoord(x,y - h)
+    }
+   // self.Scrolled -=1    
+  }
+}

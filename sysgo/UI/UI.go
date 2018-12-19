@@ -85,4 +85,10 @@ func init() {
   if MyIconPool == nil {
     MyIconPool = NewIconPool()
   }
+  if MyLangManager == nil {
+  
+    MyLangManager = NewLangManager()
+    MyLangManager.Init()
+    
+  }
 }
