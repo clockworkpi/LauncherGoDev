@@ -22,6 +22,7 @@ import (
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/LauncherPy"
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Update"
 	"github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Storage"
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Languages"
   
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/PowerOFF"
 )
@@ -98,6 +99,7 @@ func (self *SettingsPage) GenList() []*UI.UIPlugin {
     &UI.UIPlugin{0,"",      "Sound",     "Sound Volume" ,          &Sound.APIOBJ},
     &UI.UIPlugin{0,"", "Brightness",     "BackLight Brightness",   &Brightness.APIOBJ},
     &UI.UIPlugin{0,"", "Storage",        "",                       &Storage.APIOBJ},
+    &UI.UIPlugin{0,"", "Languages",        "Languages",            &Languages.APIOBJ},    
     &UI.UIPlugin{0,"",     "Update",     "Update",                 &Update.APIOBJ},
     &UI.UIPlugin{0,"",      "About",     "About",                  &About.APIOBJ},
     &UI.UIPlugin{0,"",      "PowerOFF",     "Power off",                  &PowerOFF.APIOBJ},
