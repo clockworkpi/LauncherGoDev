@@ -19,11 +19,13 @@ import (
   "github.com/cuu/LauncherGoDev/sysgo/UI"
   "github.com/cuu/LauncherGoDev/sysgo/UI/Emulator"
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings"
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/99_PowerOFF"
 )
 
 var (
   UIPluginList = []*UI.UIPlugin {
     &UI.UIPlugin{1,"", "Menu/GameShell/10_Settings",     "Settings",  &Settings.APIOBJ},
+    &UI.UIPlugin{1,"", "Menu/GameShell/99_PowerOFF",     "PowerOFF",  &PowerOFF.APIOBJ},
   }
 )
 

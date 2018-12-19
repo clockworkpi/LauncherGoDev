@@ -187,13 +187,16 @@ func InspectionTeam(main_screen *UI.MainScreen) {
       
       fmt.Println("Power Off counting down")
       
-      main_screen.CounterScreen.Draw()
-      main_screen.CounterScreen.SwapAndShow()
-      main_screen.CounterScreen.StartCounter()
+
       
       if UI.FileExists(sysgo.BackLight) {
         d := []byte(fmt.Sprintf("%d",last_brt))
         ioutil.WriteFile(sysgo.BackLight,d,0644)
+        
+        main_screen.CounterScreen.Draw()
+        main_screen.CounterScreen.SwapAndShow()
+        main_screen.CounterScreen.StartCounter()        
+        
       }
       
       main_screen.TitleBar.InLowBackLight = 0
@@ -268,10 +271,11 @@ func run() int {
 	UI.SwapAndShow()
 	
 	//fmt.Println(main_screen)
-  event.AllocEvents(3)
+  event.AllocEvents(4)
   event.AddCustomEvent(UI.RUNEVT)
   event.AddCustomEvent(UI.RUNSH)
-  
+  event.AddCustomEvent(UI.RUNSYS)
+
   go FlashLed1(main_screen)
   go InspectionTeam(main_screen)
   
@@ -307,7 +311,22 @@ func run() int {
             fmt.Println(err)
           }
           os.Exit(0)
-        
+          
+        case UI.RUNSYS:
+          main_screen.OnExitCb()      
+          gogame.Quit()   
+          exec_app_cmd := ev.Data["Msg"]
+          cmd := exec.Command("/bin/sh","-c",exec_app_cmd)
+          err := cmd.Start()
+          if err != nil {
+            fmt.Println(err)
+          }
+          err = cmd.Process.Release()
+          if err != nil {
+            fmt.Println(err)
+          }
+          os.Exit(0)
+
         case UI.RUNSH:
           main_screen.OnExitCb()      
           gogame.Quit()          

@@ -186,8 +186,8 @@ func (self *SoundSlider) StepBack() {
   if self.Value < 0 {
     self.Value = 0
   }
-  
-  vol := self.snd_segs[self.Value][0]
+
+  vol := self.snd_segs[self.Value][0] + (self.snd_segs[self.Value][1]-self.snd_segs[self.Value][0])/2
   
   if self.OnChangeCB != nil {
     self.OnChangeCB(vol)
