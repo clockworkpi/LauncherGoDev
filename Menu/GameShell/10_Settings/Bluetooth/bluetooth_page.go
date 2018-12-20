@@ -495,6 +495,8 @@ type BluetoothPage struct{
   
   LastStatusMsg string
   ADAPTER_DEV string // == adapterID
+  
+  Offline  bool
     
 }
 
@@ -679,8 +681,21 @@ func (self *BluetoothPage) Rescan() {
 
 
 func (self *BluetoothPage) OnLoadCb() {
-  self.RefreshDevices()
-  self.GenNetworkList()
+  self.Offline = false
+  
+  if self.Screen.TitleBar.InAirPlaneMode == false {
+    out := System("hcitool dev | grep hci0 |cut -f3")
+    if len(out) < 17 {
+      self.Offline = true
+      fmt.Println("Bluetooth OnLoadCb ,can not find hci0 alive,try to reboot")
+    }else {
+      self.RefreshDevices()
+      self.GenNetworkList()
+    }
+  }else {
+    self.Offline = true
+  }
+  
 }
 
 func (self *BluetoothPage) ScrollUp() {
@@ -723,6 +738,10 @@ func (self *BluetoothPage) ScrollDown() {
 func (self *BluetoothPage) KeyDown(ev *event.Event) {
 
   if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+    if self.Offline == true {
+      self.AbortedAndReturnToUpLevel()
+      return
+    }
     err := bleapi.StopDiscovery()
     if err != nil {
       fmt.Println(err)
@@ -751,14 +770,18 @@ func (self *BluetoothPage) KeyDown(ev *event.Event) {
   }
   
   if ev.Data["Key"]  == UI.CurKeys["X"] {
-    self.Rescan()
+    if self.Offline == false{
+      self.Rescan()
+    }
   }
   
   if ev.Data["Key"]  == UI.CurKeys["Y"] {
     if len(self.MyList) == 0 {
       return
     }
-    
+    if self.Offline = true {
+      return
+    }
     self.InfoPage.Props    = self.MyList[self.PsIndex].(*NetItem).Props
     self.InfoPage.Path     = self.MyList[self.PsIndex].(*NetItem).Path
     self.InfoPage.MyDevice = self.MyList[self.PsIndex].(*NetItem).Device
@@ -769,9 +792,9 @@ func (self *BluetoothPage) KeyDown(ev *event.Event) {
   }
   
   if ev.Data["Key"] == UI.CurKeys["B"] {
-    
-    self.TryConnect()
-  
+    if self.Offline == false {
+      self.TryConnect()
+    }
   }
 }
 
