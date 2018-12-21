@@ -237,7 +237,9 @@ func (self *BleInfoPage) GenList() {
       sm_text = fmt.Sprintf("%v",v)
     }
     
-
+    if len(sm_text) > 20 {
+      sm_text = sm_text[:20]
+    }
     li.SetSmallText(sm_text)
     li.PosX = 2
     
