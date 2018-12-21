@@ -684,7 +684,7 @@ func (self *BluetoothPage) OnLoadCb() {
   self.Offline = false
   
   if self.Screen.TitleBar.InAirPlaneMode == false {
-    out := System("hcitool dev | grep hci0 |cut -f3")
+    out := UI.System("hcitool dev | grep hci0 |cut -f3")
     if len(out) < 17 {
       self.Offline = true
       fmt.Println("Bluetooth OnLoadCb ,can not find hci0 alive,try to reboot")
@@ -779,7 +779,7 @@ func (self *BluetoothPage) KeyDown(ev *event.Event) {
     if len(self.MyList) == 0 {
       return
     }
-    if self.Offline = true {
+    if self.Offline == true {
       return
     }
     self.InfoPage.Props    = self.MyList[self.PsIndex].(*NetItem).Props

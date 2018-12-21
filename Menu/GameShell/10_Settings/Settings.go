@@ -25,6 +25,10 @@ import (
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Languages"
   
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/PowerOFF"
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/PowerOptions"
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Airplane"
+  
+
 )
 
 type SettingsPageSelector struct {
@@ -92,18 +96,20 @@ func NewSettingsPage() *SettingsPage {
 
 func (self *SettingsPage) GenList() []*UI.UIPlugin {
   alist := []*UI.UIPlugin{
-    
-    &UI.UIPlugin{0,"",  "Wifi",      "Wi-Fi",&Wifi.APIOBJ},
-    &UI.UIPlugin{0,"",  "Bluetooth", "Bluetooth",&Bluetooth.APIOBJ},
+  
+    &UI.UIPlugin{0,"",    "Airplane",      "Airplane Mode",            &Airplane.APIOBJ},
+    &UI.UIPlugin{0,"",    "PowerOptions",  "Power Options",            &PowerOptions.APIOBJ},
+    &UI.UIPlugin{0,"",    "Wifi",          "Wi-Fi",                    &Wifi.APIOBJ},
+    &UI.UIPlugin{0,"",    "Bluetooth",     "Bluetooth",                &Bluetooth.APIOBJ},
 
-    &UI.UIPlugin{0,"",      "Sound",     "Sound Volume" ,          &Sound.APIOBJ},
-    &UI.UIPlugin{0,"", "Brightness",     "BackLight Brightness",   &Brightness.APIOBJ},
-    &UI.UIPlugin{0,"", "Storage",        "",                       &Storage.APIOBJ},
-    &UI.UIPlugin{0,"", "Languages",        "Languages",            &Languages.APIOBJ},    
-    &UI.UIPlugin{0,"",     "Update",     "Update",                 &Update.APIOBJ},
-    &UI.UIPlugin{0,"",      "About",     "About",                  &About.APIOBJ},
-    &UI.UIPlugin{0,"",      "PowerOFF",     "Power off",                  &PowerOFF.APIOBJ},
-    &UI.UIPlugin{1,"", "LauncherPy",     "Switch to Launcher",     &LauncherPy.APIOBJ},
+    &UI.UIPlugin{0,"",    "Sound",          "Sound Volume" ,            &Sound.APIOBJ},
+    &UI.UIPlugin{0,"",    "Brightness",     "BackLight Brightness",     &Brightness.APIOBJ},
+    &UI.UIPlugin{0,"",    "Storage",        "",                         &Storage.APIOBJ},
+    &UI.UIPlugin{0,"",    "Languages",      "Languages",                &Languages.APIOBJ},    
+    &UI.UIPlugin{0,"",    "Update",         "Update",                   &Update.APIOBJ},
+    &UI.UIPlugin{0,"",    "About",          "About",                    &About.APIOBJ},
+    &UI.UIPlugin{0,"",    "PowerOFF",       "Power off",                &PowerOFF.APIOBJ},
+    &UI.UIPlugin{1,"",    "LauncherPy",     "Switch to Launcher",       &LauncherPy.APIOBJ},
     
   }
   

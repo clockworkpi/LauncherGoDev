@@ -12,6 +12,8 @@ import (
 	"github.com/cuu/gogame/image"
 	"github.com/cuu/gogame/transform"
 	"github.com/cuu/gogame/utils"
+  "github.com/cuu/gogame/rect"
+
 )
 
 type IconItemInterface interface {
@@ -55,7 +57,9 @@ type IconItemInterface interface {
 	GetCmdInvoke() PluginInterface
 
 	GetFileName() string
-	Draw() 
+	Draw()
+  DrawTopLeft() 
+  
 }
 
 type IconItem struct {
@@ -244,6 +248,37 @@ func (self *IconItem) GetCmdInvoke() PluginInterface {
 func (self *IconItem) GetFileName() string {
   return self.FileName
 }
+
+func (self *IconItem) DrawTopLeft() {
+  if self.Parent == nil {
+    fmt.Println("Error: IconItem Draw Parent nil")
+    return
+  }
+	parent_x,parent_y := self.Parent.Coord()
+	
+	if self.Label != nil {
+//		lab_x,lab_y := self.Label.Coord()
+		lab_w,lab_h:= self.Label.Size()
+		
+		if self.Align == ALIGN["VCenter"] {
+//			fmt.Println("IconItem Draw VCenter:",lab_w,lab_h,self.Label.GetText())
+			
+			self.Label.NewCoord( self.PosX - lab_w/2 + parent_x, self.PosY + self.Height/2+6+parent_y)
+			
+		}else if self.Align == ALIGN["HLeft"] {
+			self.Label.NewCoord( self.PosX + self.Width/2+3+parent_x, self.PosY - lab_h/2 + parent_y)
+		}
+
+		self.Label.Draw()
+	}
+
+	if self.ImgSurf != nil {
+    rect_ := rect.Rect( self.PosX+parent_x,self.PosY+parent_y, self.Width,self.Height ) // DIFF
+		surface.Blit(self.Parent.GetCanvasHWND(), self.ImgSurf,&rect_,nil)
+	}
+
+}
+
 func (self *IconItem) Draw() {
   if self.Parent == nil {
     fmt.Println("Error: IconItem Draw Parent nil")

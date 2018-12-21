@@ -227,9 +227,14 @@ func PreparationInAdv(){
     
     pwl := strings.Trim(string(b),"\r\n ")
     
-    if pwl == "supersaving" {
-      UI.System("sudo iw wlan0 set power_save on >/dev/null")
-    }else{
+    if pwl != ""{
+      sysgo.CurPowerLevel = pwl
+      if pwl == "supersaving" {
+        UI.System("sudo iw wlan0 set power_save on >/dev/null")
+      }else{
+        UI.System("sudo iw wlan0 set power_save off >/dev/null")
+      }
+    }else {
       UI.System("sudo iw wlan0 set power_save off >/dev/null")
     }
   }
@@ -271,12 +276,13 @@ func run() int {
 	UI.SwapAndShow()
 	
 	//fmt.Println(main_screen)
-  event.AllocEvents(4)
+  event.AllocEvents(5)
   event.AddCustomEvent(UI.RUNEVT)
   event.AddCustomEvent(UI.RUNSH)
   event.AddCustomEvent(UI.RUNSYS)
   event.AddCustomEvent(UI.RESTARTUI)
-  
+  event.AddCustomEvent(UI.POWEROPT)
+
   go FlashLed1(main_screen)
   go InspectionTeam(main_screen)
   
@@ -360,7 +366,11 @@ func run() int {
           if err != nil {
             fmt.Println(err)
           }
-          os.Exit(0)                    
+          os.Exit(0)
+          
+        case UI.POWEROPT:
+          everytime_keydown = gotime.Now()
+
       }
       
       

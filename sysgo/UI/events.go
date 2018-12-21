@@ -6,5 +6,5 @@ const (
     RESTARTUI=2
     RUNSH=3
     RUNSYS=4
-    
+    POWEROPT=5
 )
