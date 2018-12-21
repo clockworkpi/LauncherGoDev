@@ -1,8 +1,5 @@
 package Airplane
 
-/*
- * sysgo.BackLight  
- */
 import (
 /*
 	"github.com/veandco/go-sdl2/ttf"
