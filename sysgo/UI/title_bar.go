@@ -139,6 +139,8 @@ func NewTitleBar() *TitleBar {
 
 	t.TitleFont = Fonts["varela16"]
 	t.TimeFont  = Fonts["varela12"]
+  
+  t.InLowBackLight = -1
 	return t
 	
 }

@@ -30,7 +30,7 @@ import (
 
 var (
   flash_led1_counter  = 0
-  last_brt = 0
+  last_brt = -1
   passout_time_stage = 0
   led1_proc_file = "/proc/driver/led1"
   
@@ -146,6 +146,10 @@ func InspectionTeam(main_screen *UI.MainScreen) {
     if elapsed > gotime.Duration(time1) *gotime.Second && passout_time_stage == 0 {
       fmt.Println("timeout, dim screen ",elapsed)
       
+      if main_screen.TitleBar.InLowBackLight >= 0 {
+        return
+      }
+      
       if UI.FileExists(sysgo.BackLight) {
         lines,err := UI.ReadLines(sysgo.BackLight) 
         
@@ -156,7 +160,7 @@ func InspectionTeam(main_screen *UI.MainScreen) {
               if last_brt < 0 {
                 last_brt = brt
               }
-              d := []byte(fmt.Sprintf("%d",1))
+              d := []byte(fmt.Sprintf("%d",1)) // lowest backlight
               ioutil.WriteFile(sysgo.BackLight,d,0644)
             }
           }
@@ -171,6 +175,9 @@ func InspectionTeam(main_screen *UI.MainScreen) {
     }else if elapsed > gotime.Duration(time2) *gotime.Second && passout_time_stage == 1 {
       fmt.Println("timeout, close screen ", elapsed)
       
+      if main_screen.Closed == true {
+        return
+      }
       if UI.FileExists(sysgo.BackLight) {
         d := []byte(fmt.Sprintf("%d",0))
         ioutil.WriteFile(sysgo.BackLight,d,0644)

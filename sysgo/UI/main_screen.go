@@ -172,6 +172,7 @@ func NewMainScreen() *MainScreen {
 	
 	m.MsgBoxFont = Fonts["veramono20"]
 	m.IconFont   = Fonts["varela15"]
+  m.Closed = false
 	return m
 }
 
