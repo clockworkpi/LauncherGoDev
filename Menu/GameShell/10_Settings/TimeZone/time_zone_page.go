@@ -259,6 +259,10 @@ func (self *TimeZoneListPage) Click() {
     err := cpCmd.Run()
     if err != nil{
       fmt.Println(err)
+    }else {
+      
+      self.Screen.TitleBar.UpdateTimeLocation()
+    
     }
     fmt.Println("add ",cur_li.Path)
   }

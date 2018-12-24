@@ -8,6 +8,7 @@ import (
 	"bufio"
 	"strings"
   "os/exec"
+  "io/ioutil"
 	gotime "time"
 	
 	"github.com/veandco/go-sdl2/sdl"
@@ -109,6 +110,7 @@ type TitleBar struct {
 	
 	icon_base_path string /// SkinMap("gameshell/titlebar_icons/")
   
+  MyTimeLocation *gotime.Location
   
 	TitleFont *ttf.Font
 	TimeFont  *ttf.Font
@@ -405,6 +407,9 @@ func (self *TitleBar) Init(main_screen *MainScreen) {
     }
 
   }
+  
+  self.UpdateTimeLocation()
+  
 }
 
 func (self *TitleBar) ClearCanvas() {
@@ -418,6 +423,29 @@ func (self *TitleBar) ClearCanvas() {
 	self.Icons["round_corners"].SetIconIndex(1)
 	self.Icons["round_corners"].Draw()
 	
+}
+
+
+func (self *TitleBar) UpdateTimeLocation()  {
+  
+  d,err := ioutil.ReadFile("/etc/localtime")
+  if err != nil {
+    return
+  }
+  
+  self.MyTimeLocation,err = gotime.LoadLocationFromTZData("local", d)
+  if err != nil {
+    fmt.Println(err)
+    self.MyTimeLocation = nil
+  }
+}
+
+func (self *TitleBar) GetLocalTime() gotime.Time {
+  if self.MyTimeLocation == nil {
+    return gotime.Now()
+  }else {  
+    return gotime.Now().In(self.MyTimeLocation)
+  }
 }
 
 
