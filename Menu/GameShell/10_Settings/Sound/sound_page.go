@@ -9,7 +9,7 @@ import(
   "github.com/cuu/gogame/draw"
   "github.com/cuu/gogame/rect"
 
-  "github.com/cuu/LauncherGoDev/sysgo/UI"
+  "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 )
 
 type OnChangeCB_T func(int)

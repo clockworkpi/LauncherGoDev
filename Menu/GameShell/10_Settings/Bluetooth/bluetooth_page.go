@@ -21,7 +21,7 @@ import (
   
   "github.com/muka/go-bluetooth/bluez/profile"
   
-  "github.com/cuu/LauncherGoDev/sysgo/UI"
+  "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 )
 
 func showDeviceInfo(dev *bleapi.Device) {

@@ -15,7 +15,7 @@ import (
   "github.com/cuu/gogame/color"
   "github.com/cuu/gogame/draw"
 
-  "github.com/cuu/LauncherGoDev/sysgo/UI"
+  "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
   
   
 )

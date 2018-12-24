@@ -13,8 +13,8 @@ import(
   "github.com/cuu/gogame/surface"
   "github.com/cuu/gogame/rect"
 
-  "github.com/cuu/LauncherGoDev/sysgo"
-  "github.com/cuu/LauncherGoDev/sysgo/UI"
+  "github.com/clockworkpi/LauncherGoDev/sysgo"
+  "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 )
 
 type OnChangeCB_T func(int)

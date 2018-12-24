@@ -10,25 +10,25 @@ import (
 	"github.com/cuu/gogame/color"
 	"github.com/cuu/gogame/draw"
 	
-	"github.com/cuu/LauncherGoDev/sysgo/UI"
+	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
   
   //child packages
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/About"
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Sound"
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Brightness"
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Wifi"
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Bluetooth"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/About"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Sound"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Brightness"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Wifi"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Bluetooth"
   
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/LauncherPy"
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Update"
-	"github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Storage"
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Languages"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/LauncherPy"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Update"
+	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Storage"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Languages"
   
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/PowerOFF"
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/PowerOptions"
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Airplane"
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/ButtonsLayout"
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/TimeZone"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/PowerOFF"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/PowerOptions"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Airplane"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/ButtonsLayout"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/TimeZone"
 
   
 

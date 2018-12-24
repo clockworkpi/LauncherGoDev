@@ -16,7 +16,7 @@ import (
 	"github.com/cuu/gogame/event"
 	"github.com/cuu/gogame/time"
 
-  "github.com/cuu/LauncherGoDev/sysgo/UI"
+  "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 
 )
 

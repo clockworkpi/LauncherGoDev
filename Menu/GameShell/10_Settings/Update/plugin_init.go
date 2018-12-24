@@ -1,6 +1,6 @@
 package Update
 import (
-  "github.com/cuu/LauncherGoDev/sysgo/UI"
+  "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 )
 /******************************************************************************/
 type UpdatePlugin struct {

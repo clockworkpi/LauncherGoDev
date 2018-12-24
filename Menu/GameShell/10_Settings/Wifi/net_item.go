@@ -11,9 +11,9 @@ import (
 	"github.com/cuu/gogame/draw"
 	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/surface"
-	"github.com/cuu/LauncherGoDev/sysgo/UI"
+	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
   
-  "github.com/cuu/LauncherGoDev/sysgo/DBUS"
+  "github.com/clockworkpi/LauncherGoDev/sysgo/DBUS"
 	
 )
 var NetItemDefaultHeight = 30

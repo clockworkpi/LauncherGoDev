@@ -10,8 +10,8 @@ import (
 	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/color"
 */	
-	"github.com/cuu/LauncherGoDev/sysgo/UI"
-	//"github.com/cuu/LauncherGoDev/sysgo/DBUS"
+	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
+	//"github.com/clockworkpi/LauncherGoDev/sysgo/DBUS"
 )
 
 /******************************************************************************/

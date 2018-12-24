@@ -15,7 +15,7 @@ import (
   
 	"github.com/cuu/gogame/display"
 
-	"github.com/cuu/LauncherGoDev/sysgo"
+	"github.com/clockworkpi/LauncherGoDev/sysgo"
 )
 
 func ShowErr(e error) {

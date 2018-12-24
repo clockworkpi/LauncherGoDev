@@ -9,7 +9,7 @@ import (
   "github.com/cuu/gogame/event"
   "github.com/cuu/gogame/surface"
 
-  "github.com/cuu/LauncherGoDev/sysgo"
+  "github.com/clockworkpi/LauncherGoDev/sysgo"
 
 )
 type CounterScreen struct {

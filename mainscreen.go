@@ -16,10 +16,10 @@ import (
   "github.com/yookoala/realpath"
 
 
-  "github.com/cuu/LauncherGoDev/sysgo/UI"
-  "github.com/cuu/LauncherGoDev/sysgo/UI/Emulator"
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings"
-  "github.com/cuu/LauncherGoDev/Menu/GameShell/99_PowerOFF"
+  "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
+  "github.com/clockworkpi/LauncherGoDev/sysgo/UI/Emulator"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/99_PowerOFF"
 )
 
 var (
