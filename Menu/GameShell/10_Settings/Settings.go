@@ -28,7 +28,8 @@ import (
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/PowerOptions"
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/Airplane"
   "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/ButtonsLayout"
-  
+  "github.com/cuu/LauncherGoDev/Menu/GameShell/10_Settings/TimeZone"
+
   
 
 )
@@ -107,6 +108,8 @@ func (self *SettingsPage) GenList() []*UI.UIPlugin {
     &UI.UIPlugin{0,"",    "Sound",          "Sound Volume" ,            &Sound.APIOBJ},
     &UI.UIPlugin{0,"",    "Brightness",     "BackLight Brightness",     &Brightness.APIOBJ},
     &UI.UIPlugin{0,"",    "Storage",        "",                         &Storage.APIOBJ},
+    &UI.UIPlugin{0,"",    "TimeZone",        "Timezone",                &TimeZone.APIOBJ},
+
     &UI.UIPlugin{0,"",    "Languages",      "Languages",                &Languages.APIOBJ},    
     &UI.UIPlugin{0,"",    "Update",         "Update",                   &Update.APIOBJ},
     &UI.UIPlugin{0,"",    "About",          "About",                    &About.APIOBJ},

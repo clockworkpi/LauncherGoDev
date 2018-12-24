@@ -189,7 +189,7 @@ func InspectionTeam(main_screen *UI.MainScreen) {
       
 
       
-      if UI.FileExists(sysgo.BackLight) {
+      if UI.FileExists(sysgo.BackLight) { //hdmi does not have BackLight dev node
         d := []byte(fmt.Sprintf("%d",last_brt))
         ioutil.WriteFile(sysgo.BackLight,d,0644)
         

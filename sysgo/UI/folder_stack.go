@@ -1,24 +1,18 @@
-package Emulator
+package UI
 
 import (
   "sync"
-  //"github.com/cuu/LauncherGoDev/sysgo/UI"
 
 )
 
-type element struct {
-    data interface{}
-    next *element
-}
-
-type EmuStack struct {
+type FolderStack struct {
     lock *sync.Mutex
     head *element
     Size int
-    EmulatorConfig *ActionConfig
+    RootPath string
 }
 
-func (stk *EmuStack) Push(data interface{}) {
+func (stk *FolderStack) Push(data interface{}) {
     stk.lock.Lock()
 
     element := new(element)
@@ -31,7 +25,7 @@ func (stk *EmuStack) Push(data interface{}) {
     stk.lock.Unlock()
 }
 
-func (stk *EmuStack) Pop() interface{} {
+func (stk *FolderStack) Pop() interface{} {
     if stk.head == nil {
         return nil
     }
@@ -45,21 +39,25 @@ func (stk *EmuStack) Pop() interface{} {
     return r
 }
 
-func (stk *EmuStack) Length() int {
+func (stk *FolderStack) SetRootPath(path string) {
+  stk.RootPath = path
+}
+
+func (stk *FolderStack) Length() int {
 	return stk.Size
 }
 
-func (stk *EmuStack) Last() string {
+func (stk *FolderStack) Last() string {
   idx := stk.Length() -1
   if idx < 0 {
-    return stk.EmulatorConfig.ROM
+    return stk.RootPath
   }else {
     return stk.head.data.(string)
   }
 }
 
-func NewEmuStack() *EmuStack {
-    stk := new(EmuStack)
+func NewFolderStack() *FolderStack {
+    stk := new(FolderStack)
     stk.lock = &sync.Mutex{}
     return stk
 }

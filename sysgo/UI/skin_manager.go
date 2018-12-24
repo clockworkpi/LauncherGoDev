@@ -59,6 +59,8 @@ func (self *SkinManager) Init() {
 	self.Colors["Line"]  =  &color.Color{169,169,169,255}
 	self.Colors["TitleBg"] = &color.Color{228,228,228,255}
 	self.Colors["Active"]  =  &color.Color{175,90,0,255}
+  self.Colors["Disabled"]  =  &color.Color{204,204,204,255}
+
 	self.Colors["White"]  = &color.Color{255,255,255,255}
   self.Colors["Black"]  = &color.Color{0,0,0,255}
 
@@ -97,3 +99,4 @@ func (self *SkinManager) GiveColor(name string) *color.Color {
 	}
 }
 
+var MySkinManager *SkinManager

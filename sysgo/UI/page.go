@@ -1065,3 +1065,65 @@ func (self *Page) ScrollDown() {
    // self.Scrolled -=1    
   }
 }
+
+
+
+func (self *Page) FastScrollUp(step int) {
+  if len(self.MyList) == 0 {
+    return
+  }
+  if step < 1 {
+    step = 1
+  }
+  tmp := self.PsIndex
+  self.PsIndex -=step
+  
+  if self.PsIndex < 0 {
+    self.PsIndex = 0
+  }
+  dy := tmp - self.PsIndex
+  
+  cur_li := self.MyList[self.PsIndex]
+  x,y := cur_li.Coord()
+  _,h := cur_li.Size()
+  if y < 0 {
+    for i,_ := range self.MyList{
+      x,y = self.MyList[i].Coord()
+      _, h = self.MyList[i].Size()
+      self.MyList[i].NewCoord(x,y + h*dy)
+    }
+    
+    //self.Scrolled +=1
+  }
+
+}
+
+func (self *Page) FastScrollDown(step int) {
+  if len(self.MyList) == 0 {
+    return
+  }
+  if step < 1 {
+    step =1
+  }
+  tmp := self.PsIndex
+  self.PsIndex +=step
+  
+  if self.PsIndex >= len(self.MyList) {
+    self.PsIndex = len(self.MyList) - 1
+  }
+  dy := self.PsIndex - tmp
+  
+  cur_li := self.MyList[self.PsIndex]
+  x,y := cur_li.Coord()
+  _,h := cur_li.Size()
+  
+  if y+ h > self.Height { 
+    for i,_ := range self.MyList{
+      x,y = self.MyList[i].Coord()
+      _, h = self.MyList[i].Size()
+      self.MyList[i].NewCoord(x,y - h*dy)
+    }
+   // self.Scrolled -=1    
+  }
+}
+

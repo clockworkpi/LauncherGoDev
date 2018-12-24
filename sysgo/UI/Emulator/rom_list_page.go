@@ -21,7 +21,7 @@ type RomListPage struct {
   UI.Page
   Icons  map[string]UI.IconItemInterface
   ListFont *ttf.Font
-  MyStack *EmuStack
+  MyStack *UI.FolderStack
   EmulatorConfig *ActionConfig
   
   RomSoConfirmDownloadPage *RomSoConfirmPage
@@ -49,7 +49,7 @@ func NewRomListPage() *RomListPage {
   p.Icons=make(map[string]UI.IconItemInterface)
   p.ListFont =  UI.Fonts["notosanscjk15"]
   
-  p.MyStack = NewEmuStack()
+  p.MyStack = UI.NewFolderStack()
   
   p.BGwidth = 56
   p.BGheight = 70
@@ -211,6 +211,8 @@ func (self *RomListPage) Init() {
   self.Ps = ps
   self.PsIndex = 0
   
+  self.MyStack.SetRootPath(self.EmulatorConfig.ROM)
+  
   self.SyncList( self.EmulatorConfig.ROM )
   
   err := os.MkdirAll( self.EmulatorConfig.ROM+"/.Trash", 0700)
@@ -222,9 +224,7 @@ func (self *RomListPage) Init() {
   if err != nil {
     panic(err)
   }
-  
-  self.MyStack.EmulatorConfig = self.EmulatorConfig
-  
+    
   icon_for_list := UI.NewMultiIconItem()
   icon_for_list.ImgSurf = UI.MyIconPool.GetImgSurf("sys")
   icon_for_list.MyType = UI.ICON_TYPES["STAT"]
@@ -543,7 +543,7 @@ func (self *RomListPage) Draw() {
     self.Icons["bg"].Draw()
   }else{
     _,h := self.Ps.Size()
-    if len(self.MyList) * HierListItemDefaultHeight > self.Height {
+    if len(self.MyList) * UI.HierListItemDefaultHeight > self.Height {
 
       self.Ps.NewSize(self.Width - 10,h)
       self.Ps.Draw()
@@ -555,7 +555,8 @@ func (self *RomListPage) Draw() {
         v.Draw()
       }
       
-      self.Scroller.UpdateSize( len(self.MyList)*HierListItemDefaultHeight, self.PsIndex*HierListItemDefaultHeight)
+      self.Scroller.UpdateSize( len(self.MyList)*UI.HierListItemDefaultHeight, 
+                              self.PsIndex*UI.HierListItemDefaultHeight)
       self.Scroller.Draw()
       
     }else {

@@ -1,9 +1,9 @@
-package Emulator
+package TimeZone
 
 import (
-  "fmt"
-  "strings"
-  "io/ioutil"
+  //"fmt"
+  //"strings"
+  //"io/ioutil"
   "path/filepath"
   "github.com/veandco/go-sdl2/ttf"
   
@@ -17,33 +17,34 @@ import (
 
 )
 
-type EmulatorPageInterface interface {  
+var TimeZoneListPageListItemDefaultHeight = 30
+
+type TimeZoneListPageInterface interface {  
   UI.PageInterface
   GetMapIcons() map[string]UI.IconItemInterface
-  GetEmulatorConfig() *ActionConfig
+  
 }
 
-
-type EmulatorListItem struct {
+type TimeZoneListPageListItem struct {
   UI.HierListItem
-  Parent EmulatorPageInterface
+  Parent TimeZoneListPageInterface
 }
 
-func NewEmulatorListItem() *EmulatorListItem {
-  p := &EmulatorListItem{}
+func NewTimeZoneListPageListItem() *TimeZoneListPageListItem {
+  p := &TimeZoneListPageListItem{}
   p.Labels = make(map[string]UI.LabelInterface)
 	p.Icons  = make( map[string]UI.IconItemInterface)
 	p.Fonts  = make(map[string]*ttf.Font)
   
   p.MyType = UI.ICON_TYPES["EXE"]
-	p.Height = 32
+	p.Height = TimeZoneListPageListItemDefaultHeight
 	p.Width  = 0
  
   
   return p
 }
 
-func (self *EmulatorListItem) Init(text string) {
+func (self *TimeZoneListPageListItem) Init(text string) {
   l := UI.NewLabel()
   l.PosX = 20
 
@@ -54,20 +55,6 @@ func (self *EmulatorListItem) Init(text string) {
   }
   
   label_text := filepath.Base(text)
-  ext:= filepath.Ext(text)
-  if ext != "" {
-    alias_file := strings.Replace(text,ext,"",-1) + ".alias"
-    
-    if UI.FileExists(alias_file) == true {
-      b, err := ioutil.ReadFile(alias_file) 
-      if err != nil {
-        fmt.Print(err)
-      }else {
-        label_text = string(b)
-      }
-    }
-    
-  }
   
   if self.IsDir() == true {
     l.Init(label_text, self.Fonts["normal"],nil)
@@ -78,7 +65,7 @@ func (self *EmulatorListItem) Init(text string) {
   self.Labels["Text"] = l
 }
 
-func (self *EmulatorListItem) Draw() {
+func (self *TimeZoneListPageListItem) Draw() {
   x,y := self.Labels["Text"].Coord()
   _,h := self.Labels["Text"].Size()
   

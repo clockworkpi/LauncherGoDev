@@ -91,4 +91,8 @@ func init() {
     MyLangManager.Init()
     
   }
+  if MySkinManager == nil {
+    MySkinManager = NewSkinManager()
+    MySkinManager.Init()
+  }
 }
