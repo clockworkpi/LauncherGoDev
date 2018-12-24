@@ -1,5 +1,5 @@
-# GameShell launcher
-This is the launcher for GameShell based on 320x240 resolution and D-Pad layout.
+# GameShell launchergo source code
+This is the launchergo for GameShell based on 320x240 resolution and D-Pad layout.
 ![Screenshot](https://github.com/clockworkpi/GameShellDocs/blob/master/screenshot.png)
 
 # Create the necessary user and group
@@ -43,8 +43,9 @@ go get -u -v github.com/cuu/LauncherGoDev
 * https://github.com/veandco/go-sdl2
 * https://github.com/itchyny/volume-go
 * https://github.com/go-ini/ini
-* github.com/cavaliercoder/grab
-* github.com/yookoala/realpath
+* https://github.com/cavaliercoder/grab
+* https://github.com/yookoala/realpath
+* https://github.com/muka/go-bluetooth
 
 # Create “.mpd_cpi.conf” config
 
