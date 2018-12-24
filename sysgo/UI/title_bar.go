@@ -453,7 +453,7 @@ func (self *TitleBar) Draw(title string) {
 	self.ClearCanvas()
 	self.Title = title
 
-	cur_time := jodaTime.Format("HH:mm", gotime.Now())
+	cur_time := jodaTime.Format("HH:mm", self.GetLocalTime())
 	
 	time_text_w,  time_text_h  := font.Size(self.TimeFont, cur_time)
 	title_text_w, title_text_h := font.Size(self.TitleFont, self.Title)
