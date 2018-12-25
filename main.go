@@ -292,6 +292,7 @@ func run() int {
 
   go FlashLed1(main_screen)
   go InspectionTeam(main_screen)
+  go main_screen.TitleBar.RoundRobinCheck()
   
 	running := true
 	for running {

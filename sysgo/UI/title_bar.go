@@ -70,7 +70,7 @@ func (self *TitleBarIconItem) Draw() {
 //		lab_x,lab_y := self.Label.Coord()
 		lab_w,lab_h:= self.Label.Size()
 		if self.Align == ALIGN["VCenter"] {
-			self.Label.NewCoord( self.PosX - lab_w/2 + parent_x,        self.PosY + self.Height/2+6 + parent_y)
+			self.Label.NewCoord( self.PosX - lab_w/2 + parent_x, self.PosY + self.Height/2+6 + parent_y)
 		}else if self.Align == ALIGN["HLeft"] {
 			self.Label.NewCoord( self.PosX + self.Width/2+3 + parent_x, self.PosY - lab_h/2 + parent_y )
 		}
@@ -296,8 +296,9 @@ func (self *TitleBar) SetBatteryStat( bat int) {
 }
 
 func (self *TitleBar) CheckBluetooth() {
-  
+
   out := System("hcitool dev | grep hci0 |cut -f3")
+  
   if len(out) < 17 {
     fmt.Println("Titlebar CheckBluetooth: no bluetooth",out)
     self.Icons["bluetooth"].SetIconIndex(2)
