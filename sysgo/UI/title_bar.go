@@ -239,6 +239,11 @@ func (self *TitleBar) SetSoundVolume(vol int) {
 func (self *TitleBar) CheckBatteryStat() {
 	bat_segs:= [][]int{[]int{0,6},[]int{7,15},[]int{16,20},[]int{21,30},[]int{31,50},[]int{51,60},[]int{61,80},[]int{81,90},[]int{91,100}}
 	
+  if FileExists(sysgo.Battery) == false {
+    self.Icons["battery"] = self.Icons["battery_unknown"]
+    return
+  }
+  
 	file, err := os.Open( sysgo.Battery )
 	if err != nil {
 		fmt.Println("Could not open file ", sysgo.Battery)

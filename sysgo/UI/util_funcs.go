@@ -243,7 +243,11 @@ func System(cmd string) string {
   ret := ""
   out,err := exec.Command("bash","-c",cmd).Output()
   if err != nil {
-    fmt.Println(err)
+    if _, ok := err.(*exec.ExitError); ok {
+      //exit code !=0 ,but it can be ignored
+    }else{
+      fmt.Println(err)
+    }
   }else {
     ret = string(out)
   }
