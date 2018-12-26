@@ -36,6 +36,8 @@ var (
   
   everytime_keydown = gotime.Now()
   
+  sound_patch *UI.SoundPatch
+  
 )
 
 // flash the Led1 on the GS back
@@ -276,7 +278,11 @@ func run() int {
   ReunionPagesIcons(main_screen)
   
 	main_screen.FartherPages()
-
+  
+  sound_patch = UI.NewSoundPatch()
+  sound_patch.Parent = main_screen
+  sound_patch.Init()
+  
 	main_screen.Draw()
 	main_screen.SwapAndShow()
 
@@ -389,15 +395,36 @@ func run() int {
         continue
       }
       
+      
 			if ev.Data["Key"] == "Q" {
 				main_screen.OnExitCb()
 				return 0
-			}else if ev.Data["Key"] == "P" {				
-				event.Post(UI.RUNEVT,"GODEBUG=cgocheck=0 sucks") // just id and string, simplify the stuff
-				
-			}else {
-				main_screen.KeyDown(ev)
 			}
+      
+      
+      if ev.Data["Key"] == "Keypad +" {
+        if main_screen.CurPage().GetName() != "Sound volume" {
+          main_screen.Draw()
+          sound_patch.VolumeUp()
+          sound_patch.Draw()
+          main_screen.SwapAndShow()
+        }
+        continue
+      }
+      
+      if ev.Data["Key"] == "Keypad -" {
+        if main_screen.CurPage().GetName() != "Sound volume" {
+          main_screen.Draw()
+          sound_patch.VolumeDown()
+          sound_patch.Draw()
+          main_screen.SwapAndShow()       
+        
+        }
+        continue
+      }
+                  
+			main_screen.KeyDown(ev)
+			
 		}
 	}
 

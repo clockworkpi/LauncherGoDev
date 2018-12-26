@@ -25,6 +25,26 @@ import (
 
   
 )
+//eg: MainScreen
+type ScreenInterface interface {
+  AppendPage( pg PageInterface ) 
+  ClearCanvas()
+  CurPage() PageInterface 
+  Draw()
+  ExtraName(name string) string
+  FartherPages()
+  Init()
+  IsEmulatorPackage(dirname string ) bool 
+  IsExecPackage(dirname string ) bool 
+  IsPluginPackage(dirname string ) bool
+  KeyDown(ev *event.Event)
+  OnExitCb()
+  PushCurPage() 
+  PushPage( pg PageInterface) 
+  RunEXE( cmdpath string)
+  SetCurPage( pg PageInterface)
+  SwapAndShow()
+}
 
 type PluginConfig struct {
 	NAME string    `json:"NAME"`  // plugin name,default could be the same as Plugin Folder's name
@@ -359,7 +379,7 @@ func (self *MainScreen) KeyDown(ev *event.Event) {
 	if ev.Data["Key"] == "Space" {
 		self.Draw()
 		self.SwapAndShow()
-	}
+	} 
 
 	self.CurrentPage.KeyDown(ev)
 }

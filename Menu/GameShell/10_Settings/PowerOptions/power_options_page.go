@@ -262,7 +262,7 @@ func (self *InfoPage) GenList() {
     li.SetSmallText(v["value"])
     
     self.MyList = append(self.MyList,li)
-  
+    i+=1
   }
 }
 

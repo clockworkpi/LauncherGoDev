@@ -196,7 +196,7 @@ func (self *SoundSlider) StepBack() {
 
 func (self *SoundSlider) Draw() {
   self.BGpng.NewCoord(self.Width/2,self.Height/2)
-  fmt.Printf("%x\n",self.BGpng.Parent)
+  //fmt.Printf("%x\n",self.BGpng.Parent)
   self.BGpng.Draw()
   
   self.Scale.NewCoord(self.Width/2,self.Height/2)

@@ -198,7 +198,7 @@ func (self *TitleBar) SyncSoundVolume() {
 	
   vol, err := volume.GetVolume()
   if err != nil {
-    log.Fatalf("TitleBar SyncSoundVolume get volume failed: %+v", err)
+    log.Printf("TitleBar SyncSoundVolume get volume failed: %+v\n", err)
 		vol = 0
   }
   fmt.Printf("TitleBar SyncSoundVolume current volume: %d\n", vol)
