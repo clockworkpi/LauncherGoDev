@@ -218,14 +218,15 @@ func InspectionTeam(main_screen *UI.MainScreen) {
   }
 }
 
-//power stuff dealer
+//If not under awesomeWM, AutoRedraw improves the experience of gsnotify 
+//awesomeWM can hold individual window's content from being polluted without redrawing
 func AutoRedraw(main_screen *UI.MainScreen) {
 
 	for {
     if main_screen.TitleBar.InLowBackLight < 0 {
       UI.SwapAndShow()
     }
-    gotime.Sleep(500 * gotime.Millisecond)
+    gotime.Sleep(650 * gotime.Millisecond)
   }
 }
 
