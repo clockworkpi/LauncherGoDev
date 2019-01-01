@@ -414,7 +414,7 @@ type WifiList struct{
   InfoPage   *WifiInfoPage
   
   MyList []*NetItem 
-  
+  CurBssid  string
 }
 
 func NewWifiList() *WifiList {
@@ -765,6 +765,13 @@ func (self *WifiList) ConfigWireless(password string) {
   netid := self.PsIndex
   fmt.Println(netid, " ", password)
   
+  for i,v := range self.MyList {
+    if v.Bssid == self.CurBssid {
+      netid = i
+      break
+    }
+  }
+  
   /*
   self.Wireless.Method("SetWirelessProperty",netid,"dhcphostname","GameShell")
   self.Wireless.Method("SetWirelessProperty",netid,"ip","None")
@@ -963,6 +970,7 @@ func (self *WifiList) KeyDown( ev *event.Event  ) {
     if len(self.MyList) == 0 {
       return
     }
+    self.CurBssid = self.MyList[self.PsIndex].Bssid
     
     wicd_wireless_encrypt_pwd := self.GetWirelessEncrypt(self.PsIndex) 
     fmt.Println("wicd_wireless_encrypt_pwd  ", wicd_wireless_encrypt_pwd)
