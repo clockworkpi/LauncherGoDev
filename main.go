@@ -167,11 +167,12 @@ func InspectionTeam(main_screen *UI.MainScreen) {
             }
           }
         }
-      }
       
-      main_screen.TitleBar.InLowBackLight = 0
-      if time2 != 0 {
-        passout_time_stage = 1 // next 
+      
+        main_screen.TitleBar.InLowBackLight = 0
+        if time2 != 0 {
+          passout_time_stage = 1 // next 
+        }
       }
       everytime_keydown = cur_time
     }else if elapsed > gotime.Duration(time2) *gotime.Second && passout_time_stage == 1 {
