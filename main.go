@@ -213,10 +213,13 @@ func InspectionTeam(main_screen *UI.MainScreen) {
       passout_time_stage = 4
       
     }
-        
+    
+    main_screen.Draw()
+    main_screen.SwapAndShow()
     gotime.Sleep(gotime.Duration(UI.DT) * gotime.Millisecond)
   }
 }
+
 
 func PreparationInAdv(){
   
