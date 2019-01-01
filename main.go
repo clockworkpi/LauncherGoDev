@@ -214,12 +214,20 @@ func InspectionTeam(main_screen *UI.MainScreen) {
       
     }
     
-    main_screen.Draw()
-    main_screen.SwapAndShow()
     gotime.Sleep(gotime.Duration(UI.DT) * gotime.Millisecond)
   }
 }
 
+//power stuff dealer
+func AutoRedraw(main_screen *UI.MainScreen) {
+
+	for {
+    if main_screen.TitleBar.InLowBackLight < 0 {
+      UI.SwapAndShow()
+    }
+    gotime.Sleep(500 * gotime.Millisecond)
+  }
+}
 
 func PreparationInAdv(){
   
@@ -302,6 +310,7 @@ func run() int {
   go FlashLed1(main_screen)
   go InspectionTeam(main_screen)
   go main_screen.TitleBar.RoundRobinCheck()
+  go AutoRedraw(main_screen)
   
 	running := true
 	for running {
