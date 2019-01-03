@@ -18,7 +18,7 @@ import (
   "github.com/cuu/gogame/font"
 
 	bleapi "github.com/muka/go-bluetooth/api"
-  
+  "github.com/muka/go-bluetooth/bluez"
   "github.com/muka/go-bluetooth/bluez/profile"
   
   "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
@@ -604,12 +604,43 @@ func (self *BluetoothPage) TryConnect() {
   self.Screen.FootBar.ResetNavText()
 }
 
+//GetDevices returns a list of bluetooth discovered Devices
+func (self *BluetoothPage) GetDevices() ([]bleapi.Device, error) {
+
+	manager, err := bleapi.GetManager()
+	if err != nil {
+		return nil, err
+	}
+  
+  manager.LoadObjects()
+  
+	list, err := bleapi.GetDeviceList()
+	if err != nil {
+		return nil, err
+	}
+  
+	objects := manager.GetObjects()
+
+	var devices = make([]bleapi.Device, 0)
+	for _, path := range list {
+		props := (*objects)[path][bluez.Device1Interface]
+		dev, err := bleapi.ParseDevice(path, props)
+		if err != nil {
+      fmt.Println(err)
+			return nil, err
+		}
+		devices = append(devices, *dev)
+	}
+
+	return devices, nil
+}
+
 func (self *BluetoothPage) RefreshDevices() {
   
   // sync the cached devices 
   self.Devices = nil
   
-  devices, err := bleapi.GetDevices()
+  devices, err := self.GetDevices()
 	if err != nil {
 		panic(err)
 		os.Exit(1)
