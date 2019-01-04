@@ -29,7 +29,7 @@ import (
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Airplane"
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/ButtonsLayout"
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/TimeZone"
-
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Lima"
   
 
 )
@@ -116,7 +116,7 @@ func (self *SettingsPage) GenList() []*UI.UIPlugin {
     &UI.UIPlugin{0,"",    "PowerOFF",       "Power off",                &PowerOFF.APIOBJ},
     &UI.UIPlugin{0,"",    "ButtonsLayout",  "Buttons Layout",           &ButtonsLayout.APIOBJ},    
     &UI.UIPlugin{1,"",    "LauncherPy",     "Switch to Launcher",       &LauncherPy.APIOBJ},
-    
+    &UI.UIPlugin{1,"",    "Lima",            "GPU driver switch",       &Lima.APIOBJ},
   }
   
   return alist
