@@ -269,7 +269,6 @@ func run() int {
 	screen := display.SetMode(int32(UI.Width),int32(UI.Height),0,32)
     
 	UI.Init()
-	UI.MyIconPool.Init()
   
   PreparationInAdv()
   
@@ -448,7 +447,9 @@ func run() int {
 func main() {
 	
 	var exitcode int
-
+  
+  runtime.GOMAXPROCS(1)
+  
 	os.Setenv("SDL_VIDEO_CENTERED","1")
 	
 	sdl.Main(func() {

@@ -218,6 +218,7 @@ func  CheckBattery() int {
   if FileExists(sysgo.Battery) == false {
     return -1
   }
+  
   batinfos,err := ReadLines(sysgo.Battery)
   if err == nil {
     for _,v := range batinfos {
@@ -236,8 +237,12 @@ func  CheckBattery() int {
   }else{
     fmt.Println(err)
   }
-  return 0  
+  
+  return 0
 }
+
+
+
 
 func System(cmd string) string {
   ret := ""

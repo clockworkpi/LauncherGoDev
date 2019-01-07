@@ -79,11 +79,14 @@ func Init() {
 		keyname := fmt.Sprintf("notosanscjk%d",i)
 		Fonts[keyname] = font.Font(fonts_path["notocjk"],i)
 	}
-}
-
-func init() {
+  
+  //
+  keys_def_init()
+  
+  //// global variables Init
   if MyIconPool == nil {
     MyIconPool = NewIconPool()
+    MyIconPool.Init()
   }
   if MyLangManager == nil {
   
@@ -94,5 +97,7 @@ func init() {
   if MySkinManager == nil {
     MySkinManager = NewSkinManager()
     MySkinManager.Init()
-  }
+  }  
 }
+
+

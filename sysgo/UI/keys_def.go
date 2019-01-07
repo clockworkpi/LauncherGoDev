@@ -54,7 +54,8 @@ func DefineGameShell() {
 	
 }
 
-func init(){
+
+func keys_def_init(){
 	GameShell = make(map[string]string)
 	PC        = make(map[string]string)
 
