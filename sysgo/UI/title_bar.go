@@ -289,7 +289,7 @@ func (self *TitleBar) CheckBatteryStat() {
 			self.Icons["battery_charging"].SetIconIndex(cap_ge)
 			self.Icons["battery"] = self.Icons["battery_charging"]
 		}else {
-			self.Icons["battery_charging"].SetIconIndex(cap_ge)
+			self.Icons["battery_discharging"].SetIconIndex(cap_ge)
 			self.Icons["battery"] = self.Icons["battery_discharging"]	
 		}
 	}
