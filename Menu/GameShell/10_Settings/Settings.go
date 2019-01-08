@@ -119,7 +119,7 @@ func (self *SettingsPage) GenList() []*UI.UIPlugin {
     &UI.UIPlugin{UI.PluginPackage,"",    "ButtonsLayout",  "Buttons Layout",          &ButtonsLayout.APIOBJ},    
     &UI.UIPlugin{UI.PluginPackage,"",    "LauncherPy",     "Switch to Launcher",      &LauncherPy.APIOBJ},
     &UI.UIPlugin{UI.PluginPackage,"",    "Lima",           "GPU driver switch",       &Lima.APIOBJ},
-    &UI.UIPlugin{UI.PluginPackage,"",    "GateWay"         "Network gateway switch",  &GateWay.APIOBJ},
+    &UI.UIPlugin{UI.PluginPackage,"",    "GateWay",        "Network gateway switch",  &GateWay.APIOBJ},
   }
   
   return alist
