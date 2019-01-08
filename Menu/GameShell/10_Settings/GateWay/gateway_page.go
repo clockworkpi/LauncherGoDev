@@ -271,15 +271,16 @@ func (self *GateWayPage) ApplyGateWay( gateway string ) bool {
     out := UI.System("sudo ifconfig usb0 | grep inet | tr -s \" \"| cut -d \" \" -f3")
     if len(out) > 7 {
       if strings.Contains(out,"error") == false {
+        out = strings.Trim(out,"\r\n ")
         parts := strings.Split(out,".")
         if len(parts) == 4 { // IPv4
           tmp,err := strconv.Atoi(parts[3])
           if err == nil {
-            tmp = tmp +1 
-            if tmp > 255 {
-              tmp = 255
+            if tmp == 0 {
+              tmp = tmp +1 
+            }else if tmp > 0 {
+              tmp = tmp -1
             }
-            
             parts[3] = strconv.Itoa(tmp)
             ipaddress := strings.Join(parts,".")
             UI.System( fmt.Sprintf("sudo route add default gw %s",ipaddress)  )

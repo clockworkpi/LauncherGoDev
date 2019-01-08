@@ -259,3 +259,19 @@ func System(cmd string) string {
 
   return ret
 }
+
+func SystemTrim(cmd string) string {
+  ret := ""
+  out,err := exec.Command("bash","-c",cmd).Output()
+  if err != nil {
+    if _, ok := err.(*exec.ExitError); ok {
+      //exit code !=0 ,but it can be ignored
+    }else{
+      fmt.Println(err)
+    }
+  }else {
+    ret = string(out)
+  }
+
+  return strings.Trim(ret,"\r\n")
+}
