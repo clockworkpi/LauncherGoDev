@@ -91,8 +91,13 @@ func RunPlugin(p *goplugin.Plugin, main_screen *MainScreen) {
 	pi.Run(main_screen)
 }
 
+const (
+  PluginPackage = iota
+  PluginSo
+)
+
 type UIPlugin struct{ //Loadable and injectable
-  Type int
+  Type int // 0 == loadable package, 1  == .so 
   SoFile string
   FolderName string
   LabelText  string

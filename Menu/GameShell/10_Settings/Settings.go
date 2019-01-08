@@ -30,6 +30,8 @@ import (
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/ButtonsLayout"
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/TimeZone"
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Lima"
+  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/GateWay"
+
   
 
 )
@@ -100,23 +102,24 @@ func NewSettingsPage() *SettingsPage {
 func (self *SettingsPage) GenList() []*UI.UIPlugin {
   alist := []*UI.UIPlugin{
   
-    &UI.UIPlugin{0,"",    "Airplane",      "Airplane Mode",            &Airplane.APIOBJ},
-    &UI.UIPlugin{0,"",    "PowerOptions",  "Power Options",            &PowerOptions.APIOBJ},
-    &UI.UIPlugin{0,"",    "Wifi",          "Wi-Fi",                    &Wifi.APIOBJ},
-    &UI.UIPlugin{0,"",    "Bluetooth",     "Bluetooth",                &Bluetooth.APIOBJ},
+    &UI.UIPlugin{0,"",                   "Airplane",      "Airplane Mode",            &Airplane.APIOBJ},
+    &UI.UIPlugin{0,"",                   "PowerOptions",  "Power Options",            &PowerOptions.APIOBJ},
+    &UI.UIPlugin{0,"",                   "Wifi",          "Wi-Fi",                    &Wifi.APIOBJ},
+    &UI.UIPlugin{0,"",                   "Bluetooth",     "Bluetooth",                &Bluetooth.APIOBJ},
 
-    &UI.UIPlugin{0,"",    "Sound",          "Sound Volume" ,            &Sound.APIOBJ},
-    &UI.UIPlugin{0,"",    "Brightness",     "BackLight Brightness",     &Brightness.APIOBJ},
-    &UI.UIPlugin{0,"",    "Storage",        "",                         &Storage.APIOBJ},
-    &UI.UIPlugin{0,"",    "TimeZone",        "Timezone",                &TimeZone.APIOBJ},
+    &UI.UIPlugin{0,"",                   "Sound",          "Sound Volume" ,            &Sound.APIOBJ},
+    &UI.UIPlugin{0,"",                   "Brightness",     "BackLight Brightness",     &Brightness.APIOBJ},
+    &UI.UIPlugin{0,"",                   "Storage",        "",                         &Storage.APIOBJ},
+    &UI.UIPlugin{0,"",                   "TimeZone",        "Timezone",                &TimeZone.APIOBJ},
 
-    &UI.UIPlugin{0,"",    "Languages",      "Languages",                &Languages.APIOBJ},    
-    &UI.UIPlugin{0,"",    "Update",         "Update",                   &Update.APIOBJ},
-    &UI.UIPlugin{0,"",    "About",          "About",                    &About.APIOBJ},
-    &UI.UIPlugin{0,"",    "PowerOFF",       "Power off",                &PowerOFF.APIOBJ},
-    &UI.UIPlugin{0,"",    "ButtonsLayout",  "Buttons Layout",           &ButtonsLayout.APIOBJ},    
-    &UI.UIPlugin{1,"",    "LauncherPy",     "Switch to Launcher",       &LauncherPy.APIOBJ},
-    &UI.UIPlugin{1,"",    "Lima",            "GPU driver switch",       &Lima.APIOBJ},
+    &UI.UIPlugin{0,"",                   "Languages",      "Languages",                &Languages.APIOBJ},    
+    &UI.UIPlugin{0,"",                   "Update",         "Update",                   &Update.APIOBJ},
+    &UI.UIPlugin{0,"",                   "About",          "About",                    &About.APIOBJ},
+    &UI.UIPlugin{0,"",                   "PowerOFF",       "Power off",                &PowerOFF.APIOBJ},
+    &UI.UIPlugin{0,"",                   "ButtonsLayout",  "Buttons Layout",           &ButtonsLayout.APIOBJ},    
+    &UI.UIPlugin{0,"",                   "LauncherPy",     "Switch to Launcher",       &LauncherPy.APIOBJ},
+    &UI.UIPlugin{0,"",                   "Lima",            "GPU driver switch",       &Lima.APIOBJ},
+    &UI.UIPlugin{UI.PluginPackage,"",    "GateWay",         "Network gateway switch",  &GateWay.APIOBJ},
   }
   
   return alist
