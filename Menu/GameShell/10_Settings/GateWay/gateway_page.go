@@ -221,7 +221,7 @@ func (self *GateWayPage) Click() {
   if cur_li.Active == true {
     out := UI.System( "sudo ip route | grep default | cut -d \" \" -f3"  )
     if len(out) > 7 {
-      self.Screen.MsgBox.SetText(out)
+      self.Screen.MsgBox.SetText(strings.Trim(out,"\r\n "))
       self.Screen.MsgBox.Draw()
       self.Screen.SwapAndShow()      
     }
