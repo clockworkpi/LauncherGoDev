@@ -277,8 +277,10 @@ func (self *GateWayPage) ApplyGateWay( gateway string ) bool {
           tmp,err := strconv.Atoi(parts[3])
           if err == nil {
             if tmp == 0 {
-              tmp = tmp +1 
-            }else if tmp > 0 {
+              tmp = tmp + 1  
+            }else if tmp == 1 {
+              tmp = tmp + 1
+            }else if tmp > 1 {
               tmp = tmp -1
             }
             parts[3] = strconv.Itoa(tmp)
