@@ -149,7 +149,8 @@ func InspectionTeam(main_screen *UI.MainScreen) {
       fmt.Println("timeout, dim screen ",elapsed)
       
       if main_screen.TitleBar.InLowBackLight >= 0 {
-        return
+        everytime_keydown = cur_time
+        continue
       }
       
       if UI.FileExists(sysgo.BackLight) {
@@ -179,7 +180,8 @@ func InspectionTeam(main_screen *UI.MainScreen) {
       fmt.Println("timeout, close screen ", elapsed)
       
       if main_screen.Closed == true {
-        return
+        everytime_keydown = cur_time
+        continue
       }
       if UI.FileExists(sysgo.BackLight) {
         d := []byte(fmt.Sprintf("%d",0))
@@ -196,8 +198,6 @@ func InspectionTeam(main_screen *UI.MainScreen) {
     }else if elapsed > gotime.Duration(time3) * gotime.Second && passout_time_stage  == 2{
       
       fmt.Println("Power Off counting down")
-      
-
       
       if UI.FileExists(sysgo.BackLight) { //hdmi does not have BackLight dev node
         d := []byte(fmt.Sprintf("%d",last_brt))
