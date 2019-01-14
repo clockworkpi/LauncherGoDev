@@ -311,7 +311,7 @@ func run() int {
   go FlashLed1(main_screen)
   go InspectionTeam(main_screen)
   go main_screen.TitleBar.RoundRobinCheck()
-  go AutoRedraw(main_screen)
+  //go AutoRedraw(main_screen)
   
 	running := true
 	for running {
