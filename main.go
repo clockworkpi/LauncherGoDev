@@ -448,7 +448,7 @@ func main() {
 	
 	var exitcode int
   
-  runtime.GOMAXPROCS(1)
+  //runtime.GOMAXPROCS(1)
   
 	os.Setenv("SDL_VIDEO_CENTERED","1")
 	
