@@ -4,7 +4,7 @@ import (
   "fmt"
   "os"
   "strings"
-  "regexp"
+  //"regexp"
   "path/filepath"
   "os/exec"
   "errors"
@@ -106,12 +106,11 @@ func (self *RomListPage) GeneratePathList(path string) ([]map[string]string,erro
 
       if len(bname) > 1 {
         is_excluded := false
-        for _,exclude_pattern := range self.EmulatorConfig.EXCLUDE {
-          if matched, err := regexp.MatchString(exclude_pattern,bname); err == nil {
-            if matched == true {
-              is_excluded = true
-              break
-            }
+        for _,exclude_ext := range self.EmulatorConfig.EXCLUDE {
+          exclude_ext2 := strings.Trim(exclude_ext,"\r\n ")
+          if len(exclude_ext2) > 1 && strings.HasSuffix(bname,exclude_ext2) {
+            is_excluded= true
+            break
           }
         }
         
