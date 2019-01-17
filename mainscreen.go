@@ -56,6 +56,36 @@ func ReunionPagesIcons(self *UI.MainScreen) {
       
       sort.Slice(tmp, func(i, j int) bool { return tmp[i].FileName < tmp[j].FileName })
       //fmt.Println(tmp)
+      
+      var retro_games_idx []int
+      retro_games_dir := "20_Retro Games"
+      for _,x := range tmp {
+        if strings.HasPrefix(x.FileName, retro_games_dir) {
+          retro_games_idx = append(retro_games_idx,x.OrigIdx)
+        }
+      }
+      
+      if len(retro_games_idx) > 1 {
+        p_icons_0_link_page := p_icons[retro_games_idx[0]].GetLinkPage().(*UI.Page)
+        for i:=1;i<len(retro_games_idx);i++ {
+          icons_other_page := p_icons[retro_games_idx[i]].GetLinkPage().GetIcons()
+          p_icons_0_link_page.Icons = append(p_icons_0_link_page.Icons, icons_other_page...)
+        }
+        
+        var tmpswap []Tup
+        for i,x := range tmp {
+          if strings.HasPrefix(x.FileName,retro_games_dir) == false{
+            tmpswap = append(tmpswap,x)
+          }
+          
+          if strings.HasPrefix(x.FileName,retro_games_dir) == true && i==retro_games_idx[0] {
+            tmpswap = append(tmpswap,x)
+          }
+        }
+        
+        tmp = tmpswap
+      }
+      
       var new_icons []UI.IconItemInterface
       for _,x := range tmp {
         new_icons = append(new_icons, p_icons[x.OrigIdx])

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	
 //	"math"
+  //"reflect"
 	"sync"
 	
 	"github.com/veandco/go-sdl2/sdl"
@@ -845,7 +846,7 @@ func (self *Page) ClearCanvas() {
 }
 
 func (self *Page) AppendIcon( it interface{} ) {
-	self.Icons = append(self.Icons, it.(IconItemInterface))
+  self.Icons = append(self.Icons, it.(IconItemInterface))
 }
 
 func (self *Page) GetIcons() []IconItemInterface {
