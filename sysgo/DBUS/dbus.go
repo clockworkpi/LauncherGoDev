@@ -169,6 +169,15 @@ func (self *DBus) check_for_wireless(iwconfig string, wireless_ip string)  bool 
 	return true
 }
 
+func (self *DBus) GetWifiIP() string {
+  var wireless_ip string
+  if self.Wifi != nil {
+    self.Wifi.Get( self.Wifi.Method("GetWirelessIP", ""), &wireless_ip)
+  }
+  return wireless_ip
+  
+}
+
 func (self *DBus) IsWifiConnectedNow() bool {
   var fast bool
   var iwconfig string

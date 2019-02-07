@@ -17,6 +17,17 @@ type WidgetInterface interface {
 	NewCoord(x,y int)
 }
 
+type Coord struct {
+  X int 
+  Y int
+}
+
+type Plane struct {
+  W int 
+  H int
+
+}
+
 type Widget struct {
 	PosX int
 	PosY int
