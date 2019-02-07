@@ -437,7 +437,7 @@ func run() int {
       }
                   
 			main_screen.KeyDown(ev)
-			
+			main_screen.LastKeyDown = everytime_keydown
 		}
 	}
 

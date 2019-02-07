@@ -7,7 +7,7 @@ import (
 	"log"
 	//"encoding/json"
 	"path/filepath"
-  
+  gotime "time"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 
@@ -179,6 +179,9 @@ type MainScreen struct {
   Closed      bool
   
   UIPluginList []*UIPlugin
+  
+  LastKey string
+  LastKeyDown gotime.Time
 }
 
 
@@ -382,6 +385,8 @@ func (self *MainScreen) KeyDown(ev *event.Event) {
 	} 
 
 	self.CurrentPage.KeyDown(ev)
+  self.LastKey = ev.Data["Key"]
+  
 }
 
 

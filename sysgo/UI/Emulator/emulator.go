@@ -31,10 +31,17 @@ type MyEmulator struct { // as leader of RomListPage and FavListPage, it's a Plu
   FavPage *FavListPage
   DeleteConfirmPage *UI.DeleteConfirmPage
   EmulatorConfig *ActionConfig
+  
+  SpeedMax int
+  SpeedTimeInter int
+  
 }
 
 func NewMyEmulator() *MyEmulator{
   p := &MyEmulator{}
+  
+  p.SpeedMax = 5
+  p.SpeedTimeInter = 300
   
   return p
 }

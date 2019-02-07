@@ -252,6 +252,7 @@ type Page struct {
 
 	SelectedIconTopOffset int
 	EasingDur int
+  ScrollStep int
 }
 
 func NewPage() *Page {
@@ -261,7 +262,7 @@ func NewPage() *Page {
 	p.EasingDur = 10
 
 	p.Align = ALIGN["SLeft"]
-	
+	p.ScrollStep = 1
 	p.FootMsg = [5]string{"Nav.","","","","Enter"}
 	
 	return p

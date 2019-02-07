@@ -6,7 +6,7 @@ import (
   "strings"
   "path/filepath"
   "errors"
-  
+  gotime "time"
   "github.com/veandco/go-sdl2/ttf"
   
   "github.com/cuu/gogame/event"
@@ -53,6 +53,8 @@ func NewFavListPage() *FavListPage {
   p.BGwidth = 75
   p.BGheight = 73
   
+  p.ScrollStep = 1
+
   return p
 }
 
@@ -434,6 +436,22 @@ func (self *FavListPage) OnLoadCb() {
   self.Screen.SwapAndShow()
 }
 
+func (self *FavListPage) SpeedScroll(thekey string ) {
+  if self.Screen.LastKey == thekey {
+    self.ScrollStep += 1
+    if self.ScrollStep >= self.Leader.SpeedMax {
+      self.ScrollStep = self.Leader.SpeedMax
+    }
+  } else {
+    self.ScrollStep = 1
+  }
+  cur_time := gotime.Now()
+            
+  if cur_time.Sub(self.Screen.LastKeyDown) > gotime.Duration(self.Leader.SpeedTimeInter)*gotime.Millisecond {
+    self.ScrollStep = 1
+  }
+}
+
 func (self *FavListPage) KeyDown(ev *event.Event) {
 
   if ev.Data["Key"] == UI.CurKeys["Menu"] || ev.Data["Key"] == UI.CurKeys["Left"] {
@@ -443,12 +461,14 @@ func (self *FavListPage) KeyDown(ev *event.Event) {
   }
     
   if ev.Data["Key"] == UI.CurKeys["Up"]{
+    self.SpeedScroll(ev.Data["Key"])
     self.ScrollUp()
     self.Screen.Draw()
     self.Screen.SwapAndShow()
   }
   
   if ev.Data["Key"] == UI.CurKeys["Down"] {
+    self.SpeedScroll(ev.Data["Key"])
     self.ScrollDown()
     self.Screen.Draw()
     self.Screen.SwapAndShow()

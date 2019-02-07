@@ -8,7 +8,7 @@ import (
   "path/filepath"
   "os/exec"
   "errors"
-  
+  gotime "time"
   "github.com/veandco/go-sdl2/ttf"
   "github.com/cuu/gogame/time"
   "github.com/cuu/gogame/color"
@@ -54,6 +54,7 @@ func NewRomListPage() *RomListPage {
   p.BGwidth = 56
   p.BGheight = 70
   
+  p.ScrollStep = 1
   return p
 }
 
@@ -263,24 +264,27 @@ func (self *RomListPage) ScrollUp() {
   if len(self.MyList) == 0 {
     return
   }
-  
-  self.PsIndex -=1
+  tmp := self.PsIndex
+  self.PsIndex -=self.ScrollStep
+  dy := 0 
   
   if self.PsIndex < 0 {
-    self.PsIndex = 0
+    self.PsIndex = len(self.MyList) - 1
   }
+  
+  dy = tmp - self.PsIndex
   
   cur_li := self.MyList[self.PsIndex]
   x,y := cur_li.Coord()
   _,h := cur_li.Size()
-  if y < 0 {
+  {
     for i,_ := range self.MyList{
       x,y = self.MyList[i].Coord()
       _, h = self.MyList[i].Size()
-      self.MyList[i].NewCoord(x,y + h)
+      self.MyList[i].NewCoord(x,y + h*dy)
     }
     
-    self.Scrolled +=1
+    self.Scrolled +=dy
   }
 }
 
@@ -289,23 +293,26 @@ func (self *RomListPage) ScrollDown(){
   if len(self.MyList) == 0 {
     return
   }
-  self.PsIndex +=1
+  tmp := self.PsIndex
+  self.PsIndex +=self.ScrollStep
   
   if self.PsIndex >= len(self.MyList) {
-    self.PsIndex = len(self.MyList) - 1
+    self.PsIndex = 0
   }
+  
+  dy := self.PsIndex - tmp
   
   cur_li := self.MyList[self.PsIndex]
   x,y := cur_li.Coord()
   _,h := cur_li.Size()
   
-  if y+ h > self.Height { 
+  { 
     for i,_ := range self.MyList{
       x,y = self.MyList[i].Coord()
       _, h = self.MyList[i].Size()
-      self.MyList[i].NewCoord(x,y - h)
+      self.MyList[i].NewCoord(x,y - h*dy)
     }
-    self.Scrolled -=1    
+    self.Scrolled -=dy
   }
 
 }
@@ -428,19 +435,8 @@ func (self *RomListPage) ReScan() {
     self.SyncList(self.MyStack.Last())
   }
   
-  
-  idx := self.PsIndex
-  
-  if idx > len(self.MyList) - 1 {
-    idx = len(self.MyList)
-    if idx > 0 {
-      idx -= 1
-    }else if idx == 0 {
-      //nothing in MyList
-    }
-  }
-  
-  self.PsIndex = idx //sync PsIndex
+  self.PsIndex = 0 //sync PsIndex
+  self.Scrolled = 0
   
   self.SyncScroll()
 }
@@ -452,6 +448,22 @@ func (self *RomListPage) OnReturnBackCb() {
   self.Screen.SwapAndShow()
 }
 
+
+func (self *RomListPage) SpeedScroll(thekey string ) {
+  if self.Screen.LastKey == thekey {
+    self.ScrollStep += 1
+    if self.ScrollStep >= self.Leader.SpeedMax {
+      self.ScrollStep = self.Leader.SpeedMax
+    }
+  } else {
+    self.ScrollStep = 1
+  }
+  cur_time := gotime.Now()
+            
+  if cur_time.Sub(self.Screen.LastKeyDown) > gotime.Duration(self.Leader.SpeedTimeInter)*gotime.Millisecond {
+    self.ScrollStep = 1
+  }
+}
 
 func (self *RomListPage) KeyDown(ev *event.Event) {
 
@@ -469,12 +481,14 @@ func (self *RomListPage) KeyDown(ev *event.Event) {
   }
   
   if ev.Data["Key"] == UI.CurKeys["Up"]{
+    self.SpeedScroll(ev.Data["Key"])
     self.ScrollUp()
     self.Screen.Draw()
     self.Screen.SwapAndShow()
   }
   
   if ev.Data["Key"] == UI.CurKeys["Down"] {
+    self.SpeedScroll(ev.Data["Key"])
     self.ScrollDown()
     self.Screen.Draw()
     self.Screen.SwapAndShow()
