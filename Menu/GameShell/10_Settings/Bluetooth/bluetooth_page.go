@@ -5,6 +5,7 @@ import (
   "os"
   "log"
   "strings"
+  "errors"
   "github.com/fatih/structs"
   
   "github.com/veandco/go-sdl2/ttf"
@@ -17,6 +18,7 @@ import (
   "github.com/cuu/gogame/color"
   "github.com/cuu/gogame/font"
 
+  "github.com/godbus/dbus"
 	bleapi "github.com/muka/go-bluetooth/api"
   "github.com/muka/go-bluetooth/bluez"
   "github.com/muka/go-bluetooth/bluez/profile"
@@ -499,7 +501,8 @@ type BluetoothPage struct{
   ADAPTER_DEV string // == adapterID
   
   Offline  bool
-    
+  
+  Leader *BluetoothPlugin
 }
 
 func NewBluetoothPage() *BluetoothPage {
@@ -596,11 +599,50 @@ func (self *BluetoothPage) TryConnect() {
   self.Screen.FootBar.UpdateNavText("Connecting")
   self.ShowBox("Connecting")
   
-  cur_li.(*NetItem).Device.Connect()
+  self.Leader.PairPage.DevObj = cur_li.(*NetItem).Device
+  
+  err := cur_li.(*NetItem).Device.Pair()
+  if err != nil {
+    fmt.Println(err)
+    err_msg := ""
+    s := err.Error()
+    err_msg = "Pair error"
+    if strings.Contains(s,"ConnectionAttemptFailed") {
+      err_msg = "Page Timeout"
+    }
+    if strings.Contains(s,"NoReply") {
+      err_msg = "NoReply,Cancelling"
+      dev1,_ := cur_li.(*NetItem).Device.GetClient()
+      dev1.CancelPairing()
+      
+    }
+    if strings.Contains(s,"Exists") {
+      err_msg = "Already Exists"
+      adapter,err := bleapi.GetAdapter(adapterID)
+      if err == nil {
+        err = adapter.RemoveDevice(cur_li.(*NetItem).Path)
+        if err != nil {
+          fmt.Println(err)
+        }
+      }else {
+        fmt.Println(err)
+      }
+    }
+    
+    self.Leader.PairPage.PairErrorCb( err_msg )
+    self.Leader.PairPage.DevObj= nil
+    
+  }else{
+    self.Leader.PairPage.PairOKCb()
+    dev1,_ := cur_li.(*NetItem).Device.GetClient()
+		err = dev1.SetProperty("Trusted",true)
+		if err != nil {
+		  fmt.Println(err)
+    }
+    cur_li.(*NetItem).Device.Connect()
+  }
   
   self.HideBox()
-  
-  
   self.Screen.FootBar.ResetNavText()
 }
 
@@ -622,11 +664,15 @@ func (self *BluetoothPage) GetDevices() ([]bleapi.Device, error) {
 	objects := manager.GetObjects()
 
 	var devices = make([]bleapi.Device, 0)
+  
 	for _, path := range list {
-		props := (*objects)[path][bluez.Device1Interface]
+		object, ok := objects.Load(path)
+		if !ok {
+			return nil, errors.New("Path " + string(path) + " does not exists.")
+		}
+		props := (object.(map[string]map[string]dbus.Variant))[bluez.Device1Interface]
 		dev, err := bleapi.ParseDevice(path, props)
 		if err != nil {
-      fmt.Println(err)
 			return nil, err
 		}
 		devices = append(devices, *dev)

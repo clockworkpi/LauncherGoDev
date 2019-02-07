@@ -8,7 +8,7 @@ import (
 	"github.com/muka/go-bluetooth/api"
 	"github.com/muka/go-bluetooth/emitter"
 	"github.com/muka/go-bluetooth/linux"
-
+  "github.com/muka/go-bluetooth/bluez/profile"
 
 /*
 	"github.com/veandco/go-sdl2/ttf"
@@ -27,12 +27,26 @@ import (
 type BluetoothPlugin struct {
 	UI.Plugin
   BluetoothPage *BluetoothPage
+  PairPage      *BleAgentPairPage
 }
 
 const (
   adapterID = "hci0"
+	BUS_NAME = "org.bluez"
+	AGENT_INTERFACE = "org.bluez.Agent1"
+	AGENT_PATH = "/gameshell/bleagentgo"  
+  
 )
 
+
+func (self *BluetoothPlugin) InitAgent() {
+	agent := &Agent{}
+	agent.BusName = BUS_NAME
+	agent.AgentInterface = AGENT_INTERFACE
+	agent.AgentPath = AGENT_PATH
+  agent.Leader = self
+	RegisterAgent(agent, profile.AGENT_CAP_KEYBOARD_DISPLAY)
+}
 
 func (self *BluetoothPlugin) Init( main_screen *UI.MainScreen ) {
   
@@ -45,13 +59,19 @@ func (self *BluetoothPlugin) Init( main_screen *UI.MainScreen ) {
 		os.Exit(1)
 	}
 	
-
-    
-
 	self.BluetoothPage = NewBluetoothPage()
 	self.BluetoothPage.SetScreen( main_screen)
 	self.BluetoothPage.SetName("Bluetooth")
+  self.BluetoothPage.Leader  = self
 	self.BluetoothPage.Init()  
+  
+  self.PairPage = NewBleAgentPairPage()
+  self.PairPage.SetScreen( main_screen) 
+  self.PairPage.SetName("Bluetooth pair")
+  self.PairPage.Leader = self
+  self.PairPage.Init()
+  
+  self.InitAgent()
   
   err = api.On("discovery", emitter.NewCallback(func(ev emitter.Event) {
 		//discoveryEvent := ev.GetData().(api.DiscoveredDeviceEvent)

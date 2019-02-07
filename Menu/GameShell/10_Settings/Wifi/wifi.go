@@ -546,11 +546,15 @@ func (self *WifiList) DbusDaemonStatusChangedSig(body []interface{}) {
 		fmt.Println(state," ", info)
 	}
   
+  if self.Screen.CurPage() != self {
+    return
+  }
+  
   var info_str []string 
   for _,v := range info {
     info_str = append(info_str, v.String())
   } 
-  
+    
   self.UpdateNetList(state,info_str,false,false)
   if len(info_str) > 0 {
     self.Screen.Draw()
