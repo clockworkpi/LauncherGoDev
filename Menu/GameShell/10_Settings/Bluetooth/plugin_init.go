@@ -7,7 +7,7 @@ import (
   
 	"github.com/muka/go-bluetooth/api"
 	"github.com/muka/go-bluetooth/emitter"
-	"github.com/muka/go-bluetooth/linux"
+	"github.com/muka/go-bluetooth/linux/btmgmt"
   "github.com/muka/go-bluetooth/bluez/profile"
 
 /*
@@ -52,7 +52,7 @@ func (self *BluetoothPlugin) Init( main_screen *UI.MainScreen ) {
   
  	log.Println("Reset bluetooth device")
   
-	a := linux.NewBtMgmt(adapterID)
+	a := btmgmt.NewBtMgmt(adapterID)
 	err := a.Reset()
 	if err != nil {
 		log.Fatal(err)
