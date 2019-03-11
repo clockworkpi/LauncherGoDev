@@ -35,7 +35,7 @@ mkdir -p /home/cpi/music
 
 ## Install dependent packages
 ```
-go get -u -v github.com/cuu/LauncherGoDev
+go get -u -v github.com/clockworkpi/LauncherGoDev
 ```
 
 ## Relevant opensource packages 
