@@ -469,11 +469,13 @@ func (self *TitleBar) Draw(title string) {
 	title_text_surf := font.Render(self.TitleFont, self.Title, true, self.SkinManager.GiveColor("Text"),nil)
 	
 	surface.Blit(self.CanvasHWND,title_text_surf, draw.MidRect(title_text_w/2+self.LOffset,title_text_h/2+(self.BarHeight-title_text_h)/2,title_text_w,title_text_h,Width,Height),nil)
-
+  title_text_surf.Free()
 
 	time_text_surf := font.Render(self.TimeFont, cur_time,true,self.SkinManager.GiveColor("Text"),nil)
 	surface.Blit(self.CanvasHWND, time_text_surf, draw.MidRect(Width-time_text_w/2-self.ROffset, time_text_h/2+(self.BarHeight-time_text_h)/2, time_text_w,time_text_h,Width,Height),nil)
-
+  
+  time_text_surf.Free()
+  
 	start_x := Width - time_text_w - self.ROffset - self.IconWidth*3 // close to the time_text
   
   self.Icons["bluetooth"].NewCoord(start_x - self.IconWidth,self.IconHeight/2+(self.BarHeight-self.IconHeight)/2)

@@ -383,7 +383,7 @@ func (self *WifiListMessageBox) Draw() {
   
   rect_2 := rect.Rect(x,y,w,h)
   surface.Blit(self.CanvasHWND,my_text,&rect_2,nil)
-  
+  my_text.Free()
 }
 
 //---------WifiList---------------------------------

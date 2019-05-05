@@ -118,6 +118,7 @@ func (self *MessageBox) Draw() {
 
 		dest_rect := rect.Rect(x,y, word_width,word_height)
 		surface.Blit(self.CanvasHWND, word_surface, &dest_rect,nil)
+    word_surface.Free()
 		if len(words) == 1 {
 			x+=word_width
 		} else {

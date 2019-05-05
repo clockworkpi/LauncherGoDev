@@ -471,7 +471,7 @@ func (self *BleListMessageBox) Draw() {
   
   rect2_ := rect.Rect(x,y,w,h)
   surface.Blit(self.CanvasHWND,my_text,&rect2_,nil)
-  
+  my_text.Free()
 
 }
 

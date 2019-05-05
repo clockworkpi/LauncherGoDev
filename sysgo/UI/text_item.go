@@ -70,5 +70,5 @@ func (self *TextItem) Draw() {
 
 	rect_ := draw.MidRect(self.PosX,self.PosY,self.Width,self.Height,Width,Height)
 	surface.Blit(self.Parent.GetCanvasHWND(),my_text,rect_,nil)
-	
+	my_text.Free()
 }

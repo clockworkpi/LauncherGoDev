@@ -126,6 +126,7 @@ func (self *MultiLabel) blit_text(surf *sdl.Surface,text string, pos_x,pos_y int
 			}
 			rect_ := rect.Rect(x,y,self.Width,self.Height)
 			surface.Blit(surf,word_surface,&rect_,nil)
+      word_surface.Free()
 			x += (word_width+space)	
 		}
 		x = pos_x

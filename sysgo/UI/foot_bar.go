@@ -132,6 +132,11 @@ func (self *FootBar) ReadFootBarIcons( icondir string) {
 		it.AddLabel("game", self.LabelFont)
 		it.Adjust( self.IconWidth/2+i*self.IconWidth, self.IconHeight/2+2, self.IconWidth,self.IconHeight,0)
 		it.IconIndex = i
+    if val, ok := self.Icons[v]; ok {
+      if val.(*FootBarIconItem).ImgSurf != nil {
+          val.(*FootBarIconItem).ImgSurf.Free()
+      }
+    }
 		self.Icons[v] = it
 	}
 }
@@ -177,8 +182,10 @@ func (self *FootBar) UpdateNavText(texts string) {
 		my_text := font.Render(self.LabelFont, text_, true, self.SkinManager.GiveColor("Text"),nil)
 		final_piece  = text_
 		if int(my_text.W) >= left_width {
+      my_text.Free()
 			break
 		}
+    my_text.Free()
 	}
 	
 	fmt.Printf("finalpiece %s\n", final_piece)

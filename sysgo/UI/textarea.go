@@ -126,6 +126,7 @@ func (self *Textarea) BuildBlitText() {
 			linenumber += 1
 			blit_rows = append(blit_rows,[]string{})
 		}
+    t.Free()
 	}
 
 	if len(blit_rows) == 1 {
@@ -182,7 +183,7 @@ func (self *Textarea) BlitText() {
 		rect_ := rect.Rect(x,y,0,0)
 		surface.Blit(self.CanvasHWND,t,&rect_,nil)
 		x += surface.GetWidth(t)
-		
+		t.Free()
 	}
 }
 
@@ -210,11 +211,13 @@ func (self *Textarea) Cursor() {
 			break
 		}
 		x += surface.GetWidth(t)
+    t.Free()
 	}
 
 	c_t := font.Render(self.FontObj,"_",true,&color.Color{0,0,0,255},nil)
 	rect_ := rect.Rect(x+1,y-2,0,0)
 	surface.Blit(self.CanvasHWND,c_t,&rect_,nil)
+  c_t.Free()
 }
 
 func (self *Textarea) Draw() {

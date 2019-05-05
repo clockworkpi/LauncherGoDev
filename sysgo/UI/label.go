@@ -104,6 +104,7 @@ func (self *Label) DrawCenter(bold bool) { // default bold is false
   rect_ := draw.MidRect(self.PosX,self.PosY,self.Width,self.Height,Width,Height)
   
   surface.Blit(self.CanvasHWND,my_text,rect_,nil)
+  my_text.Free()
 }
 
 func (self *Label) Draw() {
@@ -114,5 +115,5 @@ func (self *Label) Draw() {
 	rect_ := rect.Rect(self.PosX,self.PosY,self.Width,self.Height)
 	
 	surface.Blit(self.CanvasHWND,my_text,&rect_,nil)
-	
+	my_text.Free()
 }
