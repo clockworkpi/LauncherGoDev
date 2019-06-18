@@ -12,6 +12,7 @@ import (
 	"strconv"
   "syscall"
   "os/exec"
+  "runtime"
   
 	"github.com/cuu/gogame/display"
 
@@ -258,6 +259,16 @@ func System(cmd string) string {
   }
 
   return ret
+}
+
+func ArmSystem(cmd string) string {
+
+  if strings.Contains(runtime.GOARCH,"arm") == true {
+    return System(cmd)
+  }else {
+    return ""
+  }
+  
 }
 
 func SystemTrim(cmd string) string {

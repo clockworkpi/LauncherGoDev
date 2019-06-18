@@ -233,9 +233,17 @@ func (self *GPUDriverPage) Click() {
     if strings.Contains(cur_li.Value,"modesetting") {
       lockfile,_ := homedir.Expand("~/.lima")
       UI.System("touch "+lockfile)
+      UI.ArmSystem("sudo mv /usr/lib/xorg/modules/drivers/modesetting_drv.so.lima  /usr/lib/xorg/modules/drivers/modesetting_drv.so")
+      UI.ArmSystem("sudo sed -i '/^#.*lima/s/^#//' /etc/ld.so.conf.d/00-arm-linux-gnueabihf.conf")
+      UI.ArmSystem("sudo ldconfig")
+      
     }else {
       lockfile,_ := homedir.Expand("~/.lima")
       UI.System("rm "+lockfile)
+      UI.ArmSystem("sudo mv /usr/lib/xorg/modules/drivers/modesetting_drv.so /usr/lib/xorg/modules/drivers/modesetting_drv.so.lima")
+      UI.ArmSystem("sudo sed -i 's/^[^#]*lima/#&/' /etc/ld.so.conf.d/00-arm-linux-gnueabihf.conf")
+      UI.ArmSystem("sudo ldconfig") 
+
     }
     
     time.BlockDelay(1000)
@@ -352,7 +360,7 @@ func (self *GPUDriverPage) Draw() {
   }
   
   if self.HWND != nil {
-    surface.Fill(self.HWND, &color.Color{255,255,255,255})
+    surface.Fill(self.HWND, UI.MySkinManager.GiveColor("White"))
     rect_ := rect.Rect(self.PosX,self.PosY,self.Width,self.Height)
     surface.Blit(self.HWND,self.CanvasHWND,&rect_,nil)
   }

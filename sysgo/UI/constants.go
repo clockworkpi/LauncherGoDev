@@ -16,6 +16,6 @@ var (
 )
 
 var (
-	Emulator_flag = "action.json"
+	Emulator_flag = "action.config"
 	Plugin_flag   = "plugin.json"
 )

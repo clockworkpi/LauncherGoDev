@@ -13,8 +13,9 @@ import (
   "encoding/json"
   "sort"
   
-  "github.com/yookoala/realpath"
+  "github.com/go-ini/ini"
 
+  "github.com/yookoala/realpath"
 
   "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
   "github.com/clockworkpi/LauncherGoDev/sysgo/UI/Emulator"
@@ -184,10 +185,11 @@ func ReadTheDirIntoPages(self *UI.MainScreen, _dir string, pglevel int, cur_page
           a_c := Emulator.ActionConfig{}
           a_c.FILETYPE="file"
           a_c.TITLE = "Game"
-          dat, err := ioutil.ReadFile(_dir+"/"+f.Name()+"/" +UI.Emulator_flag)
+          cfg, err := ini.Load(_dir+"/"+f.Name()+"/" +UI.Emulator_flag)
 					UI.ShowErr(err)
 
-					err = json.Unmarshal(dat, &a_c)
+					err = cfg.MapTo(&a_c)
+          
 					if err == nil {
             //fmt.Println(a_c)
             if UI.FileExists(filepath.Join(_dir,f.Name(),"retroarch-local.cfg")) {

@@ -6,15 +6,15 @@ import (
 )
 
 type ActionConfig struct {
-	ROM string `json:"ROM"`
-	ROM_SO string `json:"ROM_SO"`
-	EXT []string   `json:"EXT"`
-	EXCLUDE []string `json:"EXCLUDE"`
-	FILETYPE string  `json:"FILETYPE"`   // defalut is file
-	LAUNCHER string  `json:"LAUNCHER"`
-	TITLE   string   `json:"TITLE"` // defaut is Game
-	SO_URL string    `json:"SO_URL"`
-	RETRO_CONFIG string `json:"RETRO_CONFIG"`
+	ROM string `ini:"ROM"`
+	ROM_SO string `ini:"ROM_SO"`
+	EXT []string   `ini:"EXT,omitempty"`
+	EXCLUDE []string `ini:"EXCLUDE,omitempty"`
+	FILETYPE string  `ini:"FILETYPE"`   // defalut is file
+	LAUNCHER string  `ini:"LAUNCHER"`
+	TITLE   string   `ini:"TITLE"` // defaut is Game
+	SO_URL string    `ini:"SO_URL"`
+	RETRO_CONFIG string `ini:"RETRO_CONFIG"`
 }
 
 
