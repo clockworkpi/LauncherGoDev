@@ -226,9 +226,9 @@ func (self *DownloadProcessPage) StartDownload(_url,dst_dir string) {
   
   self.TheTicker = gotime.NewTicker(100 * gotime.Millisecond)
   
-  if self.Doing = false {
-    go self.UpdateProcessInterval()
+  if self.Doing == false {
     self.Doing = true
+    go self.UpdateProcessInterval()
   }
 }
 
