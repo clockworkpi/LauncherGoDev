@@ -409,7 +409,7 @@ func (self *RomListPage) Click() {
       event.Post(UI.RUNEVT,cmdpath)
     }else{
       
-      if UI.FileExists(self.EmulatorConfig.ROM_SO) == true {
+      if UI.FileExists( strings.Split(self.EmulatorConfig.ROM_SO," ")[0] ) == true {
         event.Post(UI.RUNEVT,cmdpath)
       } else {
         self.Screen.PushCurPage()
