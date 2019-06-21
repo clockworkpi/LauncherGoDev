@@ -1,5 +1,5 @@
 #!/bin/bash
 set -x
 DST=/home/cpi/launchergo
-cp -f main $DST
+cp -f launcher $DST
 

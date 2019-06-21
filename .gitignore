@@ -1,5 +1,6 @@
 test
 main
+launchergo
 *.so
 retroarch-core-options.cfg
 *.lpl

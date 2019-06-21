@@ -11,6 +11,7 @@ import (
   "runtime"
   "path/filepath"
   "os/exec"
+  "syscall"
   //"encoding/json"
 	gotime "time"
 	"github.com/veandco/go-sdl2/sdl"
@@ -263,6 +264,37 @@ func PreparationInAdv(){
   
 }
 
+func release_self_fds() {
+  fds_flags := []string{"pipe","socket:",".ttf"}
+  file_paths,err := filepath.Glob("/proc/self/fd/*")
+  if err != nil {
+    fmt.Println("release_self_fds error",err)
+    return
+  }
+  
+  ret := make(map[string]string)
+  path := ""
+  for _,v := range file_paths {
+    path,err = os.Readlink(v)
+    if err == nil {
+      ret[v] = path
+    }
+  }
+  
+  for k,v := range ret {
+    for _,f := range fds_flags {
+      if strings.Contains(v,f) {
+        id,_ :=  strconv.Atoi(filepath.Base(k))
+        //fmt.Println("closing ",id)
+        err = syscall.Close(id)
+        if err != nil {
+          fmt.Println("syscall.CLose err ",err)
+        }
+      }
+    }
+  }
+}
+
 func run() int {	
 	display.Init()
 	font.Init()
@@ -335,6 +367,7 @@ func run() int {
           exec_app_cmd += ev.Data["Msg"]
           exec_app_cmd +="; sync & cd "+UI.GetExePath()+"; "+os.Args[0]+";"
           fmt.Println(exec_app_cmd)
+          release_self_fds()
           cmd := exec.Command("/bin/sh","-c",exec_app_cmd)
           err := cmd.Start()
           if err != nil {
@@ -349,6 +382,7 @@ func run() int {
         case UI.RUNSYS:
           main_screen.OnExitCb()      
           gogame.Quit()   
+          release_self_fds()
           exec_app_cmd := ev.Data["Msg"]
           cmd := exec.Command("/bin/sh","-c",exec_app_cmd)
           err := cmd.Start()
@@ -368,6 +402,7 @@ func run() int {
           fmt.Println("RUNSH")
           exec_app_cmd := ev.Data["Msg"]+";"
           fmt.Println(exec_app_cmd)
+          release_self_fds()
           cmd := exec.Command("/bin/sh","-c",exec_app_cmd)
           err := cmd.Start()
           if err != nil {
@@ -384,6 +419,7 @@ func run() int {
           gogame.Quit()
           exec_app_cmd :=" sync & cd "+UI.GetExePath()+"; "+os.Args[0]+";"
           fmt.Println(exec_app_cmd)
+          release_self_fds()
           cmd := exec.Command("/bin/sh","-c",exec_app_cmd)
           err := cmd.Start()
           if err != nil {
