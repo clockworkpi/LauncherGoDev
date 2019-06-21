@@ -347,7 +347,7 @@ func run() int {
   
 	running := true
 	for running {
-		ev := event.Wait()
+		ev := event.Poll()
 		if ev.Type == event.QUIT {
 			running = false
 			break
@@ -475,6 +475,8 @@ func run() int {
 			main_screen.KeyDown(ev)
 			main_screen.LastKeyDown = everytime_keydown
 		}
+    
+    gotime.Sleep(50*gotime.Millisecond)
 	}
 
 	return 0

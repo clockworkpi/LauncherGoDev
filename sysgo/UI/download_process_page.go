@@ -105,19 +105,16 @@ func (self *DownloadProcessPage) OnExitCb() {
 }
 
 // should be in a gorotine
-func (self *DownloadProcessPage) UpdateProcessInterval() {
-  if self.TheTicker == nil {
+func (self *DownloadProcessPage) UpdateProcessInterval() {  
+  
+  if self.Doing == true {
     return
   }
-  
-  if self.Screen.CurPage() != self {
-    return
-  }
-  
-Loop:  
+  self.Doing = true
   for {
-		select {
-		case <-self.TheTicker.C:
+      
+      gotime.Sleep(150 * gotime.Millisecond)
+      
       fmt.Printf("  transferred %v / %v bytes (%.2f%%)\n",
 			self.resp.BytesComplete(),
 			self.resp.Size,
@@ -131,17 +128,22 @@ Loop:
       self.SizeLabel.SetText(lb_str)
     
       self.FileNameLabel.SetText(filepath.Base(self.resp.Filename))
+      
+      
       self.Screen.Draw()
       self.Screen.SwapAndShow()
-    
-		case <-self.resp.Done:
-			// download is complete
-      fmt.Println("download is complete ",self.Value)
-      self.Value = 0 
-      self.TheTicker.Stop()
-      self.Doing=false
-			break Loop
-		}
+  
+      if self.resp.Progress() >= 1.0  {
+        // download is complete
+        fmt.Println("download is complete ",self.Value)
+        self.Value = 0 
+        self.Doing=false
+        break
+      }
+      
+      if self.Doing == false {
+        break
+      }
   }
   
   self.Doing=false
@@ -176,8 +178,6 @@ Loop:
   cmd := exec.Command("rm","-rf",filename)
   cmd.Dir = self.DST_DIR
   cmd.Run()
-    
-  self.TheTicker.Stop()
   
   self.DoneAndReturnUpLevel()
   
@@ -215,40 +215,23 @@ func (self *DownloadProcessPage) StartDownload(_url,dst_dir string) {
     fmt.Println("DownloadProcessPage StartDownload Invalid ",err)
     return
   }
-
-  self.req, _ = grab.NewRequest(self.DST_DIR, _url)
-  
-  fmt.Printf("Downloading %v...\n", self.req.URL())
-  
-  self.resp = self.Downloader.Do(self.req)
-  
-  fmt.Printf("  %v\n", self.resp.HTTPResponse.Status)
-  
-  self.TheTicker = gotime.NewTicker(100 * gotime.Millisecond)
   
   if self.Doing == false {
-    self.Doing = true
-    go self.UpdateProcessInterval()
+    self.req, _ = grab.NewRequest(self.DST_DIR, _url)
+    fmt.Printf("Downloading %v...\n", self.req.URL())
+    self.resp = self.Downloader.Do(self.req)
+    fmt.Printf("  %v\n", self.resp.HTTPResponse.Status)
+    self.UpdateProcessInterval()
   }
 }
 
 func (self *DownloadProcessPage) StopDownload() {
-  
-  if self.TheTicker != nil {
-    self.TheTicker.Stop()
-    
-  }
 
-  if self.resp != nil {
-    self.resp.Cancel()
-  }
-  
-  
+  self.Doing=false  
 }
 func (self *DownloadProcessPage) KeyDown( ev *event.Event) {
 
  	if ev.Data["Key"] == CurKeys["A"] || ev.Data["Key"] == CurKeys["Menu"] {
-    
     self.StopDownload()
     
 		self.ReturnToUpLevelPage()

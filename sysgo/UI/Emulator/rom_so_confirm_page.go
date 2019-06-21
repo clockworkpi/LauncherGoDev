@@ -105,7 +105,7 @@ func (self *RomSoConfirmPage) KeyDown(ev *event.Event) {
         
       }else{
         so_url := ec.SO_URL
-        self.DownloadPage.StartDownload(so_url,filepath.Dir(ec.ROM_SO))
+        go self.DownloadPage.StartDownload(so_url,filepath.Dir(ec.ROM_SO))
       }
     }
   }
