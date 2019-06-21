@@ -24,6 +24,7 @@ type DownloadProcessPage struct {
   DST_DIR string
   Value   int
   PngSize map[string][2]int
+  Doing bool
   
   FileNameLabel LabelInterface
   SizeLabel     LabelInterface
@@ -117,32 +118,33 @@ Loop:
   for {
 		select {
 		case <-self.TheTicker.C:
-			fmt.Printf("  transferred %v / %v bytes (%.2f%%)\n",
-				self.resp.BytesComplete(),
-				self.resp.Size,
-				100*self.resp.Progress())
-    self.Value = int(100.0*self.resp.Progress())
-    total := float64(self.resp.Size)/1000.0/1000.0
-    downloaded := float64(self.resp.BytesComplete())/1000.0/1000.0
+      fmt.Printf("  transferred %v / %v bytes (%.2f%%)\n",
+			self.resp.BytesComplete(),
+			self.resp.Size,
+			100*self.resp.Progress())
+      
+      self.Value = int(100.0*self.resp.Progress())
+      total := float64(self.resp.Size)/1000.0/1000.0
+      downloaded := float64(self.resp.BytesComplete())/1000.0/1000.0
     
-    lb_str := fmt.Sprintf("%.2f/%.2fMb",downloaded,total)
-    self.SizeLabel.SetText(lb_str)
+      lb_str := fmt.Sprintf("%.2f/%.2fMb",downloaded,total)
+      self.SizeLabel.SetText(lb_str)
     
-    self.FileNameLabel.SetText(filepath.Base(self.resp.Filename))
-    
-    
-    self.Screen.Draw()
-    self.Screen.SwapAndShow()
+      self.FileNameLabel.SetText(filepath.Base(self.resp.Filename))
+      self.Screen.Draw()
+      self.Screen.SwapAndShow()
     
 		case <-self.resp.Done:
 			// download is complete
       fmt.Println("download is complete ",self.Value)
       self.Value = 0 
       self.TheTicker.Stop()
-      
+      self.Doing=false
 			break Loop
 		}
   }
+  
+  self.Doing=false
   
 	if err := self.resp.Err(); err != nil {
     self.DownloadErr()
@@ -224,8 +226,10 @@ func (self *DownloadProcessPage) StartDownload(_url,dst_dir string) {
   
   self.TheTicker = gotime.NewTicker(100 * gotime.Millisecond)
   
-  go self.UpdateProcessInterval()
-  
+  if self.Doing = false {
+    go self.UpdateProcessInterval()
+    self.Doing = true
+  }
 }
 
 func (self *DownloadProcessPage) StopDownload() {
