@@ -363,7 +363,7 @@ func run() int {
           gogame.Quit()          
           
           fmt.Println("RUNEVT")
-          exec_app_cmd := "cd " + filepath.Dir(ev.Data["Msg"])+";"
+          exec_app_cmd := "cd " + filepath.Dir( strings.Split(strings.TrimSpace(ev.Data["Msg"]), " ")[0] )+";"
           exec_app_cmd += ev.Data["Msg"]
           exec_app_cmd +="; sync & cd "+UI.GetExePath()+"; "+os.Args[0]+";"
           fmt.Println(exec_app_cmd)
