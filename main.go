@@ -363,7 +363,17 @@ func run() int {
           gogame.Quit()          
           
           fmt.Println("RUNEVT")
-          exec_app_cmd := "cd " + filepath.Dir( strings.Split(strings.TrimSpace(ev.Data["Msg"]), " ")[0] )+";"
+          
+          endpos := len(ev.Data["Msg"])
+          space_break_pos := endpos
+          for i:=0;i<endpos;i++ {
+            if i > 6 && string(ev.Data["Msg"][i]) == "/" && string(ev.Data["Msg"][i-1]) == " " {
+              space_break_pos = i-1
+              break
+            }
+          }
+          
+          exec_app_cmd := "cd " + filepath.Dir( ev.Data["Msg"][:space_break_pos] )+";"
           exec_app_cmd += ev.Data["Msg"]
           exec_app_cmd +="; sync & cd "+UI.GetExePath()+"; "+os.Args[0]+";"
           fmt.Println(exec_app_cmd)
@@ -382,7 +392,7 @@ func run() int {
         case UI.RUNSYS:
           main_screen.OnExitCb()      
           gogame.Quit()   
-          release_self_fds()
+          release_self_fds()         
           exec_app_cmd := ev.Data["Msg"]
           cmd := exec.Command("/bin/sh","-c",exec_app_cmd)
           err := cmd.Start()
