@@ -76,13 +76,15 @@ func ReunionPagesIcons(self *UI.MainScreen) {
         }
         
         var tmpswap []Tup
-        for i,x := range tmp {
+        onlyone := false
+        for _,x := range tmp {
           if strings.HasPrefix(x.FileName,retro_games_dir) == false{
             tmpswap = append(tmpswap,x)
           }
           
-          if strings.HasPrefix(x.FileName,retro_games_dir) == true && i==retro_games_idx[0] {
+          if strings.HasPrefix(x.FileName,retro_games_dir) == true && onlyone == false {
             tmpswap = append(tmpswap,x)
+            onlyone = true
           }
         }
         

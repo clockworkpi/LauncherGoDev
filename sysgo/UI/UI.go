@@ -57,7 +57,7 @@ func (self *Widget) NewCoord(x,y int) {
 func Init() {
 	font.Init()
 
-	skinpath := "skin/"+sysgo.SKIN+"/truetype"
+	skinpath :=  sysgo.SKIN+"/truetype"
 
 	Fonts = make(map[string]*ttf.Font)
 

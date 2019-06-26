@@ -19,7 +19,7 @@ var (
 
   VERSION="0.22"
 
-	SKIN="default"
+	SKIN="skin/default"
   
   //load from dot files   
   CurPowerLevel= "performance"
