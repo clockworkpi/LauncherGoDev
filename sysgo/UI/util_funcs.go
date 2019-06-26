@@ -44,7 +44,7 @@ func Abs(n int) int {
 
 
 func SkinMap(orig_file_or_dir string) string {
-	DefaultSkin := "skin/default"
+	DefaultSkin := "skin/default/"
 	ret := ""
   
 	if strings.HasPrefix(orig_file_or_dir, "/home/cpi/apps/Menu") {
