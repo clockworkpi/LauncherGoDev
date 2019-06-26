@@ -46,26 +46,21 @@ func Abs(n int) int {
 func SkinMap(orig_file_or_dir string) string {
 	DefaultSkin := "skin/default"
 	ret := ""
-	lastpad := ""
-  
-  if string(orig_file_or_dir[len(orig_file_or_dir)-1]) == "/" {
-    lastpad = string(orig_file_or_dir[len(orig_file_or_dir)-1])
-  }
   
 	if strings.HasPrefix(orig_file_or_dir, "/home/cpi/apps/Menu") {
-		ret = strings.Replace(orig_file_or_dir,"/home/cpi/apps/Menu/", filepath.Join(sysgo.SKIN,"/Menu/GameShell/"),-1)
+		ret = strings.Replace(orig_file_or_dir,"/home/cpi/apps/Menu/", sysgo.SKIN+"/Menu/GameShell/",-1)
     if FileExists(ret) == false {
-      ret = filepath.Join(DefaultSkin,orig_file_or_dir)
+      ret = DefaultSkin+orig_file_or_dir
     }
 	}else { // there is no need to add insert "sysgo" in the middle
-		ret = filepath.Join(sysgo.SKIN,orig_file_or_dir) 
+		ret = sysgo.SKIN+orig_file_or_dir
 		if FileExists(ret) == false {
-			ret = filepath.Join(DefaultSkin,orig_file_or_dir)
+			ret = DefaultSkin+orig_file_or_dir
 		}
 	}
 
 	if FileExists(ret) {
-		return ret+lastpad
+		return ret
 	}else { // if not existed both in default or custom skin ,return where it is
 		return orig_file_or_dir
 	}
