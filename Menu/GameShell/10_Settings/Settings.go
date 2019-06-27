@@ -113,12 +113,12 @@ func (self *SettingsPage) GenList() []*UI.UIPlugin {
     &UI.UIPlugin{UI.PluginPackage,"",    "TimeZone",       "Timezone",                &TimeZone.APIOBJ},
 
     &UI.UIPlugin{UI.PluginPackage,"",    "Languages",      "Languages",               &Languages.APIOBJ},    
-    &UI.UIPlugin{UI.PluginPackage,"",    "Update",         "Update",                  &Update.APIOBJ},
+    &UI.UIPlugin{UI.PluginPackage,"",    "Update",         "Update LauncherGo",                  &Update.APIOBJ},
     &UI.UIPlugin{UI.PluginPackage,"",    "About",          "About",                   &About.APIOBJ},
     &UI.UIPlugin{UI.PluginPackage,"",    "PowerOFF",       "Power off",               &PowerOFF.APIOBJ},
     &UI.UIPlugin{UI.PluginPackage,"",    "ButtonsLayout",  "Buttons Layout",          &ButtonsLayout.APIOBJ},    
     &UI.UIPlugin{UI.PluginPackage,"",    "LauncherPy",     "Switch to Launcher",      &LauncherPy.APIOBJ},
-    &UI.UIPlugin{UI.PluginPackage,"",    "Lima",           "GPU driver switch",       &Lima.APIOBJ},
+    &UI.UIPlugin{UI.PluginPackage,"",    "Lima",           "GPU Driver Switch",       &Lima.APIOBJ},
     &UI.UIPlugin{UI.PluginPackage,"",    "GateWay",        "Network gateway switch",  &GateWay.APIOBJ},
   }
   

@@ -27,7 +27,7 @@ type SoundPlugin struct {
 func (self *SoundPlugin) Init( main_screen *UI.MainScreen ) {
 	self.SoundPage = NewSoundPage()
 	self.SoundPage.SetScreen( main_screen)
-	self.SoundPage.SetName("Sound volume")
+	self.SoundPage.SetName("Sound Volume")
 	self.SoundPage.Init()  
 }
 

@@ -210,7 +210,7 @@ func (self *UpdatePage) CheckUpdate() bool {
     
   }else {
     self.Screen.Draw()
-    self.Screen.MsgBox.SetText("Launcher is up to date")
+    self.Screen.MsgBox.SetText("Launchergo is up to date")
     self.Screen.MsgBox.Draw()
     self.Screen.SwapAndShow()
     time.BlockDelay(765)

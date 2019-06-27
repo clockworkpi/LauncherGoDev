@@ -12,7 +12,7 @@ type UpdatePlugin struct {
 func (self *UpdatePlugin) Init( main_screen *UI.MainScreen ) {
 	self.Page = NewUpdatePage()
 	self.Page.SetScreen( main_screen)
-	self.Page.SetName("Update")
+	self.Page.SetName("Update LauncherGo")
 	self.Page.Init()
 }
 

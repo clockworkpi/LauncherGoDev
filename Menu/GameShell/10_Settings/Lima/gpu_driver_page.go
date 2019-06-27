@@ -130,7 +130,7 @@ type GPUDriverPage struct {
 func NewGPUDriverPage() *GPUDriverPage {
   p := &GPUDriverPage{}
   
-  p.ListFont = UI.Fonts["notosanscjk15"]
+  p.ListFont = UI.Fonts["notosanscjk12"]
   p.FootMsg = [5]string{"Nav","","","Back","Select"}
   
   p.BGwidth = UI.Width 
@@ -149,8 +149,8 @@ func (self *GPUDriverPage) GenList() {
   start_y := 0 
   last_height := 0
   
-  var drivers  = [][2]string{[2]string{"fbturbo","Fbturbo"},
-                             [2]string{"modesetting","Lima"}}
+  var drivers  = [][2]string{[2]string{"fbturbo","FBTURBO driver (Software Rendering)"},
+                             [2]string{"modesetting","LIMA driver (Experimental Hardware Rendering)"}}
   
 
   for _,u := range drivers {

@@ -23,7 +23,7 @@ type LimaPlugin struct {
 func (self *LimaPlugin) Init( main_screen *UI.MainScreen ) {
 	self.GPUDriverPage = NewGPUDriverPage()
 	self.GPUDriverPage.SetScreen( main_screen)
-	self.GPUDriverPage.SetName("GPU driver switch")
+	self.GPUDriverPage.SetName("GPU Driver Switch")
 	self.GPUDriverPage.Init()  
 }
 
