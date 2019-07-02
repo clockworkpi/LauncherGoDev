@@ -114,7 +114,7 @@ func ReadTheDirIntoPages(self *UI.MainScreen, _dir string, pglevel int, cur_page
 	}
 
 	for _,f := range files { // already sorted
-		if UI.IsDirectory( _dir +"/"+f.Name()) {
+		if UI.IsDirectory( _dir +"/"+f.Name()) && strings.HasPrefix( f.Name(), ".") == false {
 			if pglevel == 0 {
 				page := UI.NewPage()
 				page.Name = self.ExtraName(f.Name())
@@ -232,7 +232,7 @@ func ReadTheDirIntoPages(self *UI.MainScreen, _dir string, pglevel int, cur_page
 				}
 				
 			}
-		} else if UI.IsAFile(_dir+"/"+f.Name()) && (pglevel > 0) {
+		} else if UI.IsAFile(_dir+"/"+f.Name()) && strings.HasPrefix( f.Name(), ".") == false && (pglevel > 0) {
 			if strings.HasSuffix(strings.ToLower(f.Name()),UI.IconExt) {
 				i2 := self.ExtraName(f.Name())
 				iconitem := UI.NewIconItem()
