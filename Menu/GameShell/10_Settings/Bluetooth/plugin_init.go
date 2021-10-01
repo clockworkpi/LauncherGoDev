@@ -81,6 +81,7 @@ func (self *BluetoothPlugin) Init( main_screen *UI.MainScreen ) {
   a, err := adapter.GetAdapter(adapterID)
   if err != nil {
     fmt.Println(err)
+    return
   }
 
   discovery, cancel, err := api.Discover(a, nil)
