@@ -3,9 +3,9 @@ package Bluetooth
 import (
   //"fmt"
   
-  bleapi "github.com/muka/go-bluetooth/api"
-  "github.com/muka/go-bluetooth/bluez/profile"
-  //"github.com/muka/go-bluetooth/emitter"
+  //bleapi "github.com/muka/go-bluetooth/api"
+  //"github.com/muka/go-bluetooth/bluez/profile"
+  "github.com/muka/go-bluetooth/bluez/profile/device"
 
   "github.com/veandco/go-sdl2/ttf"
 	"github.com/veandco/go-sdl2/sdl"
@@ -83,8 +83,8 @@ type NetItem struct {
   MacAddr  string // 
   Parent *BluetoothPage
   Path string ///org/bluez/hci0/dev_34_88_5D_97_FF_26
-  Props *profile.Device1Properties
-  Device  *bleapi.Device
+  Props *device.Device1Properties
+  Device  *device.Device1
 }
 
 

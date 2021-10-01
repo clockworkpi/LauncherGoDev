@@ -5,7 +5,7 @@ import (
   "os"
   "log"
   "strings"
-  "errors"
+  //"errors"
   "github.com/fatih/structs"
   
   "github.com/veandco/go-sdl2/ttf"
@@ -18,24 +18,25 @@ import (
   "github.com/cuu/gogame/color"
   "github.com/cuu/gogame/font"
 
-  "github.com/godbus/dbus"
-	bleapi "github.com/muka/go-bluetooth/api"
-  "github.com/muka/go-bluetooth/bluez"
-  "github.com/muka/go-bluetooth/bluez/profile"
+  //"github.com/godbus/dbus"
+  bleapi "github.com/muka/go-bluetooth/api"
+  //"github.com/muka/go-bluetooth/bluez"
+ // "github.com/muka/go-bluetooth/bluez/profile"
+  "github.com/muka/go-bluetooth/bluez/profile/device"
   
   "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 )
 
-func showDeviceInfo(dev *bleapi.Device) {
-	if dev == nil {
-		return
-	}
-	props, err := dev.GetProperties()
-	if err != nil {
-		fmt.Printf("%s: Failed to get properties: %s\n", dev.Path, err.Error())
-		return
-	}
-	fmt.Printf("name=%s addr=%s rssi=%d\n", props.Name, props.Address, props.RSSI)
+func showDeviceInfo(dev *device.Device1) {
+  if dev == nil {
+    return
+  }
+  props, err := dev.GetProperties()
+  if err != nil {
+	  fmt.Printf("%s: Failed to get properties: %s\n", dev.Path, err.Error())
+	  return
+  }
+  fmt.Printf("name=%s addr=%s rssi=%d\n", props.Name, props.Address, props.RSSI)
 }
 
 
@@ -60,12 +61,12 @@ func NewBleForgetConfirmPage() *BleForgetConfirmPage {
 
 func (self *BleForgetConfirmPage) KeyDown(ev *event.Event) {
 
-	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
-		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
-	} 
-  
+  if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+    self.ReturnToUpLevelPage()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()
+  } 
+
   if ev.Data["Key"] == UI.CurKeys["B"] {
     self.SnapMsg("Deleting")
     self.Screen.Draw()
@@ -73,10 +74,10 @@ func (self *BleForgetConfirmPage) KeyDown(ev *event.Event) {
     
     
     time.BlockDelay(400)
-		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()    
-    
+    self.ReturnToUpLevelPage()
+    self.Screen.Draw()
+    self.Screen.SwapAndShow()    
+
   }
 }
 
@@ -133,8 +134,8 @@ type BleInfoPage struct {
   
   Scroller *UI.ListScroller
   ConfirmPage1 *BleForgetConfirmPage
-  MyDevice  *bleapi.Device // from NetItem-> from BluetoothPage
-  Props    *profile.Device1Properties
+  MyDevice  *device.Device1 // from NetItem-> from BluetoothPage
+  Props    *device.Device1Properties
   Path      string
 }
 
@@ -313,7 +314,7 @@ func (self *BleInfoPage) TryToForget() {
     self.Screen.SwapAndShow()    
   
   
-    err = adapter.RemoveDevice(self.Path)
+    err = adapter.RemoveDevice(self.MyDevice.Path())
     if err != nil {
       fmt.Println("BleInfoPage TryToForget: ",err)
     }
@@ -333,7 +334,9 @@ func (self *BleInfoPage) TryToForget() {
 
 func (self *BleInfoPage) TryToDisconnect() {
   
-  if self.MyDevice.IsConnected() {
+  is_connected,_ := self.MyDevice.GetConnected();
+
+  if is_connected {
   
     self.Screen.FootBar.UpdateNavText("Disconnecting")
     self.Screen.MsgBox.SetText("Disconnecting")
@@ -478,7 +481,7 @@ func (self *BleListMessageBox) Draw() {
 type BluetoothPage struct{
   UI.Page
   
-  Devices []bleapi.Device 
+  Devices []*device.Device1 
   
   BlePassword string 
   Connecting bool
@@ -612,7 +615,7 @@ func (self *BluetoothPage) TryConnect() {
     }
     if strings.Contains(s,"NoReply") {
       err_msg = "NoReply,Cancelling"
-      dev1,_ := cur_li.(*NetItem).Device.GetClient()
+      dev1 := cur_li.(*NetItem).Device
       dev1.CancelPairing()
       
     }
@@ -620,7 +623,7 @@ func (self *BluetoothPage) TryConnect() {
       err_msg = "Already Exists"
       adapter,err := bleapi.GetAdapter(adapterID)
       if err == nil {
-        err = adapter.RemoveDevice(cur_li.(*NetItem).Path)
+        err = adapter.RemoveDevice(cur_li.(*NetItem).Device.Path())
         if err != nil {
           fmt.Println(err)
         }
@@ -634,10 +637,10 @@ func (self *BluetoothPage) TryConnect() {
     
   }else{
     self.Leader.PairPage.PairOKCb()
-    dev1,_ := cur_li.(*NetItem).Device.GetClient()
-		err = dev1.SetProperty("Trusted",true)
-		if err != nil {
-		  fmt.Println(err)
+    dev1 := cur_li.(*NetItem).Device
+	err = dev1.SetTrusted(true)
+	if err != nil {
+	  fmt.Println(err)
     }
     cur_li.(*NetItem).Device.Connect()
   }
@@ -647,38 +650,15 @@ func (self *BluetoothPage) TryConnect() {
 }
 
 //GetDevices returns a list of bluetooth discovered Devices
-func (self *BluetoothPage) GetDevices() ([]bleapi.Device, error) {
+func (self *BluetoothPage) GetDevices() ([]*device.Device1, error) {
 
-	manager, err := bleapi.GetManager()
-	if err != nil {
-		return nil, err
-	}
+  adapter,err := bleapi.GetAdapter(adapterID)
+  if err != nil {
+    return nil,err
+  }
   
-  manager.LoadObjects()
-  
-	list, err := bleapi.GetDeviceList()
-	if err != nil {
-		return nil, err
-	}
-  
-	objects := manager.GetObjects()
-
-	var devices = make([]bleapi.Device, 0)
-  
-	for _, path := range list {
-		object, ok := objects.Load(path)
-		if !ok {
-			return nil, errors.New("Path " + string(path) + " does not exists.")
-		}
-		props := (object.(map[string]map[string]dbus.Variant))[bluez.Device1Interface]
-		dev, err := bleapi.ParseDevice(path, props)
-		if err != nil {
-			return nil, err
-		}
-		devices = append(devices, *dev)
-	}
-
-	return devices, nil
+  list, err := adapter.GetDevices()
+  return list,err
 }
 
 func (self *BluetoothPage) RefreshDevices() {
@@ -719,10 +699,9 @@ func (self *BluetoothPage) GenNetworkList() {
     ni.PosY  = start_y + i*NetItemDefaultHeight
     ni.Width  = UI.Width
     ni.FontObj = self.ListFontObj
-    ni.Path = v.Path
     ni.Props  = props
     ni.Parent = self
-    ni.Device = &v
+    ni.Device = v
     if props.Name != "" {
       ni.Init(props.Name)
     }else {
@@ -743,18 +722,19 @@ func (self *BluetoothPage) Rescan() {
   self.Scanning = true
   self.ShowBox("Bluetooth scanning")
   self.Screen.FootBar.UpdateNavText("Scanning")
-  
-  err := bleapi.StopDiscovery()
-	if err != nil {
-		fmt.Println(err)
-	}
-  
-	err = bleapi.StartDiscovery()
-	if err != nil {
-		fmt.Println(err)
-	}
+  a,nil := bleapi.GetAdapter(adapterID)
 
-	fmt.Println("Started discovery")
+  err := a.StopDiscovery()
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  err = a.StartDiscovery()
+  if err != nil {
+    fmt.Println(err)
+  }
+
+  fmt.Println("Started discovery")
   
 }
 
@@ -821,7 +801,9 @@ func (self *BluetoothPage) KeyDown(ev *event.Event) {
       self.AbortedAndReturnToUpLevel()
       return
     }
-    err := bleapi.StopDiscovery()
+    
+    a, nil := bleapi.GetAdapter(adapterID)
+    err := a.StopDiscovery()
     if err != nil {
       fmt.Println(err)
     }
