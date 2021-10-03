@@ -21,7 +21,6 @@ import (
 */	
 
   "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
-  //"github.com/clockworkpi/LauncherGoDev/sysgo/DBUS"
   log "github.com/sirupsen/logrus"
 )
 

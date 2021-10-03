@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"bufio"
 	"strings"
-  "os/exec"
-  "io/ioutil"
+    "os/exec"
+    "io/ioutil"
 	gotime "time"
 	
 	"github.com/veandco/go-sdl2/sdl"
@@ -21,8 +21,6 @@ import (
 	"github.com/itchyny/volume-go"
 	
 	"github.com/vjeantet/jodaTime"
-
-	"github.com/clockworkpi/LauncherGoDev/sysgo/DBUS"
 	
 	"github.com/clockworkpi/LauncherGoDev/sysgo"
 
@@ -91,29 +89,28 @@ func (self *TitleBarIconItem) Draw() {
 
 type TitleBar struct {
   Widget
-	BarHeight int
-	LOffset int
-	ROffset int
-	Icons map[string]IconItemInterface
-	IconWidth int
-	IconHeight int 
-	BorderWidth int
-	CanvasHWND *sdl.Surface
-	HWND       *sdl.Surface
-	Title string
+  BarHeight int
+  LOffset int
+  ROffset int
+  Icons map[string]IconItemInterface
+  IconWidth int
+  IconHeight int 
+  BorderWidth int
+  CanvasHWND *sdl.Surface
+  HWND       *sdl.Surface
+  Title string
   
-	InLowBackLight int
+  InLowBackLight int
   InAirPlaneMode bool
   
-	SkinManager *SkinManager //set by MainScreen
-	DBusManager DBUS.DBusInterface
+  SkinManager *SkinManager //set by MainScreen
 	
-	icon_base_path string /// SkinMap("gameshell/titlebar_icons/")
+  icon_base_path string /// SkinMap("gameshell/titlebar_icons/")
   
   MyTimeLocation *gotime.Location
   
-	TitleFont *ttf.Font
-	TimeFont  *ttf.Font
+  TitleFont *ttf.Font
+  TimeFont  *ttf.Font
 }
 
 
@@ -172,13 +169,40 @@ func (self *TitleBar) RoundRobinCheck() {
   }
 }
 
+func (self *TitleBar) IsWifiConnectedNow() bool {
+  cli := fmt.Sprintf( "ip -4 addr show %s | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'",sysgo.WifiDev)
+  out := System(cli)
+  if(len(out) > 7) {
+    if strings.Contains(out,"not") {
+      return false
+    }else {
+      return true
+    }
+  }
+  
+  return false
+
+}
+
 func (self *TitleBar) UpdateWifiStrength() {
 	self.Draw(self.Title)
 }
 
-func (t *TitleBar) GetWifiStrength(stren int) int {
+func (t *TitleBar) GetWifiStrength() int {
+    qua := 0
+    cli := fmt.Sprintf("iwconfig %s | grep Signal | /usr/bin/awk '{print $4}' | /usr/bin/cut -d'=' -f2",sysgo.WifiDev)
+    out := System(cli)
+    if(len(out) > 2) {
+      if strings.Contains(out,"No") == false {
+        stren,err := strconv.ParseInt(out, 10, 0)
+        if err == nil {
+          qua = 2 * (int(stren) + 100)
+        }
+      }
+    }
+
 	segs := [][]int{ []int{-2,-1}, []int{0,25}, []int{25,50}, []int{50,75},[]int{75,100}}
-	stren_number :=  stren 
+	stren_number :=  qua
 	ge := 0
 	if stren_number == 0 {
 		return ge
@@ -297,7 +321,7 @@ func (self *TitleBar) CheckBatteryStat() {
 }
 
 func (self *TitleBar) SetBatteryStat( bat int) {
-	
+  
 }
 
 func (self *TitleBar) CheckBluetooth() {
@@ -327,7 +351,6 @@ func (self *TitleBar) Init(main_screen *MainScreen) {
 	self.CanvasHWND = surface.Surface(self.Width,self.Height)
 	self.HWND = main_screen.HWND
 	self.SkinManager = main_screen.SkinManager
-	self.DBusManager = main_screen.DBusManager
 	
 	icon_wifi_status := NewTitleBarIconItem()
 
@@ -396,9 +419,8 @@ func (self *TitleBar) Init(main_screen *MainScreen) {
 	
 	self.Icons["round_corners"] = round_corners
 
-	if self.DBusManager.IsWifiConnectedNow() {
+	if self.IsWifiConnectedNow() {
 		print("wifi is connected")
-		print( self.DBusManager.WifiStrength())
 	}else {
   
     cmd := "sudo rfkill list | grep yes | cut -d \" \" -f3" //make sure sudo rfkill needs no password
@@ -482,8 +504,8 @@ func (self *TitleBar) Draw(title string) {
 	self.Icons["sound"].NewCoord( start_x, self.IconHeight/2+ (self.BarHeight-self.IconHeight)/2)
 	self.Icons["battery"].NewCoord(start_x+self.IconWidth+self.IconWidth+8, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2)
 
-	if self.DBusManager.IsWifiConnectedNow() == true {
-		ge := self.GetWifiStrength( self.DBusManager.WifiStrength() )
+	if self.IsWifiConnectedNow() == true {
+		ge := self.GetWifiStrength()
 		//fmt.Println("wifi ge: ",ge)
 		if ge > 0 {
 			self.Icons["wifistatus"].SetIconIndex(ge)

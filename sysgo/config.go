@@ -9,21 +9,23 @@ type PowerLevel struct {
 var PowerLevels map[string]*PowerLevel
 
 var (
-	CurKeySet = "GameShell" // PC or GameShell
-	DontLeave = false
-	BackLight = "/proc/driver/backlight"
-	Battery   = "/sys/class/power_supply/axp20x-battery/uevent"
-	MPD_socket = "/tmp/mpd.socket"
+  CurKeySet = "GameShell" // PC or GameShell
+  DontLeave = false
+  BackLight = "/proc/driver/backlight"
+  Battery   = "/sys/class/power_supply/axp20x-battery/uevent"
+  MPD_socket = "/tmp/mpd.socket"
 
   UPDATE_URL="https://raw.githubusercontent.com/clockworkpi/CPI/master/launchergo_ver.json"
 
   VERSION="0.22"
 
-	SKIN="skin/default/" // !!!need the last slash!!!
+  SKIN="skin/default/" // !!!need the last slash!!!
   
   //load from dot files   
   CurPowerLevel= "performance"
   Lang        = "English"
+  WifiDev     = "wlan0"
+
   
 )
 
