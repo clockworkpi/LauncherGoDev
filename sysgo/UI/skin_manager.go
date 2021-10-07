@@ -64,7 +64,7 @@ func (self *SkinManager) Init() {
 	self.Colors["White"]  = &color.Color{255,255,255,255}
   self.Colors["Black"]  = &color.Color{0,0,0,255}
 
-	fname := "skin/"+sysgo.SKIN+"/config.ini"
+	fname := sysgo.SKIN+"/config.ini"
 
 	load_opts := ini.LoadOptions{
 		IgnoreInlineComment:true,

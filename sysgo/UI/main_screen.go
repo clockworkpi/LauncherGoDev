@@ -402,6 +402,7 @@ func (self *MainScreen) Draw() {
 	}
 	
 	if self.TitleBar != nil {
+    //every plugin_init should not do any Draw actions since CurrentPage might be nil at that time
 		self.TitleBar.Draw( self.CurrentPage.GetName())
 	}
 

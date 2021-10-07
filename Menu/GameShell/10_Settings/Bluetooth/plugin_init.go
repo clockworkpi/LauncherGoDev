@@ -2,15 +2,15 @@ package Bluetooth
 
 import (
   "fmt"
- // "log"
-  //"os"
-  "time"
+	//"log"
+	//"os"
+	//"time"
   "github.com/godbus/dbus/v5"
-  "github.com/muka/go-bluetooth/api"
+  //"github.com/muka/go-bluetooth/api"
   "github.com/muka/go-bluetooth/hw"
   //"github.com/muka/go-bluetooth/bluez/profile"
   "github.com/muka/go-bluetooth/bluez/profile/agent"
-  "github.com/muka/go-bluetooth/bluez/profile/adapter"
+  //"github.com/muka/go-bluetooth/bluez/profile/adapter"
 /*
   "github.com/veandco/go-sdl2/ttf"
 
@@ -76,7 +76,7 @@ func (self *BluetoothPlugin) Init( main_screen *UI.MainScreen ) {
   
   self.InitAgent()
   
-
+  /*
   a, err := adapter.GetAdapter(adapterID)
   if err != nil {
     fmt.Println(err)
@@ -112,12 +112,12 @@ func (self *BluetoothPlugin) Init( main_screen *UI.MainScreen ) {
   if err != nil {
     fmt.Println(err)
   }
-  
+  */
 
-  self.BluetoothPage.RefreshDevices()
-  self.BluetoothPage.GenNetworkList()
-  main_screen.Draw()
-  main_screen.SwapAndShow()
+  //self.BluetoothPage.RefreshDevices()
+  //self.BluetoothPage.GenNetworkList()
+  
+  
  
 }
 

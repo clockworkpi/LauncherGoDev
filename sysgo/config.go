@@ -9,7 +9,8 @@ type PowerLevel struct {
 var PowerLevels map[string]*PowerLevel
 
 var (
-  CurKeySet = "GameShell" // PC or GameShell
+  //CurKeySet = "PC" // PC or GameShell
+  CurKeySet = "GameShell"
   DontLeave = false
   BackLight = "/proc/driver/backlight"
   Battery   = "/sys/class/power_supply/axp20x-battery/uevent"

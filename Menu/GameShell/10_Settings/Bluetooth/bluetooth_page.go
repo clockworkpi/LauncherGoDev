@@ -6,6 +6,7 @@ import (
   "log"
   "strings"
   //"errors"
+	gotime "time"
   "github.com/fatih/structs"
   
   "github.com/veandco/go-sdl2/ttf"
@@ -23,7 +24,9 @@ import (
   //"github.com/muka/go-bluetooth/bluez"
  // "github.com/muka/go-bluetooth/bluez/profile"
   "github.com/muka/go-bluetooth/bluez/profile/device"
-  
+  "github.com/muka/go-bluetooth/bluez/profile/adapter"
+
+	logrus "github.com/sirupsen/logrus"
   "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 )
 
@@ -167,9 +170,7 @@ func (self *BleInfoPage) Init() {
   ps := NewBleInfoPageSelector()
   ps.Parent = self
   self.Ps = ps
-  self.PsIndex = 0  
-  
-  //self.GenList()
+  self.PsIndex = 0
   
   self.Scroller = UI.NewListScroller()
   self.Scroller.Parent = self
@@ -210,9 +211,7 @@ func (self *BleInfoPage) GenList() {
     if skip2 {
       continue
     }
-      
-      
-      
+    
     li := UI.NewInfoPageListItem()
     li.Parent = self
     li.PosX   = start_x
@@ -480,7 +479,7 @@ func (self *BleListMessageBox) Draw() {
 
 type BluetoothPage struct{
   UI.Page
-  
+   
   Devices []*device.Device1 
   
   BlePassword string 
@@ -565,14 +564,12 @@ func (self *BluetoothPage) Init() {
   self.Scroller.PosX = 2
   self.Scroller.PosY = 2
   self.Scroller.Init()
-        
-  self.GenNetworkList()
-        
+	
   self.InfoPage = NewBleInfoPage()
   self.InfoPage.Screen = self.Screen
   self.InfoPage.Name   = "BluetoothInfo"
   self.InfoPage.Init()
-
+  
 }
 
 
@@ -664,7 +661,7 @@ func (self *BluetoothPage) GetDevices() ([]*device.Device1, error) {
 func (self *BluetoothPage) RefreshDevices() {
   
   // sync the cached devices 
-  self.Devices = nil
+  self.Devices = self.Devices[:0]
   
   devices, err := self.GetDevices()
 	if err != nil {
@@ -682,8 +679,7 @@ func (self *BluetoothPage) GenNetworkList() {
   
   start_x := 0 
   start_y := 0 
-  
-  
+	
   for i, v := range self.Devices { // v == bleapi.Device
   
   	props, err := v.GetProperties()
@@ -716,28 +712,55 @@ func (self *BluetoothPage) GenNetworkList() {
 }
 
 
-
 func (self *BluetoothPage) Rescan() {
 
-  self.Scanning = true
-  self.ShowBox("Bluetooth scanning")
+	if self.Scanning == true {
+		self.ShowBox("Bluetooth scanning")
+		self.Screen.FootBar.UpdateNavText("Scanning")
+	}
+	
+  a, err := adapter.GetAdapter(adapterID)
+  if err != nil {
+    fmt.Println(err)
+    return
+  }
+
+  discovery, cancel, err := bleapi.Discover(a, nil)
+  if err != nil {
+    fmt.Println(err)
+  }
+
+  defer cancel()
+
+  wait := make(chan error)
+	self.Scanning  = true
+	self.ShowBox("Bluetooth scanning")
   self.Screen.FootBar.UpdateNavText("Scanning")
-  a,nil := bleapi.GetAdapter(adapterID)
+	
+  go func() {
+    for dev := range discovery {
+      if dev == nil {
+        return
+      }
+      wait <- nil
+    }
+  }()
 
-  err := a.StopDiscovery()
+  go func() {
+    sleep := 5
+    gotime.Sleep(gotime.Duration(sleep) * gotime.Second)
+    logrus.Debugf("Discovery timeout exceeded (%ds)", sleep)
+    wait <- nil
+  }()
+
+  err = <-wait
   if err != nil {
     fmt.Println(err)
   }
-  
-  err = a.StartDiscovery()
-  if err != nil {
-    fmt.Println(err)
-  }
-
-  fmt.Println("Started discovery")
-  
+	self.Scanning = false
+	self.HideBox()
+	self.Screen.FootBar.ResetNavText()
 }
-
 
 func (self *BluetoothPage) OnLoadCb() {
   self.Offline = false
@@ -748,6 +771,7 @@ func (self *BluetoothPage) OnLoadCb() {
       self.Offline = true
       fmt.Println("Bluetooth OnLoadCb ,can not find hci0 alive,try to reboot")
     }else {
+			self.Rescan()
       self.RefreshDevices()
       self.GenNetworkList()
     }
@@ -860,6 +884,7 @@ func (self *BluetoothPage) KeyDown(ev *event.Event) {
 }
 
 func (self *BluetoothPage) Draw() {
+  
   self.ClearCanvas()
   
   if len(self.MyList) == 0 {
@@ -887,5 +912,5 @@ func (self *BluetoothPage) Draw() {
     }    
   
   }
-
+ 
 }
