@@ -109,7 +109,9 @@ func (self *Label) DrawCenter(bold bool) { // default bold is false
 
 func (self *Label) Draw() {
 	font.SetBold(self.FontObj,self.Bold) // avoing same font tangling set_bold to others
-  
+  if len(self.Text) == 0 {
+		return
+	}
 	my_text := font.Render(self.FontObj,self.Text, true, self.Color, nil)
 
 	rect_ := rect.Rect(self.PosX,self.PosY,self.Width,self.Height)

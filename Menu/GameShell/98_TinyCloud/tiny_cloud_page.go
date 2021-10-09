@@ -96,8 +96,8 @@ func (self *TinyCloudPage) SetCoords() {
 }
 
 func (self *TinyCloudPage) SetLabels() {
-  if self.Screen.DBusManager.IsWifiConnectedNow() {
-    self.IP = self.Screen.DBusManager.GetWifiIP()
+  if self.Screen.IsWifiConnectedNow() {
+    self.IP = self.Screen.GetWirelessIP()
     fmt.Printf("TinyCould : %s\n",self.IP)
   }else {
     self.IP = "xxx.xxx.xxx.xxx"
@@ -179,7 +179,7 @@ func (self *TinyCloudPage) KeyDown( ev *event.Event ) {
 
 func (self *TinyCloudPage) Draw() {
   self.ClearCanvas()
-  if self.Screen.DBusManager.IsWifiConnectedNow() {
+  if self.Screen.IsWifiConnectedNow() {
     self.Icons["online"].NewCoord(self.Coords["online"].X, self.Coords["online"].Y)
     self.Icons["online"].Draw()    
     

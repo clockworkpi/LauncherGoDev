@@ -9,9 +9,13 @@ import (
 	"github.com/cuu/gogame/event"
 	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/color"
-*/	
+*/
+	"github.com/clockworkpi/LauncherGoDev/sysgo"
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
+	
 	//"github.com/clockworkpi/LauncherGoDev/sysgo/DBUS"
+	wifi "github.com/cuu/wpa-connect"
+	
 )
 
 /******************************************************************************/
@@ -20,6 +24,11 @@ type WifiPlugin struct {
 	ScanPage *WifiList
   PasswordPage *UI.Keyboard
 }
+
+var (
+	GsScanManager = wifi.NewScanManager(sysgo.WifiDev)
+	GsConnectManager = wifi.NewConnectManager(sysgo.WifiDev)
+)
 
 
 func (self *WifiPlugin) Init( main_screen *UI.MainScreen ) {

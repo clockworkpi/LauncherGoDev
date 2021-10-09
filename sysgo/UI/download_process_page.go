@@ -199,7 +199,7 @@ func (self *DownloadProcessPage) DoneAndReturnUpLevel() {
 
 func (self *DownloadProcessPage) StartDownload(_url,dst_dir string) {
   
-  if self.Screen.DBusManager.IsWifiConnectedNow() == false {
+  if self.Screen.IsWifiConnectedNow() == false {
     return
   }
   
@@ -245,7 +245,7 @@ func (self *DownloadProcessPage) Draw() {
 
   self.ClearCanvas()
   
-  if self.Screen.DBusManager.IsWifiConnectedNow() == false {
+  if self.Screen.IsWifiConnectedNow() == false {
     self.Icons["needwifi_bg"].NewCoord(self.Width/2,self.Height/2)
     self.Icons["needwifi_bg"].Draw()
     return

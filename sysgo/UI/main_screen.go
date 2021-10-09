@@ -1,7 +1,7 @@
 package UI
 
 import (
-	//"fmt"
+	"fmt"
 	"io/ioutil"
 	"strings"
 	"log"
@@ -21,9 +21,7 @@ import (
 	
 	"github.com/cuu/gogame/event"
   
-	"github.com/clockworkpi/LauncherGoDev/sysgo/DBUS"
-
-  
+	"github.com/clockworkpi/LauncherGoDev/sysgo"
 )
 //eg: MainScreen
 type ScreenInterface interface {
@@ -44,6 +42,7 @@ type ScreenInterface interface {
   RunEXE( cmdpath string)
   SetCurPage( pg PageInterface)
   SwapAndShow()
+	IsWifiConnectedNow()
 }
 
 type PluginConfig struct {
@@ -175,7 +174,7 @@ type MainScreen struct {
 	MsgBoxFont  *ttf.Font
 	IconFont    *ttf.Font
 	SkinManager *SkinManager
-	DBusManager *DBUS.DBus
+	
   CounterScreen *CounterScreen
   Closed      bool
   
@@ -210,8 +209,6 @@ func (self *MainScreen) Init() {
 	self.SkinManager = NewSkinManager()
 	self.SkinManager.Init()
 
-  self.DBusManager = DBUS.DBusHandler
-  
   self.CounterScreen = NewCounterScreen()
   self.CounterScreen.HWND = self.HWND
   self.CounterScreen.Init()
@@ -352,6 +349,27 @@ func (self *MainScreen) IsEmulatorPackage(dirname string ) bool {
 	}
 
 	return ret	
+}
+
+func (self *MainScreen) IsWifiConnectedNow() bool {
+	
+  cli := fmt.Sprintf( "ip -4 addr show %s | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'",sysgo.WifiDev)
+  out := System(cli)
+	if len(out)<6 {
+		return false
+	}
+	return true
+}
+
+func (self *MainScreen) GetWirelessIP() string {
+
+  cli := fmt.Sprintf( "ip -4 addr show %s | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'",sysgo.WifiDev)
+  out := System(cli)
+  if len(out) > 5 {
+		out = strings.TrimSuffix(out,"\n")
+	}
+	
+  return out	
 }
 
 func (self *MainScreen) RunEXE( cmdpath string) {

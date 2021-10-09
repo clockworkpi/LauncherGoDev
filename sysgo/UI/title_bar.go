@@ -194,10 +194,13 @@ func (t *TitleBar) GetWifiStrength() int {
     out := System(cli)
     if(len(out) > 2) {
       if strings.Contains(out,"No") == false {
+				out = strings.TrimSuffix(out, "\n")
         stren,err := strconv.ParseInt(out, 10, 0)
         if err == nil {
           qua = 2 * (int(stren) + 100)
-        }
+        }else {
+					fmt.Println(err)
+				}
       }
     }
 
@@ -513,6 +516,7 @@ func (self *TitleBar) Draw(title string) {
 			self.Icons["wifistatus"].Draw()
 		}else {
 			self.Icons["wifistatus"].SetIconIndex(0)
+			self.Icons["wifistatus"].NewCoord(start_x+self.IconWidth+5, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2 )
 			self.Icons["wifistatus"].Draw()
 		}
 	}else {

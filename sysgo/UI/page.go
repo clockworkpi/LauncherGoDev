@@ -826,7 +826,7 @@ func (self *Page) ReturnToUpLevelPage() {
 	if pop_page != nil {
 		page_ := pop_page.(PageInterface)
 		page_.Draw()
-		self.Screen.SetCurPage(page_)
+		self.Screen.CurrentPage = page_
     self.Screen.CurrentPage.OnReturnBackCb()
     
 	}else {

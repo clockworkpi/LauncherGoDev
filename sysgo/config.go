@@ -9,8 +9,8 @@ type PowerLevel struct {
 var PowerLevels map[string]*PowerLevel
 
 var (
-  //CurKeySet = "PC" // PC or GameShell
-  CurKeySet = "GameShell"
+  CurKeySet = "PC" // PC or GameShell
+  //CurKeySet = "GameShell"
   DontLeave = false
   BackLight = "/proc/driver/backlight"
   Battery   = "/sys/class/power_supply/axp20x-battery/uevent"
@@ -25,11 +25,11 @@ var (
   //load from dot files   
   CurPowerLevel= "performance"
   Lang        = "English"
-  WifiDev     = "wlan0"
+  //WifiDev     = "wlan0"
+	WifiDev     = "wlp5s0"
 
   
 )
-
 
 
 func init() {

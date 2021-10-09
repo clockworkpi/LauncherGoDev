@@ -16,7 +16,7 @@ import (
 	"github.com/cuu/gogame/color"
 	"github.com/cuu/gogame/event"
 	"github.com/cuu/gogame/time"
-
+	"github.com/clockworkpi/LauncherGoDev/sysgo"
   "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 
 )
@@ -292,8 +292,8 @@ func (self *GateWayPage) ApplyGateWay( gateway string ) bool {
       }
     }
   }else { // wlan0
-    if self.Screen.DBusManager.IsWifiConnectedNow() == true {
-      UI.System("sudo dhclient wlan0")
+    if self.Screen.IsWifiConnectedNow() == true {
+      UI.System(fmt.Sprintf("sudo dhclient %s",sysgo.WifiDev))
       return true
     }else {
       self.Screen.MsgBox.SetText("Wi-Fi is not connected")

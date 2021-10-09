@@ -2,7 +2,7 @@ package Wifi
 
 import (
   "fmt"
-  "strconv"
+  //"strconv"
   //"strings"
   
   "github.com/veandco/go-sdl2/sdl"
@@ -74,11 +74,11 @@ type NetItem struct {
 	ip string
 	Encrypt   string // WPA2
 	Channel   string //'10'
-	Signal    string // -67
+	Signal    int16 // -67
 	Mode      string // Master or AdHoc
 	Parent    *WifiList
 	IsActive  bool
-    Password  string 
+	Password  string 
 	Labels map[string]UI.LabelInterface
 	Icons  map[string]UI.IconItemInterface
 	Fonts  map[string]*ttf.Font
@@ -103,9 +103,7 @@ func (self *NetItem) SetActive( act bool) {
 	self.IsActive = act
 }
 
-func (self *NetItem) UpdateStrenLabel( sig_str string) { //  ## sig_str should be 'number',eg:'-70'
-
-	self.Signal = sig_str
+func (self *NetItem) UpdateStrenLabel() { //  ## sig_str should be 'number',eg:'-70'
     
 	if _, ok := self.Labels["stren"]; ok {
 	  self.Labels["stren"].SetText( fmt.Sprintf("%d",self.CalcWifiQuality()) )
@@ -132,19 +130,33 @@ func (self *NetItem) Init(is_active bool) {
   essid_  := ""
 	
   if len(self.Essid) > 19 {
-	essid_ = self.Essid[:20]
+		essid_ = self.Essid[:20]
   }else {
-	essid_ = self.Essid
+		essid_ = self.Essid
   }
- 
-  essid_label.Init(essid_, self.FontObj,nil)
 
+	if len(essid_) == 0 {
+		essid_ = self.Bssid
+	}
+	
+	if len(essid_) == 0 {
+		essid_ = EMPTY_NETWORK
+	}
+	
+	//fmt.Println("essid: ",essid_, len(essid_))
+	
+  essid_label.Init(essid_, self.FontObj,nil)
+	
   self.Labels["essid"] = essid_label
 
   stren_label := UI.NewLabel()
   stren_label.CanvasHWND = self.Parent.GetCanvasHWND()
 
-  stren_label.Init(self.Signal, self.FontObj,nil)
+	stren_l := fmt.Sprintf("%%%d ",self.CalcWifiQuality())
+	if len(stren_l) == 0 {
+		stren_l = "%%0"
+	}
+  stren_label.Init(stren_l, self.FontObj,nil)
   stren_label.PosX = self.Width - 23 - stren_label.Width-2
 
   self.Labels["stren"] = stren_label
@@ -179,10 +191,7 @@ func (self *NetItem) Connect() {
 func (self *NetItem) CalcWifiQuality() int {
 
   qua := 0
-  stren,err := strconv.ParseInt(self.Signal, 10, 0)
-  if err == nil {
-    qua = 2 * (int(stren) + 100)
-  }
+  qua = 2 * (int(self.Signal) + 100)
   
   return qua
 }
@@ -209,15 +218,15 @@ func (self *NetItem) CalcWifiStrength() int {
 
 func (self *NetItem) Draw() {
   for i,v := range self.Labels {
-	x_,_ := v.Coord()
-	_,h_  := v.Size()
-	self.Labels[i].NewCoord(x_,self.PosY+(self.Height - h_)/2)
-	self.Labels[i].Draw()
+		x_,_ := v.Coord()
+		_,h_  := v.Size()
+		self.Labels[i].NewCoord(x_,self.PosY+(self.Height - h_)/2)
+		self.Labels[i].Draw()
   }
 
   if self.IsActive == true {
-	self.Icons["done"].NewCoord(14,self.PosY)
-	self.Icons["done"].Draw()
+		self.Icons["done"].NewCoord(14,self.PosY)
+		self.Icons["done"].Draw()
   }
 
   /*
@@ -231,17 +240,18 @@ func (self *NetItem) Draw() {
   ge := self.CalcWifiStrength()
   if ge > 0 {
     self.Icons["wifistatus"].SetIconIndex(ge)
-	self.Icons["wifistatus"].NewCoord(self.Width-23,self.PosY)
-	self.Icons["wifistatus"].Draw()
+		self.Icons["wifistatus"].NewCoord(self.Width-23,self.PosY)
+		self.Icons["wifistatus"].Draw()
   }else {
-	self.Icons["wifistatus"].SetIconIndex(0)
-	self.Icons["wifistatus"].NewCoord(self.Width-23,self.PosY)
-	self.Icons["wifistatus"].Draw()
+		self.Icons["wifistatus"].SetIconIndex(0)
+		self.Icons["wifistatus"].NewCoord(self.Width-23,self.PosY)
+		self.Icons["wifistatus"].Draw()
   }
 
   draw.Line(self.Parent.GetCanvasHWND(),
-	&color.Color{169,169,169,255},
-	self.PosX,self.PosY+self.Height-1,
-	self.PosX+self.Width,self.PosY+self.Height-1,
-  1)
+		&color.Color{169,169,169,255},
+		self.PosX,self.PosY+self.Height-1,
+		self.PosX+self.Width,self.PosY+self.Height-1,
+		1)
+	
 }
