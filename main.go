@@ -15,6 +15,7 @@ import (
   //"encoding/json"
 	gotime "time"
 	"github.com/veandco/go-sdl2/sdl"
+	//"github.com/go-ini/ini"
 	"github.com/cuu/gogame"
 	"github.com/cuu/gogame/display"
 	"github.com/cuu/gogame/event"
@@ -240,7 +241,7 @@ func PreparationInAdv(){
   
   if UI.FileExists("sysgo/.powerlevel") == false {
     UI.System("touch sysgo/.powerlevel")
-    UI.System("sudo iw wlan0 set power_save off >/dev/null")
+    UI.System(fmt.Sprintf("sudo iw %s set power_save off >/dev/null",sysgo.WifiDev))
     
   }else{
     b, err := ioutil.ReadFile("sysgo/.powerlevel")
@@ -253,12 +254,12 @@ func PreparationInAdv(){
     if pwl != ""{
       sysgo.CurPowerLevel = pwl
       if pwl == "supersaving" {
-        UI.System("sudo iw wlan0 set power_save on >/dev/null")
+        UI.System(fmt.Sprintf("sudo iw %s set power_save on >/dev/null",sysgo.WifiDev))
       }else{
-        UI.System("sudo iw wlan0 set power_save off >/dev/null")
+        UI.System(fmt.Sprintf("sudo iw %s set power_save off >/dev/null",sysgo.WifiDev))
       }
     }else {
-      UI.System("sudo iw wlan0 set power_save off >/dev/null")
+      UI.System(fmt.Sprintf("sudo iw %s set power_save off >/dev/null",sysgo.WifiDev))
     }
   }
   
@@ -299,7 +300,7 @@ func run() int {
 	display.Init()
 	font.Init()
 	screen := display.SetMode(int32(UI.Width),int32(UI.Height),0,32)
-    
+
 	UI.Init()
   
   PreparationInAdv()
@@ -495,7 +496,7 @@ func run() int {
 func main() {
 	
 	var exitcode int
-  
+
   //runtime.GOMAXPROCS(1)
   
 	os.Setenv("SDL_VIDEO_CENTERED","1")

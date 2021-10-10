@@ -32,7 +32,7 @@ var (
 
 
 func (self *WifiPlugin) Init( main_screen *UI.MainScreen ) {
-
+		
   self.PasswordPage = UI.NewKeyboard()
   self.PasswordPage.Name = "Enter wifi password"
   self.PasswordPage.Screen= main_screen

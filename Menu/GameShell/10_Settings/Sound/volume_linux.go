@@ -20,10 +20,6 @@ func init() {
 	}
 }
 
-func cmdEnv() []string {
-	return []string{"LANG=C", "LC_ALL=C"}
-}
-
 func getVolumeCmd() []string {
 	if useAmixer {
 		return []string{"amixer", "get", "Master"}

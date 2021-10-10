@@ -5,8 +5,8 @@ import (
     "fmt"
     //"strconv"
     "strings"
-    "os"
-    "os/exec"
+	//"os"
+	// "os/exec"
     gotime "time"
 
     //"github.com/godbus/dbus"
@@ -32,21 +32,6 @@ type WifiDisconnectConfirmPage struct {
   UI.ConfirmPage
   Parent *WifiInfoPage
 }
-
-func cmdEnv() []string {
-	return []string{"LANG=C", "LC_ALL=C"}
-}
-
-func execCmd(cmdArgs []string) ([]byte, error) {
-	cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
-	cmd.Env = append(os.Environ(), cmdEnv()...)
-	out, err := cmd.Output()
-	if err != nil {
-		err = fmt.Errorf(`failed to execute "%v" (%+v)`, strings.Join(cmdArgs, " "), err)
-	}
-	return out, err
-}
-
 
 func NewWifiDisconnectConfirmPage() *WifiDisconnectConfirmPage {
   p := &WifiDisconnectConfirmPage{}  
@@ -488,10 +473,10 @@ func (self *WifiList) Disconnect() {
   self.Connecting = false
 	
   wpa_cli_disconnect := []string{"wpa_cli","disconnect",self.CurEssid,"-i",sysgo.WifiDev}
-  execCmd( wpa_cli_disconnect )
+  UI.ExecCmd( wpa_cli_disconnect )
 	fmt.Println(wpa_cli_disconnect)
 	dhcp_release := []string{"dhclient","-r",sysgo.WifiDev}
-	execCmd(dhcp_release)
+	UI.ExecCmd(dhcp_release)
 
 	self.CurEssid = ""
 	self.CurBssid = ""
@@ -578,7 +563,7 @@ func (self *WifiList) ConfigWireless(password string) {
 		self.CurBssid = self.MyList[self.PsIndex].Bssid
     self.MyList[self.PsIndex].Password = password
     dhcp := []string{"dhclient" ,sysgo.WifiDev}
-    execCmd(dhcp)
+    UI.ExecCmd(dhcp)
     GsConnectManager.ReadNetAddress(gotime.Second*3)
 		self.CurIP = GsConnectManager.IPv4().String()
 		self.ShowBox("Connected")
@@ -603,10 +588,8 @@ func (self *WifiList) ConfigWireless(password string) {
 func (self *WifiList) GetWirelessIP() string {
 
   cli := fmt.Sprintf( "ip -4 addr show %s | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'",sysgo.WifiDev)
-  out := UI.System(cli)
-  if len(out) > 5 {
-		out = strings.TrimSuffix(out,"\n")
-	}
+  out := UI.SystemTrim(cli)
+	
   return out
   
 }

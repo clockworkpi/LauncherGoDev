@@ -151,7 +151,7 @@ func (self *GateWayPage) GenList() {
   last_height := 0
   
   var drivers  = [][2]string{[2]string{"usb0","USB Ethernet"},
-                             [2]string{"wlan0","Wi-Fi"}}
+                             [2]string{sysgo.WifiDev,"Wi-Fi"}}
   
 
   for _,u := range drivers {
@@ -318,8 +318,8 @@ func (self *GateWayPage) OnLoadCb() {
     if len(out) > 7 {
       if strings.Contains(out,"usb0") {
         thedrv = "usb0"
-      }else if strings.Contains(out,"wlan0") {
-        thedrv = "wlan0"
+      }else if strings.Contains(out,sysgo.WifiDev) {
+        thedrv = sysgo.WifiDev
       }
     }
   }

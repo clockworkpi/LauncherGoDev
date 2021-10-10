@@ -502,9 +502,9 @@ func (self *PowerOptionsPage) Click() {
   sysgo.CurPowerLevel = cur_li.Value
   
   if sysgo.CurPowerLevel == "supersaving" {
-    UI.System("sudo iw wlan0 set power_save on >/dev/null")
+    UI.System(fmt.Sprintf("sudo iw %s set power_save on >/dev/null",sysgo.WifiDev))
   }else{
-    UI.System("sudo iw wlan0 set power_save off >/dev/null")
+    UI.System(fmt.Sprintf("sudo iw %s set power_save off >/dev/null",sysgo.WifiDev))
   }
   
   self.Screen.MsgBox.SetText("Applying")

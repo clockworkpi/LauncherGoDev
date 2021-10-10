@@ -1,5 +1,12 @@
 package sysgo
 
+import (
+	"fmt"
+	"os"
+	"github.com/go-ini/ini"
+	
+)
+
 type PowerLevel struct {
   Dim int
   Close  int
@@ -9,8 +16,8 @@ type PowerLevel struct {
 var PowerLevels map[string]*PowerLevel
 
 var (
-  CurKeySet = "PC" // PC or GameShell
-  //CurKeySet = "GameShell"
+  //CurKeySet = "PC" // PC or GameShell
+  CurKeySet = "GameShell"
   DontLeave = false
   BackLight = "/proc/driver/backlight"
   Battery   = "/sys/class/power_supply/axp20x-battery/uevent"
@@ -25,10 +32,8 @@ var (
   //load from dot files   
   CurPowerLevel= "performance"
   Lang        = "English"
-  //WifiDev     = "wlan0"
-	WifiDev     = "wlp5s0"
-
-  
+  WifiDev     = "wlan0"
+	
 )
 
 
@@ -40,4 +45,37 @@ func init() {
     PowerLevels["server"]      = &PowerLevel{40, 120, 0  }
     PowerLevels["performance"] = &PowerLevel{40, 0,   0  }
   }
+
+	//sudo LauncherGoDev=1 ./launchergo # for develop code on PC
+	dev_mode := os.Getenv("LauncherGoDev")
+	
+	if len(dev_mode) < 1 {
+		return
+	}
+	
+	if _, err := os.Stat("app-local.ini" ); err == nil {
+		load_opts := ini.LoadOptions{
+			IgnoreInlineComment:true,
+		}
+		cfg, err := ini.LoadSources(load_opts, "app-local.ini" )
+		if err != nil {
+			fmt.Printf("Fail to read file: %v\n", err)
+			return
+		}
+		section := cfg.Section("GameShell")
+		if section != nil {
+			gs_opts := section.KeyStrings()
+			for i,v := range gs_opts {
+				fmt.Println(i,v, section.Key(v).String())
+				switch v{
+					case "WifiDev":
+					WifiDev = section.Key(v).String()
+					case "CurKeySet":
+					CurKeySet = section.Key(v).String()
+					
+				}
+			}
+		}
+	}
+	
 }

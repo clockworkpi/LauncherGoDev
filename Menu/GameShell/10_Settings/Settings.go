@@ -19,7 +19,6 @@ import (
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Wifi"
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Bluetooth"
   
-  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/LauncherPy"
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Update"
 	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Storage"
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Languages"
@@ -29,7 +28,7 @@ import (
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Airplane"
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/ButtonsLayout"
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/TimeZone"
-  "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Lima"
+  //"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/Lima"
   "github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings/GateWay"
 
   
@@ -117,8 +116,8 @@ func (self *SettingsPage) GenList() []*UI.UIPlugin {
     &UI.UIPlugin{UI.PluginPackage,"",    "About",          "About",                   &About.APIOBJ},
     &UI.UIPlugin{UI.PluginPackage,"",    "PowerOFF",       "Power off",               &PowerOFF.APIOBJ},
     &UI.UIPlugin{UI.PluginPackage,"",    "ButtonsLayout",  "Buttons Layout",          &ButtonsLayout.APIOBJ},    
-    &UI.UIPlugin{UI.PluginPackage,"",    "LauncherPy",     "Switch to Launcher",      &LauncherPy.APIOBJ},
-    &UI.UIPlugin{UI.PluginPackage,"",    "Lima",           "GPU Driver Switch",       &Lima.APIOBJ},
+		// &UI.UIPlugin{UI.PluginPackage,"",    "LauncherPy",     "Switch to Launcher",      &LauncherPy.APIOBJ},
+    //&UI.UIPlugin{UI.PluginPackage,"",    "Lima",           "GPU Driver Switch",       &Lima.APIOBJ},
     &UI.UIPlugin{UI.PluginPackage,"",    "GateWay",        "Network gateway switch",  &GateWay.APIOBJ},
   }
   

@@ -286,3 +286,17 @@ func SystemTrim(cmd string) string {
 
   return strings.Trim(ret,"\r\n")
 }
+
+func cmdEnv() []string {
+	return []string{"LANG=C", "LC_ALL=C"}
+}
+
+func ExecCmd(cmdArgs []string) ([]byte, error) {
+	cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
+	cmd.Env = append(os.Environ(), cmdEnv()...)
+	out, err := cmd.Output()
+	if err != nil {
+		err = fmt.Errorf(`failed to execute "%v" (%+v)`, strings.Join(cmdArgs, " "), err)
+	}
+	return out, err
+}

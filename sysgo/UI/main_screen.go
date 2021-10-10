@@ -364,10 +364,8 @@ func (self *MainScreen) IsWifiConnectedNow() bool {
 func (self *MainScreen) GetWirelessIP() string {
 
   cli := fmt.Sprintf( "ip -4 addr show %s | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'",sysgo.WifiDev)
-  out := System(cli)
-  if len(out) > 5 {
-		out = strings.TrimSuffix(out,"\n")
-	}
+  out := SystemTrim(cli)
+
 	
   return out	
 }
