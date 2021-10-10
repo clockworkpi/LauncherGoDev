@@ -7,7 +7,7 @@ import (
     "strings"
 	//"os"
 	// "os/exec"
-    gotime "time"
+	// gotime "time"
 
     //"github.com/godbus/dbus"
 
@@ -472,12 +472,8 @@ func (self *WifiList) GenNetworkList() {
 func (self *WifiList) Disconnect() {
   self.Connecting = false
 	
-  wpa_cli_disconnect := []string{"wpa_cli","disconnect",self.CurEssid,"-i",sysgo.WifiDev}
-  UI.ExecCmd( wpa_cli_disconnect )
-	fmt.Println(wpa_cli_disconnect)
-	dhcp_release := []string{"dhclient","-r",sysgo.WifiDev}
-	UI.ExecCmd(dhcp_release)
-
+  nmcli_disconnect := []string{"nmcli","con","down",self.CurEssid}
+  UI.ExecCmd( nmcli_disconnect )
 	self.CurEssid = ""
 	self.CurBssid = ""
 	
@@ -556,29 +552,19 @@ func (self *WifiList) ConfigWireless(password string) {
   self.ShowBox("Connecting...")
 
 	self.Connecting = true
-	
-  if conn, err := GsConnectManager.Connect(ssid, password, gotime.Second * 20); err == nil {
-		fmt.Println("Connected!", conn.NetInterface, conn.SSID, conn.IP4.String(), conn.IP6.String())
+
+	out := UI.System(fmt.Sprintf("nmcli dev wifi connect %s password \"%s\"",ssid,password))
+	if strings.Contains(out,"successfully") {
     self.CurEssid = self.MyList[self.PsIndex].Essid
 		self.CurBssid = self.MyList[self.PsIndex].Bssid
     self.MyList[self.PsIndex].Password = password
-    dhcp := []string{"dhclient" ,sysgo.WifiDev}
-    UI.ExecCmd(dhcp)
-    GsConnectManager.ReadNetAddress(gotime.Second*3)
-		self.CurIP = GsConnectManager.IPv4().String()
 		self.ShowBox("Connected")
-  } else {
-		err_str := err.Error()
-		s := strings.Split(err_str,":")
-		if len(s)> 1 && s[1] == "15" {
-			self.ShowBox("Wifi auth error")
-		}else {
-			self.ShowBox(err_str)
-		}
-
+	}else {
+		self.ShowBox("Wifi connect error")
 		self.CurEssid = ""
 		self.CurBssid = ""
   }
+	
 	self.Connecting = false
 	
   self.UpdateListActive()
