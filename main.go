@@ -343,7 +343,7 @@ func run() int {
 
 	running := true
 	for running {
-		ev := event.Wait()
+		ev := event.Poll()
 		if ev.Type == event.QUIT {
 			running = false
 			break
