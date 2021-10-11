@@ -496,14 +496,13 @@ func run() int {
 func main() {
 	
 	var exitcode int
+	defer sdl.Quit()
 
   //runtime.GOMAXPROCS(1)
   
 	os.Setenv("SDL_VIDEO_CENTERED","1")
 	
-	sdl.Main(func() {
-		exitcode = run()
-	})
+	exitcode = run()
 
 	os.Exit(exitcode)
 }
