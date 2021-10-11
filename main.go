@@ -343,7 +343,15 @@ func run() int {
 
 	running := true
 	for running {
+		peeped := event.Peep(true,sdl.KEYDOWN,sdl.KEYUP)
+		if peeped > 1 {
+			fmt.Println("event Peeped: ",peeped)
+			event.Clear(sdl.KEYDOWN)
+			event.Clear(sdl.KEYUP)
+			continue
+		}
 		ev := event.Poll()
+		//fmt.Println(ev.Data["Repeat"]) //0 or "" ,1 
 		if ev.Type == event.QUIT {
 			running = false
 			break
@@ -443,6 +451,7 @@ func run() int {
 
 		}
 		if ev.Type == event.KEYDOWN {
+			
 			everytime_keydown = gotime.Now()
 			if RestoreLastBackLightBrightness(main_screen) == false {
 				continue

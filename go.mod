@@ -3,7 +3,7 @@ module github.com/clockworkpi/LauncherGoDev
 go 1.17
 
 require (
-	github.com/cuu/gogame v0.0.0-20211011051747-74f98678cdcc
+	github.com/cuu/gogame v0.0.0-20211011085728-70b3e040be73
 	github.com/cuu/grab v2.0.0+incompatible
 	github.com/cuu/wpa-connect v1.5.4
 	github.com/fatih/structs v1.1.0
