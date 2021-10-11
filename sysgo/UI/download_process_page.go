@@ -1,291 +1,284 @@
 package UI
 
 import (
-  "fmt"
-  "os"
-  "strings"
-  "path/filepath"
-  "os/exec"
-  
-  gotime "time"
-  "net/url"
-  
-  "github.com/cuu/grab"
-  "github.com/cuu/gogame/color"
-  "github.com/cuu/gogame/event"
-  "github.com/cuu/gogame/draw"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 
+	"net/url"
+	gotime "time"
+
+	"github.com/cuu/gogame/color"
+	"github.com/cuu/gogame/draw"
+	"github.com/cuu/gogame/event"
+	"github.com/cuu/grab"
 )
 
 type DownloadProcessPage struct {
-  Page
-    
-  URL string
-  DST_DIR string
-  Value   int
-  PngSize map[string][2]int
-  Doing bool
-  
-  FileNameLabel LabelInterface
-  SizeLabel     LabelInterface
-  
-  Icons  map[string]IconItemInterface
+	Page
 
-  URLColor  *color.Color
-  TextColor  *color.Color
-  TheTicker *gotime.Ticker
-  
-  Downloader *grab.Client
-  resp *grab.Response
-  req *grab.Request
-  
+	URL     string
+	DST_DIR string
+	Value   int
+	PngSize map[string][2]int
+	Doing   bool
+
+	FileNameLabel LabelInterface
+	SizeLabel     LabelInterface
+
+	Icons map[string]IconItemInterface
+
+	URLColor  *color.Color
+	TextColor *color.Color
+	TheTicker *gotime.Ticker
+
+	Downloader *grab.Client
+	resp       *grab.Response
+	req        *grab.Request
 }
 
-
 func NewDownloadProcessPage() *DownloadProcessPage {
-  
-  p := &DownloadProcessPage{}
-  
-  p.FootMsg = [5]string{"Nav","","","Back",""}
-  
-  p.URLColor = &color.Color{51, 166, 255,255 } // URL
-  p.TextColor = &color.Color{83,83,83,255 } // Text
-  
-  p.PngSize = make(map[string][2]int,0)
-  
-  p.Icons=make(map[string]IconItemInterface)
-  
-  return p
+
+	p := &DownloadProcessPage{}
+
+	p.FootMsg = [5]string{"Nav", "", "", "Back", ""}
+
+	p.URLColor = &color.Color{51, 166, 255, 255} // URL
+	p.TextColor = &color.Color{83, 83, 83, 255}  // Text
+
+	p.PngSize = make(map[string][2]int, 0)
+
+	p.Icons = make(map[string]IconItemInterface)
+
+	return p
 }
 
 func (self *DownloadProcessPage) Init() {
-  self.PosX = self.Index * self.Screen.Width
-  self.Width  = self.Screen.Width
-  self.Height = self.Screen.Height
-  
-  self.CanvasHWND = self.Screen.CanvasHWND
-  self.PngSize["bg"] = [2]int{48,79}
-  self.PngSize["needwifi_bg"] = [2]int{253,132}
-  
-  bgpng := NewIconItem()
-  bgpng.ImgSurf = MyIconPool.GetImgSurf("rom_download")
-  bgpng.MyType = ICON_TYPES["STAT"]
-  bgpng.Parent = self
-  bgpng.Adjust(0,0,self.PngSize["bg"][0],self.PngSize["bg"][1],0)
-  self.Icons["bg"] = bgpng
-  
-  needwifi_bg := NewIconItem()
-  needwifi_bg.ImgSurf = MyIconPool.GetImgSurf("needwifi_bg")
-  needwifi_bg.MyType = ICON_TYPES["STAT"]
-  needwifi_bg.Parent = self
-  needwifi_bg.Adjust(0,0,self.PngSize["needwifi_bg"][0],self.PngSize["needwifi_bg"][1],0)
-  
-  self.Icons["needwifi_bg"] = needwifi_bg
+	self.PosX = self.Index * self.Screen.Width
+	self.Width = self.Screen.Width
+	self.Height = self.Screen.Height
 
-  self.FileNameLabel = NewLabel()
-  self.FileNameLabel.SetCanvasHWND(self.CanvasHWND)
-  self.FileNameLabel.Init("", Fonts["varela12"],nil)
-  
-  self.SizeLabel = NewLabel()
-  self.SizeLabel.SetCanvasHWND(self.CanvasHWND)
-  self.SizeLabel.Init("0/0Kb",Fonts["varela12"],nil)
-  self.SizeLabel.SetColor( self.URLColor )
-  
-  self.Downloader = grab.NewClient()
-  
+	self.CanvasHWND = self.Screen.CanvasHWND
+	self.PngSize["bg"] = [2]int{48, 79}
+	self.PngSize["needwifi_bg"] = [2]int{253, 132}
+
+	bgpng := NewIconItem()
+	bgpng.ImgSurf = MyIconPool.GetImgSurf("rom_download")
+	bgpng.MyType = ICON_TYPES["STAT"]
+	bgpng.Parent = self
+	bgpng.Adjust(0, 0, self.PngSize["bg"][0], self.PngSize["bg"][1], 0)
+	self.Icons["bg"] = bgpng
+
+	needwifi_bg := NewIconItem()
+	needwifi_bg.ImgSurf = MyIconPool.GetImgSurf("needwifi_bg")
+	needwifi_bg.MyType = ICON_TYPES["STAT"]
+	needwifi_bg.Parent = self
+	needwifi_bg.Adjust(0, 0, self.PngSize["needwifi_bg"][0], self.PngSize["needwifi_bg"][1], 0)
+
+	self.Icons["needwifi_bg"] = needwifi_bg
+
+	self.FileNameLabel = NewLabel()
+	self.FileNameLabel.SetCanvasHWND(self.CanvasHWND)
+	self.FileNameLabel.Init("", Fonts["varela12"], nil)
+
+	self.SizeLabel = NewLabel()
+	self.SizeLabel.SetCanvasHWND(self.CanvasHWND)
+	self.SizeLabel.Init("0/0Kb", Fonts["varela12"], nil)
+	self.SizeLabel.SetColor(self.URLColor)
+
+	self.Downloader = grab.NewClient()
+
 }
 
 func (self *DownloadProcessPage) OnExitCb() {
-  
-  //Stop Ticker and the Grab
-  if self.TheTicker != nil {
-    self.TheTicker.Stop()
-  }
-  
+
+	//Stop Ticker and the Grab
+	if self.TheTicker != nil {
+		self.TheTicker.Stop()
+	}
+
 }
 
 // should be in a gorotine
-func (self *DownloadProcessPage) UpdateProcessInterval() {  
-  
-  if self.Doing == true {
-    return
-  }
-  self.Doing = true
-  for {
-      
-      gotime.Sleep(150 * gotime.Millisecond)
-      
-      fmt.Printf("  transferred %v / %v bytes (%.2f%%)\n",
+func (self *DownloadProcessPage) UpdateProcessInterval() {
+
+	if self.Doing == true {
+		return
+	}
+	self.Doing = true
+	for {
+
+		gotime.Sleep(150 * gotime.Millisecond)
+
+		fmt.Printf("  transferred %v / %v bytes (%.2f%%)\n",
 			self.resp.BytesComplete(),
 			self.resp.Size,
 			100*self.resp.Progress())
-      
-      self.Value = int(100.0*self.resp.Progress())
-      total := float64(self.resp.Size)/1000.0/1000.0
-      downloaded := float64(self.resp.BytesComplete())/1000.0/1000.0
-    
-      lb_str := fmt.Sprintf("%.2f/%.2fMb",downloaded,total)
-      self.SizeLabel.SetText(lb_str)
-    
-      self.FileNameLabel.SetText(filepath.Base(self.resp.Filename))
-      
-      
-      self.Screen.Draw()
-      self.Screen.SwapAndShow()
-  
-      if self.resp.Progress() >= 1.0  {
-        // download is complete
-        fmt.Println("download is complete ",self.Value)
-        self.Value = 0 
-        self.Doing=false
-        break
-      }
-      
-      if self.Doing == false {
-        break
-      }
-  }
-  
-  self.Doing=false
-  
-	if err := self.resp.Err(); err != nil {
-    self.DownloadErr()
-		fmt.Fprintf(os.Stderr, "Download failed: %v\n", err)
-    
-    cmd := exec.Command("rm","-rf",self.resp.Filename)
-    cmd.Dir= self.DST_DIR
-    cmd.Run()
+
+		self.Value = int(100.0 * self.resp.Progress())
+		total := float64(self.resp.Size) / 1000.0 / 1000.0
+		downloaded := float64(self.resp.BytesComplete()) / 1000.0 / 1000.0
+
+		lb_str := fmt.Sprintf("%.2f/%.2fMb", downloaded, total)
+		self.SizeLabel.SetText(lb_str)
+
+		self.FileNameLabel.SetText(filepath.Base(self.resp.Filename))
+
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+
+		if self.resp.Progress() >= 1.0 {
+			// download is complete
+			fmt.Println("download is complete ", self.Value)
+			self.Value = 0
+			self.Doing = false
+			break
+		}
+
+		if self.Doing == false {
+			break
+		}
 	}
 
-  fmt.Printf("Download saved to %s/%v \n",self.DST_DIR, self.resp.Filename)
-  
-  filename := filepath.Base(self.resp.Filename)
-  
-  if strings.HasSuffix(filename,".zip") {
-    cmd := exec.Command("unzip",filename)
-    cmd.Dir = self.DST_DIR
-    cmd.Run()
-  }else if strings.HasSuffix(filename,".zsync") {
-    cmd := exec.Command("rm","-rf",filename)
-    cmd.Dir = self.DST_DIR
-    cmd.Run()
-  }else if strings.HasSuffix(filename,".tar.gz") {
-    cmd := exec.Command("tar", "xf", filename)
-    cmd.Dir= self.DST_DIR
-    cmd.Run()
-  }
-  
-  cmd := exec.Command("rm","-rf",filename)
-  cmd.Dir = self.DST_DIR
-  cmd.Run()
-  
-  self.DoneAndReturnUpLevel()
-  
+	self.Doing = false
+
+	if err := self.resp.Err(); err != nil {
+		self.DownloadErr()
+		fmt.Fprintf(os.Stderr, "Download failed: %v\n", err)
+
+		cmd := exec.Command("rm", "-rf", self.resp.Filename)
+		cmd.Dir = self.DST_DIR
+		cmd.Run()
+	}
+
+	fmt.Printf("Download saved to %s/%v \n", self.DST_DIR, self.resp.Filename)
+
+	filename := filepath.Base(self.resp.Filename)
+
+	if strings.HasSuffix(filename, ".zip") {
+		cmd := exec.Command("unzip", filename)
+		cmd.Dir = self.DST_DIR
+		cmd.Run()
+	} else if strings.HasSuffix(filename, ".zsync") {
+		cmd := exec.Command("rm", "-rf", filename)
+		cmd.Dir = self.DST_DIR
+		cmd.Run()
+	} else if strings.HasSuffix(filename, ".tar.gz") {
+		cmd := exec.Command("tar", "xf", filename)
+		cmd.Dir = self.DST_DIR
+		cmd.Run()
+	}
+
+	cmd := exec.Command("rm", "-rf", filename)
+	cmd.Dir = self.DST_DIR
+	cmd.Run()
+
+	self.DoneAndReturnUpLevel()
+
 }
 
-func (self *DownloadProcessPage) DownloadErr()  {
-  self.Screen.MsgBox.SetText("Download Failed")
-  self.Screen.MsgBox.Draw()
-  self.Screen.SwapAndShow()  
+func (self *DownloadProcessPage) DownloadErr() {
+	self.Screen.MsgBox.SetText("Download Failed")
+	self.Screen.MsgBox.Draw()
+	self.Screen.SwapAndShow()
 }
 
 func (self *DownloadProcessPage) DoneAndReturnUpLevel() {
-  self.ReturnToUpLevelPage()
-  self.Screen.Draw()
-  self.Screen.SwapAndShow()
+	self.ReturnToUpLevelPage()
+	self.Screen.Draw()
+	self.Screen.SwapAndShow()
 }
 
+func (self *DownloadProcessPage) StartDownload(_url, dst_dir string) {
 
+	if self.Screen.IsWifiConnectedNow() == false {
+		return
+	}
 
-func (self *DownloadProcessPage) StartDownload(_url,dst_dir string) {
-  
-  if self.Screen.IsWifiConnectedNow() == false {
-    return
-  }
-  
-  _, err := url.ParseRequestURI(_url)
-  if err == nil && IsDirectory(dst_dir) {
-    self.URL = _url
-    self.DST_DIR = dst_dir
-  }else{
-  
-    self.Screen.MsgBox.SetText("Invaid")
-    self.Screen.MsgBox.Draw()
-    self.Screen.SwapAndShow() 
-    fmt.Println("DownloadProcessPage StartDownload Invalid ",err)
-    return
-  }
-  
-  if self.Doing == false {
-    self.req, _ = grab.NewRequest(self.DST_DIR, _url)
-    fmt.Printf("Downloading %v...\n", self.req.URL())
-    self.resp = self.Downloader.Do(self.req)
-    fmt.Printf("  %v\n", self.resp.HTTPResponse.Status)
-    self.UpdateProcessInterval()
-  }
+	_, err := url.ParseRequestURI(_url)
+	if err == nil && IsDirectory(dst_dir) {
+		self.URL = _url
+		self.DST_DIR = dst_dir
+	} else {
+
+		self.Screen.MsgBox.SetText("Invaid")
+		self.Screen.MsgBox.Draw()
+		self.Screen.SwapAndShow()
+		fmt.Println("DownloadProcessPage StartDownload Invalid ", err)
+		return
+	}
+
+	if self.Doing == false {
+		self.req, _ = grab.NewRequest(self.DST_DIR, _url)
+		fmt.Printf("Downloading %v...\n", self.req.URL())
+		self.resp = self.Downloader.Do(self.req)
+		fmt.Printf("  %v\n", self.resp.HTTPResponse.Status)
+		self.UpdateProcessInterval()
+	}
 }
 
 func (self *DownloadProcessPage) StopDownload() {
 
-  self.Doing=false  
+	self.Doing = false
 }
-func (self *DownloadProcessPage) KeyDown( ev *event.Event) {
+func (self *DownloadProcessPage) KeyDown(ev *event.Event) {
 
- 	if ev.Data["Key"] == CurKeys["A"] || ev.Data["Key"] == CurKeys["Menu"] {
-    self.StopDownload()
-    
+	if ev.Data["Key"] == CurKeys["A"] || ev.Data["Key"] == CurKeys["Menu"] {
+		self.StopDownload()
+
 		self.ReturnToUpLevelPage()
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
-	}  
+	}
 
 }
 
 func (self *DownloadProcessPage) Draw() {
 
-  self.ClearCanvas()
-  
-  if self.Screen.IsWifiConnectedNow() == false {
-    self.Icons["needwifi_bg"].NewCoord(self.Width/2,self.Height/2)
-    self.Icons["needwifi_bg"].Draw()
-    return
-    
-  }
-  
-  self.Icons["bg"].NewCoord(self.Width/2,self.Height/2-20)
-  self.Icons["bg"].Draw()
-  
-  percent := self.Value
-  if percent < 10 {
-    percent = 10
-  }
-  
-  rect_ := draw.MidRect(self.Width/2,self.Height/2+33,170,17, Width,Height)
-  
-  draw.AARoundRect(self.CanvasHWND,rect_,
-                  &color.Color{228,228,228,255},5,0,&color.Color{228,228,228,255})
-  
-  
-  rect2_ := draw.MidRect( self.Width/2,self.Height/2+33,int(170.0*(float64(percent)/100.0)),17, Width,Height )
-  
-  rect2_.X = rect_.X
-  rect2_.Y = rect_.Y
-  
-  draw.AARoundRect(self.CanvasHWND,rect2_,
-                  &color.Color{131, 199, 219,255},5,0,&color.Color{131, 199, 219,255})
-  
-  w,h := self.FileNameLabel.Size()
-  
-  rect3_ := draw.MidRect(self.Width/2,self.Height/2+53,w, h,Width,Height)
+	self.ClearCanvas()
 
-  w, h = self.SizeLabel.Size()
-  
-  rect4_ := draw.MidRect(self.Width/2,self.Height/2+70,w, h,Width,Height)
-  
-  self.FileNameLabel.NewCoord(int(rect3_.X),int(rect3_.Y))
-  self.FileNameLabel.Draw()
-  
-  self.SizeLabel.NewCoord(int(rect4_.X),int(rect4_.Y))
-  self.SizeLabel.Draw()
-  
+	if self.Screen.IsWifiConnectedNow() == false {
+		self.Icons["needwifi_bg"].NewCoord(self.Width/2, self.Height/2)
+		self.Icons["needwifi_bg"].Draw()
+		return
+
+	}
+
+	self.Icons["bg"].NewCoord(self.Width/2, self.Height/2-20)
+	self.Icons["bg"].Draw()
+
+	percent := self.Value
+	if percent < 10 {
+		percent = 10
+	}
+
+	rect_ := draw.MidRect(self.Width/2, self.Height/2+33, 170, 17, Width, Height)
+
+	draw.AARoundRect(self.CanvasHWND, rect_,
+		&color.Color{228, 228, 228, 255}, 5, 0, &color.Color{228, 228, 228, 255})
+
+	rect2_ := draw.MidRect(self.Width/2, self.Height/2+33, int(170.0*(float64(percent)/100.0)), 17, Width, Height)
+
+	rect2_.X = rect_.X
+	rect2_.Y = rect_.Y
+
+	draw.AARoundRect(self.CanvasHWND, rect2_,
+		&color.Color{131, 199, 219, 255}, 5, 0, &color.Color{131, 199, 219, 255})
+
+	w, h := self.FileNameLabel.Size()
+
+	rect3_ := draw.MidRect(self.Width/2, self.Height/2+53, w, h, Width, Height)
+
+	w, h = self.SizeLabel.Size()
+
+	rect4_ := draw.MidRect(self.Width/2, self.Height/2+70, w, h, Width, Height)
+
+	self.FileNameLabel.NewCoord(int(rect3_.X), int(rect3_.Y))
+	self.FileNameLabel.Draw()
+
+	self.SizeLabel.NewCoord(int(rect4_.X), int(rect4_.Y))
+	self.SizeLabel.Draw()
+
 }

@@ -1,22 +1,23 @@
 package Update
+
 import (
-  "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
+	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 )
+
 /******************************************************************************/
 type UpdatePlugin struct {
 	UI.Plugin
 	Page UI.PageInterface
 }
 
-
-func (self *UpdatePlugin) Init( main_screen *UI.MainScreen ) {
+func (self *UpdatePlugin) Init(main_screen *UI.MainScreen) {
 	self.Page = NewUpdatePage()
-	self.Page.SetScreen( main_screen)
+	self.Page.SetScreen(main_screen)
 	self.Page.SetName("Update LauncherGo")
 	self.Page.Init()
 }
 
-func (self *UpdatePlugin) Run( main_screen *UI.MainScreen ) {
+func (self *UpdatePlugin) Run(main_screen *UI.MainScreen) {
 	if main_screen != nil {
 		main_screen.PushPage(self.Page)
 		main_screen.Draw()

@@ -1,19 +1,18 @@
 package UI
 
 import (
-  "fmt"
+	"fmt"
 	"strings"
-  
-  "github.com/cuu/gogame/font"
-	"github.com/cuu/gogame/draw"
-	"github.com/cuu/gogame/surface"
-	"github.com/cuu/gogame/color"
-	"github.com/cuu/gogame/event"
 
+	"github.com/cuu/gogame/color"
+	"github.com/cuu/gogame/draw"
+	"github.com/cuu/gogame/event"
+	"github.com/cuu/gogame/font"
+	"github.com/cuu/gogame/surface"
 
 	"github.com/clockworkpi/LauncherGoDev/sysgo/easings"
-
 )
+
 //sysgo/UI/keyboard_keys.layout
 type KeyboardIcon struct {
 	TextItem // IconItem->TextItem->KeyboardIcon
@@ -22,8 +21,8 @@ type KeyboardIcon struct {
 func NewKeyboardIcon() *KeyboardIcon {
 	p := &KeyboardIcon{}
 
-	p.Color = &color.Color{83,83,83,255}//SkinManager().GiveColor('Text')
-	
+	p.Color = &color.Color{83, 83, 83, 255} //SkinManager().GiveColor('Text')
+
 	p.MyType = ICON_TYPES["NAV"]
 
 	return p
@@ -31,20 +30,18 @@ func NewKeyboardIcon() *KeyboardIcon {
 
 func (self *KeyboardIcon) Draw() {
 
-	rect_ := draw.MidRect(self.PosX,self.PosY,self.Width,self.Height,Width,Height)
-	
-	surface.Blit(self.Parent.GetCanvasHWND(),self.ImgSurf,rect_,nil)
-	
-}
+	rect_ := draw.MidRect(self.PosX, self.PosY, self.Width, self.Height, Width, Height)
 
+	surface.Blit(self.Parent.GetCanvasHWND(), self.ImgSurf, rect_, nil)
+
+}
 
 type KeyboardSelector struct {
 	PageSelector
 	Parent *Keyboard
 }
 
-
-func NewKeyboardSelector() * KeyboardSelector {
+func NewKeyboardSelector() *KeyboardSelector {
 	p := &KeyboardSelector{}
 
 	return p
@@ -53,19 +50,19 @@ func NewKeyboardSelector() * KeyboardSelector {
 func (self *KeyboardSelector) Draw() {
 	sec_idx := self.Parent.SectionIndex
 	row_idx := self.Parent.RowIndex
-	idx     := self.Parent.PsIndex
+	idx := self.Parent.PsIndex
 
-	x, y    := self.Parent.SecsKeys[sec_idx][row_idx][idx].Coord()
-	w, h    := self.Parent.SecsKeys[sec_idx][row_idx][idx].Size()
+	x, y := self.Parent.SecsKeys[sec_idx][row_idx][idx].Coord()
+	w, h := self.Parent.SecsKeys[sec_idx][row_idx][idx].Size()
 
-	rect_   := draw.MidRect(x,y,w+6,h+1,self.Parent.Width,self.Parent.Height)
+	rect_ := draw.MidRect(x, y, w+6, h+1, self.Parent.Width, self.Parent.Height)
 
 	if rect_.W <= 0 || rect_.H <= 0 {
 		return
 	}
-	
-	color_ := &color.Color{126,206,244,255}
-	draw.AARoundRect(self.Parent.CanvasHWND,rect_,color_,3,0,color_)
+
+	color_ := &color.Color{126, 206, 244, 255}
+	draw.AARoundRect(self.Parent.CanvasHWND, rect_, color_, 3, 0, color_)
 
 }
 
@@ -73,12 +70,12 @@ type Keyboard struct {
 	Page
 
 	Secs map[int][][]string
-	
+
 	SecsKeys map[int][][]TextItemInterface
-	
+
 	SectionNumbers int
-	SectionIndex int
-	Icons  map[string]IconItemInterface
+	SectionIndex   int
+	Icons          map[string]IconItemInterface
 
 	KeyboardLayoutFile string ///sysgo/UI/keyboard_keys.layout
 
@@ -99,36 +96,34 @@ func NewKeyboard() *Keyboard {
 	p.SelectedIconTopOffset = 20
 
 	p.Align = ALIGN["SLeft"]
-  
+
 	p.EasingDur = 10
-	
+
 	p.SectionNumbers = 3
 	p.SectionIndex = 1
 
-	p.Icons =  make( map[string]IconItemInterface )
+	p.Icons = make(map[string]IconItemInterface)
 
 	p.LeftOrRight = 1
 
 	p.RowIndex = 0
-	
-	p.FootMsg = [5]string{"Nav.","ABC","Done","Backspace","Enter"}
+
+	p.FootMsg = [5]string{"Nav.", "ABC", "Done", "Backspace", "Enter"}
 
 	p.Secs = make(map[int][][]string)
 	p.SecsKeys = make(map[int][][]TextItemInterface)
-	
+
 	p.KeyboardLayoutFile = "sysgo/UI/keyboard_keys.layout"
 
-	
 	return p
-	
+
 }
 
-func (self *Keyboard) ReadLayoutFile( fname string) {
+func (self *Keyboard) ReadLayoutFile(fname string) {
 
-	
 	LayoutIndex := 0
 
-	content ,err := ReadLines(fname)
+	content, err := ReadLines(fname)
 
 	Assert(err)
 
@@ -159,19 +154,17 @@ func (self *Keyboard) ReadLayoutFile( fname string) {
 		} else { //empty []
 			LayoutIndex += 1
 		}
-	}	
-}
-
-
-func (self *Keyboard) SetPassword(pwd string) {
-	pwd_seq_list := strings.SplitAfter(pwd,"")
-
-	self.Textarea.ResetMyWords()
-	for _,v := range pwd_seq_list {
-		self.Textarea.AppendText(v)
 	}
 }
 
+func (self *Keyboard) SetPassword(pwd string) {
+	pwd_seq_list := strings.SplitAfter(pwd, "")
+
+	self.Textarea.ResetMyWords()
+	for _, v := range pwd_seq_list {
+		self.Textarea.AppendText(v)
+	}
+}
 
 func (self *Keyboard) Init() {
 	self.CanvasHWND = self.Screen.CanvasHWND
@@ -187,26 +180,26 @@ func (self *Keyboard) Init() {
 
 	word_margin := 15
 
-	secs_zero := strings.Join(self.Secs[0][0],"")
-	fw,_:= font.Size(fontobj,secs_zero)
+	secs_zero := strings.Join(self.Secs[0][0], "")
+	fw, _ := font.Size(fontobj, secs_zero)
 
-	start_x := (self.Width - fw - len(self.Secs[0][0])*word_margin)/2+word_margin/2
+	start_x := (self.Width-fw-len(self.Secs[0][0])*word_margin)/2 + word_margin/2
 	start_y := 0
 
-//	cnt := 0
+	//	cnt := 0
 
-	for i:=0; i < self.SectionNumbers; i++ {
+	for i := 0; i < self.SectionNumbers; i++ {
 		self.SecsKeys[i] = [][]TextItemInterface{}
-		for j:=0; j < len(self.Secs[i]); j++ {
-			self.SecsKeys[i] = append(self.SecsKeys[i],[]TextItemInterface{})
-			secs_ij := strings.Join(self.Secs[i][j],"")
-			fw,_ := font.Size(fontobj,secs_ij)
-			start_x = (self.Width-fw- len(self.Secs[i][j])*word_margin)/2+word_margin/2
+		for j := 0; j < len(self.Secs[i]); j++ {
+			self.SecsKeys[i] = append(self.SecsKeys[i], []TextItemInterface{})
+			secs_ij := strings.Join(self.Secs[i][j], "")
+			fw, _ := font.Size(fontobj, secs_ij)
+			start_x = (self.Width-fw-len(self.Secs[i][j])*word_margin)/2 + word_margin/2
 			start_x = start_x + i*self.Width
 
-			start_y = 84 + j * (word_margin+14)
+			start_y = 84 + j*(word_margin+14)
 
-			for _,val := range self.Secs[i][j] {
+			for _, val := range self.Secs[i][j] {
 				ti := NewTextItem()
 				ti.FontObj = fontobj
 				ti.Parent = self
@@ -216,23 +209,23 @@ func (self *Keyboard) Init() {
 					it.ImgSurf = MyIconPool.GetImgSurf(val)
 					it.Parent = self
 					it.Str = val
-					it.Init(start_x+surface.GetWidth(it.ImgSurf)/2,start_y,surface.GetWidth(it.ImgSurf),surface.GetHeight(it.ImgSurf),0)
-					self.SecsKeys[i][j] = append(self.SecsKeys[i][j],it)
+					it.Init(start_x+surface.GetWidth(it.ImgSurf)/2, start_y, surface.GetWidth(it.ImgSurf), surface.GetHeight(it.ImgSurf), 0)
+					self.SecsKeys[i][j] = append(self.SecsKeys[i][j], it)
 					self.IconNumbers += 1
-					start_x = start_x + surface.GetWidth(it.ImgSurf)+word_margin
-				}else {
+					start_x = start_x + surface.GetWidth(it.ImgSurf) + word_margin
+				} else {
 
-					if val ==  "_S" {
+					if val == "_S" {
 						val = "Space"
 						ti.FontObj = Fonts["veramono15"]
 						ti.Bold = true
 					}
 
-					cur_alpha_w,cur_alpha_h := font.Size(ti.FontObj,val)
-					ti.Init(start_x + cur_alpha_w/2,start_y,cur_alpha_w,cur_alpha_h,0)
+					cur_alpha_w, cur_alpha_h := font.Size(ti.FontObj, val)
+					ti.Init(start_x+cur_alpha_w/2, start_y, cur_alpha_w, cur_alpha_h, 0)
 					ti.Str = val
-					start_x = start_x + cur_alpha_w+word_margin // prepare for next alphabet
-					self.SecsKeys[i][j] = append(self.SecsKeys[i][j],ti)
+					start_x = start_x + cur_alpha_w + word_margin // prepare for next alphabet
+					self.SecsKeys[i][j] = append(self.SecsKeys[i][j], ti)
 				}
 			}
 		}
@@ -253,9 +246,9 @@ func (self *Keyboard) Init() {
 	ps := NewKeyboardSelector()
 
 	ps.Parent = self
-	ps.Init(start_x,start_y,25,25,128)
-  ps.OnShow = true
-  
+	ps.Init(start_x, start_y, 25, 25, 128)
+	ps.OnShow = true
+
 	self.Ps = ps
 	self.PsIndex = 0
 
@@ -264,13 +257,13 @@ func (self *Keyboard) Init() {
 func (self *Keyboard) SelectUpChar() {
 	sec_idx := self.SectionIndex
 
-	self.RowIndex -=1
+	self.RowIndex -= 1
 	if self.RowIndex < 0 {
-		self.RowIndex = len(self.SecsKeys[sec_idx])-1
+		self.RowIndex = len(self.SecsKeys[sec_idx]) - 1
 	}
 
 	if self.PsIndex >= len(self.SecsKeys[sec_idx][self.RowIndex]) {
-		self.PsIndex = len(self.SecsKeys[sec_idx][self.RowIndex])-1
+		self.PsIndex = len(self.SecsKeys[sec_idx][self.RowIndex]) - 1
 	}
 
 	self.ClearCanvas()
@@ -287,8 +280,8 @@ func (self *Keyboard) SelectDownChar() {
 		self.RowIndex = 0
 	}
 
-	if self.PsIndex >=len(self.SecsKeys[sec_idx][self.RowIndex]) {
-		self.PsIndex = len(self.SecsKeys[sec_idx][self.RowIndex])-1
+	if self.PsIndex >= len(self.SecsKeys[sec_idx][self.RowIndex]) {
+		self.PsIndex = len(self.SecsKeys[sec_idx][self.RowIndex]) - 1
 	}
 
 	self.ClearCanvas()
@@ -300,34 +293,34 @@ func (self *Keyboard) SelectNextChar() {
 
 	sec_idx := self.SectionIndex
 	row_idx := self.RowIndex
-	self.PsIndex+=1
-	
+	self.PsIndex += 1
+
 	if self.PsIndex >= len(self.SecsKeys[sec_idx][row_idx]) {
 		self.PsIndex = 0
-		self.RowIndex+=1
-	
+		self.RowIndex += 1
+
 		if self.RowIndex >= len(self.SecsKeys[sec_idx]) {
 			self.RowIndex = 0
 		}
 
 	}
-	
+
 	self.ClearCanvas()
 	self.Draw()
 	self.Screen.SwapAndShow()
-	
+
 }
 
 func (self *Keyboard) SelectPrevChar() {
 
-	sec_idx := self.SectionIndex    
-	self.PsIndex-=1
+	sec_idx := self.SectionIndex
+	self.PsIndex -= 1
 	if self.PsIndex < 0 {
-		self.RowIndex-=1
-		if self.RowIndex <=0 {
-			self.RowIndex = len(self.SecsKeys[sec_idx])-1
+		self.RowIndex -= 1
+		if self.RowIndex <= 0 {
+			self.RowIndex = len(self.SecsKeys[sec_idx]) - 1
 		}
-		self.PsIndex = len(self.SecsKeys[sec_idx][self.RowIndex]) -1
+		self.PsIndex = len(self.SecsKeys[sec_idx][self.RowIndex]) - 1
 	}
 
 	self.ClearCanvas()
@@ -336,20 +329,20 @@ func (self *Keyboard) SelectPrevChar() {
 }
 
 func (self *Keyboard) ClickOnChar() {
-	sec_idx := self.SectionIndex        
+	sec_idx := self.SectionIndex
 	alphabet := self.SecsKeys[sec_idx][self.RowIndex][self.PsIndex].GetStr()
-  
-	if alphabet == "Space"{
+
+	if alphabet == "Space" {
 		alphabet = " "
 	}
 
 	if alphabet == "_L" || alphabet == "_R" {
 		if alphabet == "_L" {
 			self.Textarea.SubTextIndex()
-		}else if alphabet == "_R"{
+		} else if alphabet == "_R" {
 			self.Textarea.AddTextIndex()
 		}
-	}else {
+	} else {
 		self.Textarea.AppendText(alphabet)
 	}
 
@@ -360,23 +353,23 @@ func (self *Keyboard) ClickOnChar() {
 func (self *Keyboard) KeyboardShift() {
 	distance := self.Width //320
 	current_time := float32(0.0)
-	start_posx   := float32(0.0)
+	start_posx := float32(0.0)
 	current_posx := start_posx
-	final_posx   := float32(distance)
-//	posx_init    := start
-	dur          := self.EasingDur
-	last_posx    := float32(0.0)
+	final_posx := float32(distance)
+	//	posx_init    := start
+	dur := self.EasingDur
+	last_posx := float32(0.0)
 
 	var all_last_posx []int
 
-	for i:=0;i<distance*dur;i++ {
-		current_posx = float32(easings.SineIn(float32(current_time), float32(start_posx), float32(final_posx-start_posx),float32(dur)))
+	for i := 0; i < distance*dur; i++ {
+		current_posx = float32(easings.SineIn(float32(current_time), float32(start_posx), float32(final_posx-start_posx), float32(dur)))
 		if current_posx >= final_posx {
 			current_posx = final_posx
 		}
 		dx := current_posx - last_posx
-		all_last_posx = append(all_last_posx,int(dx))
-		current_time+=1.0
+		all_last_posx = append(all_last_posx, int(dx))
+		current_time += 1.0
 		last_posx = current_posx
 		if current_posx >= final_posx {
 			break
@@ -384,19 +377,19 @@ func (self *Keyboard) KeyboardShift() {
 	}
 
 	c := 0
-	for _,v := range all_last_posx {
-		c+=v
+	for _, v := range all_last_posx {
+		c += v
 	}
-	if c < int(final_posx - start_posx) {
-		all_last_posx = append(all_last_posx, int( int(final_posx) - c ))
+	if c < int(final_posx-start_posx) {
+		all_last_posx = append(all_last_posx, int(int(final_posx)-c))
 	}
 
-	for _,v := range all_last_posx {
-		for j:=0;j<self.SectionNumbers;j++ {
-			for _,u := range self.SecsKeys[j] {
-				for _,x := range u {
-          x_,y_ := x.Coord()
-          x.NewCoord(x_+self.LeftOrRight*v,y_)
+	for _, v := range all_last_posx {
+		for j := 0; j < self.SectionNumbers; j++ {
+			for _, u := range self.SecsKeys[j] {
+				for _, x := range u {
+					x_, y_ := x.Coord()
+					x.NewCoord(x_+self.LeftOrRight*v, y_)
 				}
 			}
 		}
@@ -415,8 +408,7 @@ func (self *Keyboard) ShiftKeyboardPage() {
 	self.Screen.SwapAndShow()
 }
 
-
-func (self *Keyboard) KeyDown( ev *event.Event) {
+func (self *Keyboard) KeyDown(ev *event.Event) {
 	if ev.Data["Key"] == CurKeys["Up"] {
 		self.SelectUpChar()
 		return
@@ -441,36 +433,36 @@ func (self *Keyboard) KeyDown( ev *event.Event) {
 		self.ClickOnChar()
 		return
 	}
-  
-  if ev.Data["Key"] == CurKeys["X"] {
-    if self.SectionIndex <= 0 {
-      self.LeftOrRight = -1
-    }
-    
-    if self.SectionIndex >= (self.SectionNumbers - 1) {
-      self.LeftOrRight = 1
-    }
-    
-    self.ShiftKeyboardPage()
-    
-  }
+
+	if ev.Data["Key"] == CurKeys["X"] {
+		if self.SectionIndex <= 0 {
+			self.LeftOrRight = -1
+		}
+
+		if self.SectionIndex >= (self.SectionNumbers - 1) {
+			self.LeftOrRight = 1
+		}
+
+		self.ShiftKeyboardPage()
+
+	}
 
 	if ev.Data["Key"] == CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
-    
+
 	}
 
 	if ev.Data["Key"] == CurKeys["Y"] { // done
-		fmt.Println(strings.Join(self.Textarea.MyWords,""))
+		fmt.Println(strings.Join(self.Textarea.MyWords, ""))
 		self.ReturnToUpLevelPage()
 		self.Screen.SwapAndShow()
-    if self.Caller != nil {
-      self.Caller.OnKbdReturnBackCb()
-    }
+		if self.Caller != nil {
+			self.Caller.OnKbdReturnBackCb()
+		}
 		//Uplevel/Parent page invoke OnReturnBackCb,eg: ConfigWireless
-		
+
 	}
 
 	if ev.Data["Key"] == CurKeys["A"] {
@@ -480,7 +472,7 @@ func (self *Keyboard) KeyDown( ev *event.Event) {
 	}
 
 	if ev.Data["Key"] == CurKeys["LK1"] {
-		if self.SectionIndex < self.SectionNumbers -1 {
+		if self.SectionIndex < self.SectionNumbers-1 {
 			self.LeftOrRight = -1
 			self.ShiftKeyboardPage()
 		}
@@ -499,9 +491,9 @@ func (self *Keyboard) Draw() {
 	self.ClearCanvas()
 	self.Ps.Draw()
 
-	for i:=0; i < self.SectionNumbers; i++ {
-		for _,j := range self.SecsKeys[i] {
-			for _,u := range j {
+	for i := 0; i < self.SectionNumbers; i++ {
+		for _, j := range self.SecsKeys[i] {
+			for _, u := range j {
 				u.Draw()
 			}
 		}

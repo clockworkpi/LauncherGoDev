@@ -2,60 +2,59 @@ package UI
 
 import (
 	"fmt"
-	
-//	"math"
-  //"reflect"
+
+	//	"math"
+	//"reflect"
 	"sync"
-	
+
 	"github.com/veandco/go-sdl2/sdl"
 
-	"github.com/cuu/gogame/surface"
 	"github.com/cuu/gogame/draw"
-//	"github.com/cuu/gogame/rect"
-//	"github.com/cuu/gogame/font"
+	"github.com/cuu/gogame/surface"
+	//	"github.com/cuu/gogame/rect"
+	//	"github.com/cuu/gogame/font"
 	"github.com/cuu/gogame/event"
 
-	"github.com/cuu/gogame/transform"
 	"github.com/clockworkpi/LauncherGoDev/sysgo/easings"
-	
+	"github.com/cuu/gogame/transform"
 )
 
 type element struct {
-    data interface{}
-    next *element
+	data interface{}
+	next *element
 }
 
 type PageStack struct {
-    lock *sync.Mutex
-    head *element
-    Size int
+	lock *sync.Mutex
+	head *element
+	Size int
 }
 
 func (stk *PageStack) Push(data interface{}) {
-    stk.lock.Lock()
+	stk.lock.Lock()
 
-    element := new(element)
-    element.data = data
-    temp := stk.head
-    element.next = temp
-    stk.head = element
-    stk.Size++
+	element := new(element)
+	element.data = data
+	temp := stk.head
+	element.next = temp
+	stk.head = element
+	stk.Size++
 
-    stk.lock.Unlock()
+	stk.lock.Unlock()
 }
 
 func (stk *PageStack) Pop() interface{} {
-    if stk.head == nil {
-        return nil
-    }
-    stk.lock.Lock()
-    r := stk.head.data
-    stk.head = stk.head.next
-    stk.Size--
+	if stk.head == nil {
+		return nil
+	}
+	stk.lock.Lock()
+	r := stk.head.data
+	stk.head = stk.head.next
+	stk.Size--
 
-    stk.lock.Unlock()
+	stk.lock.Unlock()
 
-    return r
+	return r
 }
 
 func (stk *PageStack) Length() int {
@@ -63,196 +62,189 @@ func (stk *PageStack) Length() int {
 }
 
 func NewPageStack() *PageStack {
-    stk := new(PageStack)
-    stk.lock = &sync.Mutex{}
-    return stk
+	stk := new(PageStack)
+	stk.lock = &sync.Mutex{}
+	return stk
 }
 
-
 type PageSelectorInterface interface {
-	Init(x,y,w,h,alpha int)
-	Adjust(x,y,w,h,alpha int)
+	Init(x, y, w, h, alpha int)
+	Adjust(x, y, w, h, alpha int)
 	GetOnShow() bool
 	SetOnShow(onshow bool)
 
-	Coord() (int,int)
-	NewCoord(x,y int)
-	Size() (int,int)
-	NewSize(w,h int)
-	
+	Coord() (int, int)
+	NewCoord(x, y int)
+	Size() (int, int)
+	NewSize(w, h int)
+
 	Draw()
 }
 
 type PageSelector struct {
 	Widget
-	
-	Alpha int
-	OnShow bool
-	IconSurf  *sdl.Surface
-	
+
+	Alpha    int
+	OnShow   bool
+	IconSurf *sdl.Surface
+
 	Parent PageInterface
 }
 
 func NewPageSelector() *PageSelector {
 	p := &PageSelector{}
 	p.OnShow = true
-	
+
 	return p
 }
 
-func (self *PageSelector) Init(x,y,w,h,alpha int) {
-	self.Adjust(x,y,w,h,alpha)
+func (self *PageSelector) Init(x, y, w, h, alpha int) {
+	self.Adjust(x, y, w, h, alpha)
 }
 
-func (self *PageSelector) Adjust(x,y,w,h,alpha int) {
+func (self *PageSelector) Adjust(x, y, w, h, alpha int) {
 	self.PosX = x
 	self.PosY = y
 	self.Width = w
 	self.Height = h
-	self.Alpha  = alpha
+	self.Alpha = alpha
 }
 
 func (self *PageSelector) GetOnShow() bool {
 	return self.OnShow
 }
 
-func (self *PageSelector) SetOnShow( onshow bool ) {
+func (self *PageSelector) SetOnShow(onshow bool) {
 	self.OnShow = onshow
 }
 
 func (self *PageSelector) Draw() {
-	canvas  := self.Parent.GetCanvasHWND()
-	idx     := self.Parent.GetPsIndex()
+	canvas := self.Parent.GetCanvasHWND()
+	idx := self.Parent.GetPsIndex()
 	iconidx := self.Parent.GetIconIndex()
-	icons   := self.Parent.GetIcons()
-	
+	icons := self.Parent.GetIcons()
+
 	if idx < len(icons) {
-		icon_x ,_ := icons[idx].Coord()
-		_,icon_y  := icons[iconidx].Coord()
-		
-		parent_x,_ := self.Parent.Coord()
-		parent_w,parent_h := self.Parent.Size()
-		
+		icon_x, _ := icons[idx].Coord()
+		_, icon_y := icons[iconidx].Coord()
+
+		parent_x, _ := self.Parent.Coord()
+		parent_w, parent_h := self.Parent.Size()
+
 		x := icon_x + parent_x
 		y := icon_y // only use current icon's PosY
-		
-		rect_ := draw.MidRect(x,y, self.Width, self.Height, parent_w,parent_h)
-		if rect_.W <=0 || rect_.H <= 0 {
+
+		rect_ := draw.MidRect(x, y, self.Width, self.Height, parent_w, parent_h)
+		if rect_.W <= 0 || rect_.H <= 0 {
 			return
 		}
-		
+
 		if self.IconSurf != nil {
-			surface.Blit(canvas,self.IconSurf, rect_,nil)
+			surface.Blit(canvas, self.IconSurf, rect_, nil)
 		}
-		
+
 	}
 }
-
 
 type PageInterface interface {
 	// ## shared functions ##
 	Adjust()
 	Init()
-	
+
 	GetScreen() *MainScreen
 	GetIcons() []IconItemInterface
-	SetScreen( main_screen *MainScreen)
+	SetScreen(main_screen *MainScreen)
 	SetFootMsg(footmsg [5]string)
 	GetCanvasHWND() *sdl.Surface
-	SetCanvasHWND( canvas *sdl.Surface)
+	SetCanvasHWND(canvas *sdl.Surface)
 
 	GetHWND() *sdl.Surface
 	SetHWND(h *sdl.Surface)
-	
+
 	AdjustHLeftAlign()
 	AdjustSAutoLeftAlign()
 
-	SetPsIndex( idx int)
+	SetPsIndex(idx int)
 	GetPsIndex() int
 
 	SetIndex(idx int)
 
 	GetAlign() int
 	SetAlign(al int)
-	
-  ScrollUp()
-  ScrollDown()
-  
-	
+
+	ScrollUp()
+	ScrollDown()
+
 	SetIconIndex(idx int)
 	GetIconIndex() int
 
 	Coord() (int, int)
-	NewCoord(x,y int)
-	Size() (int,int)
-	NewSize(w,h int)
-	
-	
+	NewCoord(x, y int)
+	Size() (int, int)
+	NewSize(w, h int)
+
 	UpdateIconNumbers()
 	GetIconNumbers() int
 
-	
 	SetOnShow(on_show bool)
 	GetOnShow() bool
-	
-	AppendIcon( it interface{} )
+
+	AppendIcon(it interface{})
 	ClearIcons()
 	DrawIcons()
 
 	GetMyList() []ListItemInterface
-	
+
 	GetName() string
 	SetName(n string)
 	GetFootMsg() [5]string
 
-	KeyDown( ev *event.Event)
+	KeyDown(ev *event.Event)
 
 	ReturnToUpLevelPage()
-	
+
 	OnLoadCb()
 	OnReturnBackCb()
-  OnKbdReturnBackCb()
+	OnKbdReturnBackCb()
 	OnExitCb()
 
-//	IconClick()
+	//	IconClick()
 	ResetPageSelector()
 	DrawPageSelector()
 
 	ClearCanvas()
 	Draw()
-
-	
 }
 
 type Page struct {
 	Widget
-	Icons []IconItemInterface // slice ,use append
-	IconNumbers int
-	IconIndex int
+	Icons         []IconItemInterface // slice ,use append
+	IconNumbers   int
+	IconIndex     int
 	PrevIconIndex int
-	
-	Ps PageSelectorInterface
+
+	Ps      PageSelectorInterface
 	PsIndex int
 
 	Index int
 
 	Align int
-	
+
 	CanvasHWND *sdl.Surface
 	HWND       *sdl.Surface
 
 	MyList []ListItemInterface
-	
+
 	OnShow bool
-	Name  string
+	Name   string
 	Screen *MainScreen
-	
+
 	PageIconMargin int // default 20
-	FootMsg  [5]string
+	FootMsg        [5]string
 
 	SelectedIconTopOffset int
-	EasingDur int
-  ScrollStep int
+	EasingDur             int
+	ScrollStep            int
 }
 
 func NewPage() *Page {
@@ -263,8 +255,8 @@ func NewPage() *Page {
 
 	p.Align = ALIGN["SLeft"]
 	p.ScrollStep = 1
-	p.FootMsg = [5]string{"Nav.","","","","Enter"}
-	
+	p.FootMsg = [5]string{"Nav.", "", "", "", "Enter"}
+
 	return p
 }
 
@@ -276,29 +268,28 @@ func (self *Page) SetScreen(main_screen *MainScreen) {
 	self.Screen = main_screen
 }
 
-
 func (self *Page) AdjustHLeftAlign() {
-	self.PosX = self.Index*self.Screen.Width
+	self.PosX = self.Index * self.Screen.Width
 	self.Width = self.Screen.Width
 	self.Height = self.Screen.Height
 
-	cols := int(Width/IconWidth)
-	rows := int( self.IconNumbers * IconWidth) / self.Width + 1
+	cols := int(Width / IconWidth)
+	rows := int(self.IconNumbers*IconWidth)/self.Width + 1
 	cnt := 0
-	
+
 	if rows < 1 {
 		rows = 1
 	}
-	
+
 	for i := 0; i < rows; i++ {
 		for j := 0; j < cols; j++ {
 			start_x := IconWidth/2 + j*IconWidth
 			start_y := IconHeight/2 + i*IconHeight
-			icon    := self.Icons[cnt]
-			icon.Adjust(start_x,start_y,IconWidth-4,IconHeight-4,0)
+			icon := self.Icons[cnt]
+			icon.Adjust(start_x, start_y, IconWidth-4, IconHeight-4, 0)
 			icon.SetIndex(cnt)
 			icon.SetParent(self)
-			if cnt >= self.IconNumbers -1 {
+			if cnt >= self.IconNumbers-1 {
 				break
 			}
 			cnt += 1
@@ -309,8 +300,8 @@ func (self *Page) AdjustHLeftAlign() {
 	ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 	ps.Parent = self
 
-	ps.Init(IconWidth/2,TitleBar_BarHeight+IconHeight/2, 92,92,128) //hard coded of the blueselector png size
-	
+	ps.Init(IconWidth/2, TitleBar_BarHeight+IconHeight/2, 92, 92, 128) //hard coded of the blueselector png size
+
 	self.Ps = ps
 	self.PsIndex = 0
 	self.OnShow = false
@@ -321,25 +312,25 @@ func (self *Page) AdjustSLeftAlign() { // ## adjust coordinator and append the P
 	self.Width = self.Screen.Width
 	self.Height = self.Screen.Height
 
-	start_x := (self.PageIconMargin + IconWidth + self.PageIconMargin ) / 2
-	start_y := self.Height/2
+	start_x := (self.PageIconMargin + IconWidth + self.PageIconMargin) / 2
+	start_y := self.Height / 2
 
 	for i := 0; i < self.IconNumbers; i++ {
 		it := self.Icons[i]
 		it.SetParent(self)
 		it.SetIndex(i)
-		it.Adjust(start_x+i*self.PageIconMargin+i*IconWidth, start_y, IconWidth-6,IconHeight-6,0)
+		it.Adjust(start_x+i*self.PageIconMargin+i*IconWidth, start_y, IconWidth-6, IconHeight-6, 0)
 
 		old_surf := it.GetImgSurf()
-		
-		it_w,it_h := it.Size() //width height changed by Adjust above
-		it.SetImgSurf( transform.SmoothScale(old_surf,it_w,it_h) )
+
+		it_w, it_h := it.Size() //width height changed by Adjust above
+		it.SetImgSurf(transform.SmoothScale(old_surf, it_w, it_h))
 	}
 
 	ps := NewPageSelector()
 	ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 	ps.Parent = self
-	ps.Init(start_x,start_y,92,92,128)
+	ps.Init(start_x, start_y, 92, 92, 128)
 
 	self.Ps = ps
 	self.PsIndex = 0
@@ -349,66 +340,65 @@ func (self *Page) AdjustSLeftAlign() { // ## adjust coordinator and append the P
 		self.PsIndex = 1
 		self.IconIndex = self.PsIndex
 		self.PrevIconIndex = self.IconIndex
-		cur_icon_x,cur_icon_y := self.Icons[self.IconIndex].Coord()
-		self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y - self.SelectedIconTopOffset )
+		cur_icon_x, cur_icon_y := self.Icons[self.IconIndex].Coord()
+		self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y-self.SelectedIconTopOffset)
 	}
 }
-
 
 func (self *Page) AdjustSAutoLeftAlign() { //  ## adjust coordinator and append the PageSelector
 	self.PosX = self.Index * self.Screen.Width
 	self.Width = self.Screen.Width
 	self.Height = self.Screen.Height
 
-	start_x := (self.PageIconMargin + IconWidth + self.PageIconMargin ) / 2
-	start_y := self.Height/2
+	start_x := (self.PageIconMargin + IconWidth + self.PageIconMargin) / 2
+	start_y := self.Height / 2
 
 	if self.IconNumbers == 1 {
-		start_x = self.Width/2
-		start_y = self.Height/2
+		start_x = self.Width / 2
+		start_y = self.Height / 2
 		it := self.Icons[0]
 		it.SetParent(self)
 		it.SetIndex(0)
-		it.Adjust(start_x,start_y, IconWidth,IconHeight,0)
+		it.Adjust(start_x, start_y, IconWidth, IconHeight, 0)
 		/*
-		old_surf := it.GetImgSurf()
-		it_w,it_h := it.Size()
-		it.SetImgSurf( transform.SmoothScale(old_surf, it_w,it_h))
+			old_surf := it.GetImgSurf()
+			it_w,it_h := it.Size()
+			it.SetImgSurf( transform.SmoothScale(old_surf, it_w,it_h))
 		*/
-	}else if self.IconNumbers == 2 {
-		start_x = (self.Width - self.PageIconMargin - self.IconNumbers*IconWidth) / 2 + IconWidth/2
-		start_y = self.Height /2
+	} else if self.IconNumbers == 2 {
+		start_x = (self.Width-self.PageIconMargin-self.IconNumbers*IconWidth)/2 + IconWidth/2
+		start_y = self.Height / 2
 
-		for i:=0; i < self.IconNumbers; i++ {
+		for i := 0; i < self.IconNumbers; i++ {
 			it := self.Icons[i]
 			it.SetParent(self)
 			it.SetIndex(i)
-			it.Adjust( start_x+ i*self.PageIconMargin+i*IconWidth, start_y, IconWidth, IconHeight,0)
+			it.Adjust(start_x+i*self.PageIconMargin+i*IconWidth, start_y, IconWidth, IconHeight, 0)
 			/*
-			old_surf := it.GetImgSurf()
-			it_w,it_h := it.Size()
-			it.SetImgSurf( transform.SmoothScale( old_surf, it_w,it_h))
+				old_surf := it.GetImgSurf()
+				it_w,it_h := it.Size()
+				it.SetImgSurf( transform.SmoothScale( old_surf, it_w,it_h))
 			*/
 		}
-		
-	}else if self.IconNumbers > 2 {
-		for i:=0; i < self.IconNumbers; i++ {
+
+	} else if self.IconNumbers > 2 {
+		for i := 0; i < self.IconNumbers; i++ {
 			it := self.Icons[i]
 			it.SetParent(self)
 			it.SetIndex(i)
-			it.Adjust(start_x+i*self.PageIconMargin + i*IconWidth, start_y, IconWidth, IconHeight, 0)
+			it.Adjust(start_x+i*self.PageIconMargin+i*IconWidth, start_y, IconWidth, IconHeight, 0)
 			/*
-			old_surf := it.GetImgSurf()
-			it_w,it_h := it.Size()
-			it.SetImgSurf( transform.SmoothScale( old_surf, it_w,it_h))			
-      */
+				old_surf := it.GetImgSurf()
+				it_w,it_h := it.Size()
+				it.SetImgSurf( transform.SmoothScale( old_surf, it_w,it_h))
+			*/
 		}
 	}
 
 	ps := NewPageSelector()
 	ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 	ps.Parent = self
-	ps.Init(start_x,start_y,92,92,128)
+	ps.Init(start_x, start_y, 92, 92, 128)
 
 	self.Ps = ps
 	self.PsIndex = 0
@@ -418,54 +408,52 @@ func (self *Page) AdjustSAutoLeftAlign() { //  ## adjust coordinator and append 
 		self.PsIndex = 1
 		self.IconIndex = self.PsIndex
 		self.PrevIconIndex = self.IconIndex
-		cur_icon_x,cur_icon_y := self.Icons[self.IconIndex].Coord()
-		self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y - self.SelectedIconTopOffset )	
+		cur_icon_x, cur_icon_y := self.Icons[self.IconIndex].Coord()
+		self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y-self.SelectedIconTopOffset)
 	}
 }
 
-
-
 func (self *Page) InitLeftAlign() {
-	self.PosX   = self.Index * self.Screen.Width
-	self.Width  = self.Screen.Width
+	self.PosX = self.Index * self.Screen.Width
+	self.Width = self.Screen.Width
 	self.Height = self.Screen.Height
 
-	cols := int(self.Width/IconWidth)
-	rows := int((self.IconNumbers * IconWidth) / self.Width +1)
+	cols := int(self.Width / IconWidth)
+	rows := int((self.IconNumbers*IconWidth)/self.Width + 1)
 
-	if rows < 1{
+	if rows < 1 {
 		rows = 1
 	}
 	cnt := 0
 	start_x := 0
 	start_y := 0
-	
-	for i:=0; i< rows; i++ {
-		for j:=0; j< cols; j++ {
+
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
 			start_x = IconWidth/2 + j*IconWidth
-			start_y = TitleBar_BarHeight + IconHeight /2 + i*IconHeight
+			start_y = TitleBar_BarHeight + IconHeight/2 + i*IconHeight
 
 			icon := NewIconItem()
-			icon.Init(start_x,start_y,IconWidth-4,IconHeight-4,0)
+			icon.Init(start_x, start_y, IconWidth-4, IconHeight-4, 0)
 			icon.SetIndex(cnt)
 			icon.SetParent(self)
 			self.Icons = append(self.Icons, icon)
-			if cnt >= (self.IconNumbers -1 ){
+			if cnt >= (self.IconNumbers - 1) {
 				break
 			}
-			cnt+=1
+			cnt += 1
 		}
 	}
 
 	ps := NewPageSelector()
 	ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 	ps.Parent = self
-	ps.Init(IconWidth/2,IconHeight/2,92,92,128)
+	ps.Init(IconWidth/2, IconHeight/2, 92, 92, 128)
 
 	self.Ps = ps
 	self.PsIndex = 0
-	self.OnShow = false	
-	
+	self.OnShow = false
+
 }
 
 func (self *Page) Adjust() { // default init way,
@@ -475,38 +463,38 @@ func (self *Page) Adjust() { // default init way,
 
 	start_x := 0
 	start_y := 0
-	
-	if self.Align == ALIGN["HLeft"] {
-		start_x = (self.Width - self.IconNumbers*IconWidth) / 2 + IconWidth/2
-		start_y = self.Height/2
 
-		for i:=0;i< self.IconNumbers; i++ {
+	if self.Align == ALIGN["HLeft"] {
+		start_x = (self.Width-self.IconNumbers*IconWidth)/2 + IconWidth/2
+		start_y = self.Height / 2
+
+		for i := 0; i < self.IconNumbers; i++ {
 			self.Icons[i].SetParent(self)
 			self.Icons[i].SetIndex(i)
-			self.Icons[i].Adjust(start_x + i*IconWidth, start_y, IconWidth, IconHeight,0)
+			self.Icons[i].Adjust(start_x+i*IconWidth, start_y, IconWidth, IconHeight, 0)
 		}
 
 		ps := NewPageSelector()
 		ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 		ps.Parent = self
-		ps.Init(start_x,start_y, 92,92,128)
+		ps.Init(start_x, start_y, 92, 92, 128)
 		self.Ps = ps
 		self.PsIndex = 0
 		self.OnShow = false
-		
-	}else if self.Align == ALIGN["SLeft"] {
+
+	} else if self.Align == ALIGN["SLeft"] {
 		start_x = (self.PageIconMargin + IconWidth + self.PageIconMargin) / 2
-		start_y = self.Height/2
-		for i:=0;i< self.IconNumbers; i++ {
-			it:=self.Icons[i]
+		start_y = self.Height / 2
+		for i := 0; i < self.IconNumbers; i++ {
+			it := self.Icons[i]
 			it.SetParent(self)
 			it.SetIndex(i)
-			it.Adjust(start_x + i*self.PageIconMargin+i*IconWidth, start_y, IconWidth, IconHeight,0)
+			it.Adjust(start_x+i*self.PageIconMargin+i*IconWidth, start_y, IconWidth, IconHeight, 0)
 		}
 		ps := NewPageSelector()
 		ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 		ps.Parent = self
-		ps.Init(start_x,start_y-self.SelectedIconTopOffset, 92,92,128)
+		ps.Init(start_x, start_y-self.SelectedIconTopOffset, 92, 92, 128)
 		self.Ps = ps
 		self.PsIndex = 0
 		self.OnShow = false
@@ -515,25 +503,25 @@ func (self *Page) Adjust() { // default init way,
 			self.PsIndex = 1
 			self.IconIndex = self.PsIndex
 			self.PrevIconIndex = self.IconIndex
-			cur_icon_x,cur_icon_y := self.Icons[self.IconIndex].Coord()
-			self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y - self.SelectedIconTopOffset )
+			cur_icon_x, cur_icon_y := self.Icons[self.IconIndex].Coord()
+			self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y-self.SelectedIconTopOffset)
 		}
 	}
-	
+
 }
 
 func (self *Page) GetOnShow() bool {
 	return self.OnShow
 }
 
-func (self *Page) SetOnShow( on_show bool) {
+func (self *Page) SetOnShow(on_show bool) {
 	self.OnShow = on_show
 }
 
 func (self *Page) UpdateIconNumbers() {
 
 	self.IconNumbers = len(self.Icons)
-	
+
 }
 
 func (self *Page) GetIconNumbers() int {
@@ -552,14 +540,14 @@ func (self *Page) Init() {
 	self.Width = self.Screen.Width
 	self.Height = self.Screen.Height
 
-	start_x := (self.Width - self.IconNumbers *IconWidth) /2 + IconWidth /2
-	start_y := self.Height/2
-	
-	for i:=0; i< self.IconNumbers; i++ {
+	start_x := (self.Width-self.IconNumbers*IconWidth)/2 + IconWidth/2
+	start_y := self.Height / 2
+
+	for i := 0; i < self.IconNumbers; i++ {
 		it := NewIconItem()
 		it.SetParent(self)
 		it.SetIndex(i)
-		it.Init(start_x + i * IconWidth, start_y, IconWidth,IconHeight, 0)
+		it.Init(start_x+i*IconWidth, start_y, IconWidth, IconHeight, 0)
 		self.Icons = append(self.Icons, it)
 	}
 
@@ -567,23 +555,22 @@ func (self *Page) Init() {
 		ps := NewPageSelector()
 		ps.IconSurf = MyIconPool.GetImgSurf("blueselector")
 		ps.Parent = self
-		ps.Init(start_x,start_y, IconWidth+4, IconHeight+4, 128)
+		ps.Init(start_x, start_y, IconWidth+4, IconHeight+4, 128)
 		self.Ps = ps
 		self.PsIndex = 0
 		self.OnShow = false
 	}
 }
 
-
-func (self *Page) IconStepMoveData(icon_eh ,cuts int)  []int {  //  no Sine,No curve,plain movement steps data
+func (self *Page) IconStepMoveData(icon_eh, cuts int) []int { //  no Sine,No curve,plain movement steps data
 	var all_pieces []int
-	
-	piece := float32( icon_eh / cuts )
+
+	piece := float32(icon_eh / cuts)
 	c := float32(0.0)
 	prev := float32(0.0)
-	for i:=0;i<cuts;i++ {
-		c+= piece
-		dx:= c-prev
+	for i := 0; i < cuts; i++ {
+		c += piece
+		dx := c - prev
 		if dx < 0.5 {
 			dx = float32(1.0)
 		}
@@ -597,9 +584,9 @@ func (self *Page) IconStepMoveData(icon_eh ,cuts int)  []int {  //  no Sine,No c
 	c = 0.0
 	bidx := 0
 
-	for _,v := range all_pieces {
+	for _, v := range all_pieces {
 		c += float32(v)
-		bidx+=1
+		bidx += 1
 		if c >= float32(icon_eh) {
 			break
 		}
@@ -610,35 +597,35 @@ func (self *Page) IconStepMoveData(icon_eh ,cuts int)  []int {  //  no Sine,No c
 	if len(all_pieces) < cuts {
 		dff := cuts - len(all_pieces)
 		var diffa []int
-		for i:=0;i<dff;i++ {
-			diffa= append(diffa,0)
+		for i := 0; i < dff; i++ {
+			diffa = append(diffa, 0)
 		}
-		
+
 		all_pieces = append(all_pieces, diffa...)
 	}
 
-	return all_pieces		
+	return all_pieces
 }
 
-func (self *Page) EasingData(start,distance int) []int {
+func (self *Page) EasingData(start, distance int) []int {
 	current_time := float32(0.0)
-	start_posx   := float32(0.0)
+	start_posx := float32(0.0)
 	current_posx := start_posx
-	final_posx   := float32(distance)
-//	posx_init    := start
-	dur          := self.EasingDur
-	last_posx    := float32(0.0)
+	final_posx := float32(distance)
+	//	posx_init    := start
+	dur := self.EasingDur
+	last_posx := float32(0.0)
 
 	var all_last_posx []int
 
-	for i:=0;i<distance*dur;i++ {
-		current_posx = float32(easings.SineIn(float32(current_time), float32(start_posx), float32(final_posx-start_posx),float32(dur)))
+	for i := 0; i < distance*dur; i++ {
+		current_posx = float32(easings.SineIn(float32(current_time), float32(start_posx), float32(final_posx-start_posx), float32(dur)))
 		if current_posx >= final_posx {
 			current_posx = final_posx
 		}
 		dx := current_posx - last_posx
-		all_last_posx = append(all_last_posx,int(dx))
-		current_time+=1.0
+		all_last_posx = append(all_last_posx, int(dx))
+		current_time += 1.0
 		last_posx = current_posx
 		if current_posx >= final_posx {
 			break
@@ -646,30 +633,29 @@ func (self *Page) EasingData(start,distance int) []int {
 	}
 
 	c := 0
-	for _,v := range all_last_posx {
-		c+=v
+	for _, v := range all_last_posx {
+		c += v
 	}
-	if c < int(final_posx - start_posx) {
-		all_last_posx = append(all_last_posx, int( int(final_posx) - c ))
+	if c < int(final_posx-start_posx) {
+		all_last_posx = append(all_last_posx, int(int(final_posx)-c))
 	}
 
-	return all_last_posx	
+	return all_last_posx
 }
 
-
 func (self *Page) IconSmoothUp(icon_ew int) {
-	data := self.EasingData(self.PosX,icon_ew)
+	data := self.EasingData(self.PosX, icon_ew)
 	data2 := self.IconStepMoveData(self.SelectedIconTopOffset, len(data))
 
-	for i,_ := range data {
+	for i, _ := range data {
 		self.ClearCanvas()
-		cur_icon_x,cur_icon_y := self.Icons[self.IconIndex].Coord()
-		self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y - data2[i] )
-		
-		prev_icon_x,prev_icon_y := self.Icons[self.PrevIconIndex].Coord()
-		
+		cur_icon_x, cur_icon_y := self.Icons[self.IconIndex].Coord()
+		self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y-data2[i])
+
+		prev_icon_x, prev_icon_y := self.Icons[self.PrevIconIndex].Coord()
+
 		if prev_icon_y < self.Height/2 {
-			self.Icons[self.PrevIconIndex].NewCoord(prev_icon_x, prev_icon_y + data2[i])
+			self.Icons[self.PrevIconIndex].NewCoord(prev_icon_x, prev_icon_y+data2[i])
 
 			self.DrawIcons()
 			self.Screen.SwapAndShow()
@@ -681,39 +667,38 @@ func (self *Page) IconsEasingLeft(icon_ew int) {
 	data := self.EasingData(self.PosX, icon_ew)
 	data2 := self.IconStepMoveData(self.SelectedIconTopOffset, len(data))
 
-	for i,v := range data {
+	for i, v := range data {
 		self.ClearCanvas()
-		
-		self.PosX -= v
-		
-		cur_icon_x,cur_icon_y := self.Icons[self.IconIndex].Coord()
-		self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y - data2[i] )
 
-		prev_icon_x,prev_icon_y := self.Icons[self.PrevIconIndex].Coord()
+		self.PosX -= v
+
+		cur_icon_x, cur_icon_y := self.Icons[self.IconIndex].Coord()
+		self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y-data2[i])
+
+		prev_icon_x, prev_icon_y := self.Icons[self.PrevIconIndex].Coord()
 		if prev_icon_y < self.Height/2 {
-			self.Icons[self.PrevIconIndex].NewCoord(prev_icon_x, prev_icon_y + data2[i])
+			self.Icons[self.PrevIconIndex].NewCoord(prev_icon_x, prev_icon_y+data2[i])
 		}
 		self.DrawIcons()
 		self.Screen.SwapAndShow()
 	}
 }
 
-
 func (self *Page) IconsEasingRight(icon_ew int) {
 	data := self.EasingData(self.PosX, icon_ew)
 	data2 := self.IconStepMoveData(self.SelectedIconTopOffset, len(data))
 
-	for i,v := range data {
+	for i, v := range data {
 		self.ClearCanvas()
-		
-		self.PosX += v
-		
-		cur_icon_x,cur_icon_y := self.Icons[self.IconIndex].Coord()
-		self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y - data2[i] )
 
-		prev_icon_x,prev_icon_y := self.Icons[self.PrevIconIndex].Coord()
+		self.PosX += v
+
+		cur_icon_x, cur_icon_y := self.Icons[self.IconIndex].Coord()
+		self.Icons[self.IconIndex].NewCoord(cur_icon_x, cur_icon_y-data2[i])
+
+		prev_icon_x, prev_icon_y := self.Icons[self.PrevIconIndex].Coord()
 		if prev_icon_y < self.Height/2 {
-			self.Icons[self.PrevIconIndex].NewCoord(prev_icon_x, prev_icon_y + data2[i])
+			self.Icons[self.PrevIconIndex].NewCoord(prev_icon_x, prev_icon_y+data2[i])
 		}
 		self.DrawIcons()
 		self.Screen.SwapAndShow()
@@ -721,7 +706,7 @@ func (self *Page) IconsEasingRight(icon_ew int) {
 }
 
 func (self *Page) EasingLeft(ew int) {
-	data := self.EasingData(self.PosX,ew)
+	data := self.EasingData(self.PosX, ew)
 
 	for _, i := range data {
 		self.PosX -= i
@@ -730,9 +715,8 @@ func (self *Page) EasingLeft(ew int) {
 	}
 }
 
-
 func (self *Page) EasingRight(ew int) {
-	data := self.EasingData(self.PosX,ew)
+	data := self.EasingData(self.PosX, ew)
 
 	for _, i := range data {
 		self.PosX += i
@@ -757,7 +741,7 @@ func (self *Page) ResetPageSelector() {
 
 func (self *Page) DrawPageSelector() {
 	if self.Ps.GetOnShow() == true {
-//		fmt.Println("DrawPageSelector")
+		//		fmt.Println("DrawPageSelector")
 		self.Ps.Draw()
 	}
 }
@@ -775,9 +759,9 @@ func (self *Page) MoveIconIndexPrev() bool {
 }
 
 func (self *Page) MoveIconIndexNext() bool {
-	self.IconIndex+=1
+	self.IconIndex += 1
 	if self.IconIndex > (self.IconNumbers - 1) {
-		self.IconIndex = self.IconNumbers -1
+		self.IconIndex = self.IconNumbers - 1
 		self.PrevIconIndex = self.IconIndex
 		return false
 	}
@@ -785,9 +769,8 @@ func (self *Page) MoveIconIndexNext() bool {
 	return true
 }
 
-
 func (self *Page) IconClick() {
-	if self.IconIndex > ( len(self.Icons) - 1) {
+	if self.IconIndex > (len(self.Icons) - 1) {
 		return
 	}
 
@@ -798,7 +781,7 @@ func (self *Page) IconClick() {
 	}
 
 	if cur_icon.GetMyType() == ICON_TYPES["EXE"] {
-		fmt.Printf("IconClick: %s %d", cur_icon.GetCmdPath(), cur_icon.GetIndex() )
+		fmt.Printf("IconClick: %s %d", cur_icon.GetCmdPath(), cur_icon.GetIndex())
 		self.Screen.RunEXE(cur_icon.GetCmdPath())
 		return
 	}
@@ -812,7 +795,7 @@ func (self *Page) IconClick() {
 		return
 	}
 
-	if cur_icon.GetMyType() == ICON_TYPES["FUNC"]  || cur_icon.GetMyType() == ICON_TYPES["Emulator"] {
+	if cur_icon.GetMyType() == ICON_TYPES["FUNC"] || cur_icon.GetMyType() == ICON_TYPES["Emulator"] {
 		invoker := cur_icon.GetCmdInvoke()
 		if invoker != nil {
 			invoker.Run(self.Screen)
@@ -827,15 +810,15 @@ func (self *Page) ReturnToUpLevelPage() {
 		page_ := pop_page.(PageInterface)
 		page_.Draw()
 		self.Screen.CurrentPage = page_
-    self.Screen.CurrentPage.OnReturnBackCb()
-    
-	}else {
+		self.Screen.CurrentPage.OnReturnBackCb()
+
+	} else {
 		if self.Screen.MyPageStack.Length() == 0 {
 			if len(self.Screen.Pages) > 0 {
 				if self.Screen.PageIndex < len(self.Screen.Pages) {
-					self.Screen.CurrentPage = self.Screen.Pages[ self.Screen.PageIndex ]
+					self.Screen.CurrentPage = self.Screen.Pages[self.Screen.PageIndex]
 					self.Screen.CurrentPage.Draw()
-					fmt.Println( "OnTopLevel", self.Screen.PageIndex)
+					fmt.Println("OnTopLevel", self.Screen.PageIndex)
 				}
 			}
 		}
@@ -846,8 +829,8 @@ func (self *Page) ClearCanvas() {
 	surface.Fill(self.CanvasHWND, self.Screen.SkinManager.GiveColor("White"))
 }
 
-func (self *Page) AppendIcon( it interface{} ) {
-  self.Icons = append(self.Icons, it.(IconItemInterface))
+func (self *Page) AppendIcon(it interface{}) {
+	self.Icons = append(self.Icons, it.(IconItemInterface))
 }
 
 func (self *Page) GetIcons() []IconItemInterface {
@@ -855,22 +838,22 @@ func (self *Page) GetIcons() []IconItemInterface {
 }
 
 func (self *Page) ClearIcons() {
-	for i:=0;i<self.IconNumbers; i++ {
+	for i := 0; i < self.IconNumbers; i++ {
 		self.Icons[i].Clear()
 	}
 }
 
 func (self *Page) DrawIcons() {
-	for i:=0;i<self.IconNumbers; i++ {
+	for i := 0; i < self.IconNumbers; i++ {
 		self.Icons[i].Draw()
-	}	
+	}
 }
 
 func (self *Page) GetMyList() []ListItemInterface {
 	return self.MyList
 }
 
-func (self *Page) KeyDown( ev *event.Event) {
+func (self *Page) KeyDown(ev *event.Event) {
 	if ev.Data["Key"] == CurKeys["A"] {
 
 		if self.FootMsg[3] == "Back" {
@@ -889,12 +872,12 @@ func (self *Page) KeyDown( ev *event.Event) {
 
 	if ev.Data["Key"] == CurKeys["Right"] {
 		if self.MoveIconIndexNext() == true {
-			if self.IconIndex == (self.IconNumbers -1) || self.PrevIconIndex == 0 {
+			if self.IconIndex == (self.IconNumbers-1) || self.PrevIconIndex == 0 {
 				self.IconSmoothUp(IconWidth + self.PageIconMargin)
-			}else {
+			} else {
 				self.IconsEasingLeft(IconWidth + self.PageIconMargin)
 			}
-			
+
 			self.PsIndex = self.IconIndex
 			self.Screen.Draw()
 			self.Screen.SwapAndShow()
@@ -903,9 +886,9 @@ func (self *Page) KeyDown( ev *event.Event) {
 
 	if ev.Data["Key"] == CurKeys["Left"] {
 		if self.MoveIconIndexPrev() == true {
-			if self.IconIndex == 0 || self.PrevIconIndex == (self.IconNumbers -1) {
+			if self.IconIndex == 0 || self.PrevIconIndex == (self.IconNumbers-1) {
 				self.IconSmoothUp(IconWidth + self.PageIconMargin)
-			}else {
+			} else {
 				self.IconsEasingRight(IconWidth + self.PageIconMargin)
 			}
 			self.PsIndex = self.IconIndex
@@ -919,24 +902,23 @@ func (self *Page) KeyDown( ev *event.Event) {
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
 	}
-	
+
 }
 
-
 func (self *Page) OnLoadCb() {
-	
+
 }
 
 func (self *Page) OnKbdReturnBackCb() {
-	
+
 }
 
 func (self *Page) OnReturnBackCb() {
-	
+
 }
 
 func (self *Page) OnExitCb() {
-	
+
 }
 
 func (self *Page) Draw() {
@@ -953,25 +935,23 @@ func (self *Page) SetFootMsg(footmsg [5]string) {
 	self.FootMsg = footmsg
 }
 
-
 func (self *Page) GetCanvasHWND() *sdl.Surface {
 	return self.CanvasHWND
 }
 
-func (self *Page)	SetCanvasHWND( canvas *sdl.Surface) {
+func (self *Page) SetCanvasHWND(canvas *sdl.Surface) {
 	self.CanvasHWND = canvas
 }
 
-
-func (self *Page)	GetHWND() *sdl.Surface {
+func (self *Page) GetHWND() *sdl.Surface {
 	return self.HWND
 }
 
-func (self *Page)	SetHWND(h *sdl.Surface) {
+func (self *Page) SetHWND(h *sdl.Surface) {
 	self.HWND = h
 }
 
-func (self *Page) SetPsIndex( idx int) {
+func (self *Page) SetPsIndex(idx int) {
 	self.PsIndex = idx
 }
 
@@ -979,14 +959,13 @@ func (self *Page) GetPsIndex() int {
 	return self.PsIndex
 }
 
-func (self *Page) SetIconIndex( idx int) {
+func (self *Page) SetIconIndex(idx int) {
 	self.IconIndex = idx
 }
 
 func (self *Page) GetIconIndex() int {
 	return self.IconIndex
 }
-
 
 func (self *Page) GetName() string {
 	return self.Name
@@ -1002,7 +981,7 @@ func (self *Page) SetIndex(idx int) {
 
 func (self *Page) SetAlign(al int) {
 	inthere := false
-	for _,v := range ALIGN {
+	for _, v := range ALIGN {
 		if v == al {
 			inthere = true
 			break
@@ -1019,113 +998,110 @@ func (self *Page) GetAlign() int {
 }
 
 func (self *Page) ScrollUp() {
-  if len(self.MyList) == 0 {
-    return
-  }
-  
-  self.PsIndex -=1
-  
-  if self.PsIndex < 0 {
-    self.PsIndex = 0
-  }
-  
-  cur_li := self.MyList[self.PsIndex]
-  x,y := cur_li.Coord()
-  _,h := cur_li.Size()
-  if y < 0 {
-    for i,_ := range self.MyList{
-      x,y = self.MyList[i].Coord()
-      _, h = self.MyList[i].Size()
-      self.MyList[i].NewCoord(x,y + h)
-    }
-    
-    //self.Scrolled +=1
-  }
+	if len(self.MyList) == 0 {
+		return
+	}
+
+	self.PsIndex -= 1
+
+	if self.PsIndex < 0 {
+		self.PsIndex = 0
+	}
+
+	cur_li := self.MyList[self.PsIndex]
+	x, y := cur_li.Coord()
+	_, h := cur_li.Size()
+	if y < 0 {
+		for i, _ := range self.MyList {
+			x, y = self.MyList[i].Coord()
+			_, h = self.MyList[i].Size()
+			self.MyList[i].NewCoord(x, y+h)
+		}
+
+		//self.Scrolled +=1
+	}
 
 }
 
 func (self *Page) ScrollDown() {
-  if len(self.MyList) == 0 {
-    return
-  }
-  self.PsIndex +=1
-  
-  if self.PsIndex >= len(self.MyList) {
-    self.PsIndex = len(self.MyList) - 1
-  }
-  
-  cur_li := self.MyList[self.PsIndex]
-  x,y := cur_li.Coord()
-  _,h := cur_li.Size()
-  
-  if y+ h > self.Height { 
-    for i,_ := range self.MyList{
-      x,y = self.MyList[i].Coord()
-      _, h = self.MyList[i].Size()
-      self.MyList[i].NewCoord(x,y - h)
-    }
-   // self.Scrolled -=1    
-  }
+	if len(self.MyList) == 0 {
+		return
+	}
+	self.PsIndex += 1
+
+	if self.PsIndex >= len(self.MyList) {
+		self.PsIndex = len(self.MyList) - 1
+	}
+
+	cur_li := self.MyList[self.PsIndex]
+	x, y := cur_li.Coord()
+	_, h := cur_li.Size()
+
+	if y+h > self.Height {
+		for i, _ := range self.MyList {
+			x, y = self.MyList[i].Coord()
+			_, h = self.MyList[i].Size()
+			self.MyList[i].NewCoord(x, y-h)
+		}
+		// self.Scrolled -=1
+	}
 }
 
-
-
 func (self *Page) FastScrollUp(step int) {
-  if len(self.MyList) == 0 {
-    return
-  }
-  if step < 1 {
-    step = 1
-  }
-  tmp := self.PsIndex
-  self.PsIndex -=step
-  
-  if self.PsIndex < 0 {
-    self.PsIndex = 0
-  }
-  dy := tmp - self.PsIndex
-  
-  cur_li := self.MyList[self.PsIndex]
-  x,y := cur_li.Coord()
-  _,h := cur_li.Size()
-  if y < 0 {
-    for i,_ := range self.MyList{
-      x,y = self.MyList[i].Coord()
-      _, h = self.MyList[i].Size()
-      self.MyList[i].NewCoord(x,y + h*dy)
-    }
-    
-    //self.Scrolled +=1
-  }
+	if len(self.MyList) == 0 {
+		return
+	}
+	if step < 1 {
+		step = 1
+	}
+	tmp := self.PsIndex
+	self.PsIndex -= step
+
+	if self.PsIndex < 0 {
+		self.PsIndex = 0
+	}
+	dy := tmp - self.PsIndex
+
+	cur_li := self.MyList[self.PsIndex]
+	x, y := cur_li.Coord()
+	_, h := cur_li.Size()
+	if y < 0 {
+		for i, _ := range self.MyList {
+			x, y = self.MyList[i].Coord()
+			_, h = self.MyList[i].Size()
+			self.MyList[i].NewCoord(x, y+h*dy)
+		}
+
+		//self.Scrolled +=1
+	}
 
 }
 
 func (self *Page) FastScrollDown(step int) {
-  if len(self.MyList) == 0 {
-    return
-  }
-  if step < 1 {
-    step =1
-  }
-  tmp := self.PsIndex
-  self.PsIndex +=step
-  
-  if self.PsIndex >= len(self.MyList) {
-    self.PsIndex = len(self.MyList) - 1
-  }
-  dy := self.PsIndex - tmp
-  
-  cur_li := self.MyList[self.PsIndex]
-  x,y := cur_li.Coord()
-  _,h := cur_li.Size()
-  
-  if y+ h > self.Height { 
-    for i,_ := range self.MyList{
-      x,y = self.MyList[i].Coord()
-      _, h = self.MyList[i].Size()
-      self.MyList[i].NewCoord(x,y - h*dy)
-    }
-   // self.Scrolled -=1    
-  }
-}
+	if len(self.MyList) == 0 {
+		return
+	}
+	if step < 1 {
+		step = 1
+	}
+	tmp := self.PsIndex
+	self.PsIndex += step
 
+	if self.PsIndex >= len(self.MyList) {
+		self.PsIndex = len(self.MyList) - 1
+	}
+	dy := self.PsIndex - tmp
+
+	cur_li := self.MyList[self.PsIndex]
+	x, y := cur_li.Coord()
+	_, h := cur_li.Size()
+
+	if y+h > self.Height {
+		for i, _ := range self.MyList {
+			x, y = self.MyList[i].Coord()
+			_, h = self.MyList[i].Size()
+			self.MyList[i].NewCoord(x, y-h*dy)
+		}
+		// self.Scrolled -=1
+	}
+}

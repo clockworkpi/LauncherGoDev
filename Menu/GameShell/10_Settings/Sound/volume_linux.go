@@ -1,4 +1,6 @@
+//go:build !windows && !darwin
 // +build !windows,!darwin
+
 /*
  * Copied from https://github.com/itchyny/volume-go,  MIT License
  */

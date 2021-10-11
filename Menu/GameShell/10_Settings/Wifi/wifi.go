@@ -1,633 +1,629 @@
 package Wifi
+
 //wifi_list.py
 
 import (
-    "fmt"
-    //"strconv"
-    "strings"
+	"fmt"
+	//"strconv"
+	"strings"
 	//"os"
 	// "os/exec"
 	// gotime "time"
 
-    //"github.com/godbus/dbus"
+	//"github.com/godbus/dbus"
 
-    "github.com/veandco/go-sdl2/ttf"
+	"github.com/veandco/go-sdl2/ttf"
 
-    "github.com/cuu/gogame/surface"
-    "github.com/cuu/gogame/font"
-    "github.com/cuu/gogame/color"
-    "github.com/cuu/gogame/event"
-    "github.com/cuu/gogame/time"
-    "github.com/cuu/gogame/rect"
-    "github.com/cuu/gogame/draw"
-    "github.com/clockworkpi/LauncherGoDev/sysgo"
-    "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
+	"github.com/clockworkpi/LauncherGoDev/sysgo"
+	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
+	"github.com/cuu/gogame/color"
+	"github.com/cuu/gogame/draw"
+	"github.com/cuu/gogame/event"
+	"github.com/cuu/gogame/font"
+	"github.com/cuu/gogame/rect"
+	"github.com/cuu/gogame/surface"
+	"github.com/cuu/gogame/time"
 
-    wifi "github.com/cuu/wpa-connect"
+	wifi "github.com/cuu/wpa-connect"
 )
 
 const EMPTY_NETWORK = "00:00:00:00:00:00"
 
 type WifiDisconnectConfirmPage struct {
-  UI.ConfirmPage
-  Parent *WifiInfoPage
+	UI.ConfirmPage
+	Parent *WifiInfoPage
 }
 
 func NewWifiDisconnectConfirmPage() *WifiDisconnectConfirmPage {
-  p := &WifiDisconnectConfirmPage{}  
-  p.ListFont = UI.Fonts["veramono20"]
-  p.FootMsg = [5]string{"Nav","","","Cancel","Yes"}
+	p := &WifiDisconnectConfirmPage{}
+	p.ListFont = UI.Fonts["veramono20"]
+	p.FootMsg = [5]string{"Nav", "", "", "Cancel", "Yes"}
 
-  p.ConfirmText ="Confirm Disconnect?"
-  return p
+	p.ConfirmText = "Confirm Disconnect?"
+	return p
 }
 
-func (self *WifiDisconnectConfirmPage) KeyDown(ev *event.Event ) {
+func (self *WifiDisconnectConfirmPage) KeyDown(ev *event.Event) {
 
-  if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
-    self.ReturnToUpLevelPage()
-      self.Screen.Draw()
-      self.Screen.SwapAndShow()
-  }
+	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+		self.ReturnToUpLevelPage()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
 
-  if ev.Data["Key"] == UI.CurKeys["B"] {
-    fmt.Println("Disconnecting..")
+	if ev.Data["Key"] == UI.CurKeys["B"] {
+		fmt.Println("Disconnecting..")
 		self.SnapMsg("Disconnecting...")
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
-		
+
 		self.Parent.Parent.Disconnect()
-		
+
 		time.BlockDelay(400)
-		
+
 		self.ReturnToUpLevelPage()
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
 		self.Parent.Parent.Rescan(false)
-  }
+	}
 }
 
 type WifiInfoPage struct {
-  UI.Page
-  ListFontObj  *ttf.Font
-  Bss *wifi.BSS
+	UI.Page
+	ListFontObj *ttf.Font
+	Bss         *wifi.BSS
 
-  AList map[string]map[string]string
-  ESSID  string
+	AList  map[string]map[string]string
+	ESSID  string
 	BSSID  string
-  MyList []UI.ListItemInterface
+	MyList []UI.ListItemInterface
 
-  DisconnectConfirmPage *WifiDisconnectConfirmPage //child page 
-  Parent *WifiList
+	DisconnectConfirmPage *WifiDisconnectConfirmPage //child page
+	Parent                *WifiList
 }
 
 func NewWifiInfoPage() *WifiInfoPage {
-  p := &WifiInfoPage{}
-  p.FootMsg = [5]string{"Nav","Disconnect","","Back",""}
+	p := &WifiInfoPage{}
+	p.FootMsg = [5]string{"Nav", "Disconnect", "", "Back", ""}
 
-  p.ListFontObj = UI.Fonts["varela15"]
+	p.ListFontObj = UI.Fonts["varela15"]
 
-  p.AList = make(map[string]map[string]string)
+	p.AList = make(map[string]map[string]string)
 
-  p.BSSID = ""
+	p.BSSID = ""
 	p.ESSID = ""
-  return p
+	return p
 
 }
 
 func (self *WifiInfoPage) GenList() {
 
-    self.MyList = nil
-    self.MyList = make([]UI.ListItemInterface,0)
+	self.MyList = nil
+	self.MyList = make([]UI.ListItemInterface, 0)
 
-    if self.BSSID != "" {
-      self.AList["ip"]["value"] = "Not Connected"
-      if self.BSSID == self.Parent.CurBssid {
-        var ip string
-        ip = self.Parent.GetWirelessIP()
-        if len(ip) > 0 {
-          self.AList["ip"]["value"]=ip
-        }
-      }else {
-				fmt.Println(self.BSSID)
+	if self.BSSID != "" {
+		self.AList["ip"]["value"] = "Not Connected"
+		if self.BSSID == self.Parent.CurBssid {
+			var ip string
+			ip = self.Parent.GetWirelessIP()
+			if len(ip) > 0 {
+				self.AList["ip"]["value"] = ip
 			}
+		} else {
+			fmt.Println(self.BSSID)
+		}
 
-      self.AList["ssid"]["value"] = self.ESSID
-    }
+		self.AList["ssid"]["value"] = self.ESSID
+	}
 
-    start_x := 0 
-    start_y := 0 
-    i := 0
-    for k,_ := range self.AList {
-      li := UI.NewInfoPageListItem()
-      li.Parent = self
-      li.PosX = start_x
-      li.PosY = start_y + i * li.Height//default is 30
-      li.Width = UI.Width
-      li.Fonts["normal"] = self.ListFontObj
-      li.Fonts["small"]  = UI.Fonts["varela12"]
+	start_x := 0
+	start_y := 0
+	i := 0
+	for k, _ := range self.AList {
+		li := UI.NewInfoPageListItem()
+		li.Parent = self
+		li.PosX = start_x
+		li.PosY = start_y + i*li.Height //default is 30
+		li.Width = UI.Width
+		li.Fonts["normal"] = self.ListFontObj
+		li.Fonts["small"] = UI.Fonts["varela12"]
 
-      if self.AList[k]["label"] != "" {
-        li.Init(self.AList[k]["label"])
-      }else {
-        li.Init(self.AList[k]["key"])
-      }
+		if self.AList[k]["label"] != "" {
+			li.Init(self.AList[k]["label"])
+		} else {
+			li.Init(self.AList[k]["key"])
+		}
 
-      li.Flag = self.AList[k]["key"]
+		li.Flag = self.AList[k]["key"]
 
-      li.SetSmallText(self.AList[k]["value"])
-      self.MyList = append(self.MyList,li)
-      i+=1
-    }
+		li.SetSmallText(self.AList[k]["value"])
+		self.MyList = append(self.MyList, li)
+		i += 1
+	}
 
 }
 
 func (self *WifiInfoPage) Init() {
-  if self.Screen != nil {
-    if self.Screen.CanvasHWND != nil && self.CanvasHWND == nil {
-      self.CanvasHWND = self.Screen.CanvasHWND
-    }
-  }
-  self.PosX = self.Index * self.Screen.Width
-  self.Width = self.Screen.Width
-  self.Height = self.Screen.Height
+	if self.Screen != nil {
+		if self.Screen.CanvasHWND != nil && self.CanvasHWND == nil {
+			self.CanvasHWND = self.Screen.CanvasHWND
+		}
+	}
+	self.PosX = self.Index * self.Screen.Width
+	self.Width = self.Screen.Width
+	self.Height = self.Screen.Height
 
-  ps := UI.NewInfoPageSelector()
-  ps.Parent = self
-  ps.PosX = 2
-  self.Ps = ps
-  self.PsIndex = 0
+	ps := UI.NewInfoPageSelector()
+	ps.Parent = self
+	ps.PosX = 2
+	self.Ps = ps
+	self.PsIndex = 0
 
-  ip := make(map[string]string) // ip = {}
-  ip["key"] = "ip"
-  ip["label"] = "IP"
-  ip["value"] = "Not Connected"
+	ip := make(map[string]string) // ip = {}
+	ip["key"] = "ip"
+	ip["label"] = "IP"
+	ip["value"] = "Not Connected"
 
-  ssid := make(map[string]string) // ssid = {}
-  ssid["key"] = "ssid"
-  ssid["label"] = "SSID"
-  ssid["value"] = ""
+	ssid := make(map[string]string) // ssid = {}
+	ssid["key"] = "ssid"
+	ssid["label"] = "SSID"
+	ssid["value"] = ""
 
-  self.AList["ip"] = ip
-  self.AList["ssid"] = ssid
+	self.AList["ip"] = ip
+	self.AList["ssid"] = ssid
 
-  self.DisconnectConfirmPage = NewWifiDisconnectConfirmPage()
-  self.DisconnectConfirmPage.Screen = self.Screen
-  self.DisconnectConfirmPage.Name   = "Confirm Disconnect"
-  self.DisconnectConfirmPage.Parent = self
+	self.DisconnectConfirmPage = NewWifiDisconnectConfirmPage()
+	self.DisconnectConfirmPage.Screen = self.Screen
+	self.DisconnectConfirmPage.Name = "Confirm Disconnect"
+	self.DisconnectConfirmPage.Parent = self
 
-  self.DisconnectConfirmPage.Init()
+	self.DisconnectConfirmPage.Init()
 
 }
 
 func (self *WifiInfoPage) ScrollUp() {
-  if len(self.MyList) == 0 {
-    return
-  }
+	if len(self.MyList) == 0 {
+		return
+	}
 
-  self.PsIndex -= 1
+	self.PsIndex -= 1
 
-  if self.PsIndex < 0 {
-    self.PsIndex = 0
-  }
-  cur_li := self.MyList[self.PsIndex]
-  x,y := cur_li.Coord()
-  if x < 0 {
-    for i:=0;i<len(self.MyList);i++ {
-      _,h := self.MyList[i].Size()
-      x,y  = self.MyList[i].Coord()
-      self.MyList[i].NewCoord(x, y+h)
-    }
-  }
+	if self.PsIndex < 0 {
+		self.PsIndex = 0
+	}
+	cur_li := self.MyList[self.PsIndex]
+	x, y := cur_li.Coord()
+	if x < 0 {
+		for i := 0; i < len(self.MyList); i++ {
+			_, h := self.MyList[i].Size()
+			x, y = self.MyList[i].Coord()
+			self.MyList[i].NewCoord(x, y+h)
+		}
+	}
 }
 
 func (self *WifiInfoPage) ScrollDown() {
-  if len(self.MyList) == 0 {
-    return
-  }
+	if len(self.MyList) == 0 {
+		return
+	}
 
-  self.PsIndex += 1
-  if self.PsIndex >= len(self.MyList) {
-    self.PsIndex = len(self.MyList) - 1
-  }
+	self.PsIndex += 1
+	if self.PsIndex >= len(self.MyList) {
+		self.PsIndex = len(self.MyList) - 1
+	}
 
-  cur_li := self.MyList[self.PsIndex]
-  x,y  := cur_li.Coord()
-  _,h  := cur_li.Size()
+	cur_li := self.MyList[self.PsIndex]
+	x, y := cur_li.Coord()
+	_, h := cur_li.Size()
 
-  if y + h > self.Height {
-    for i:=0;i<len(self.MyList);i++ {
-      _,h = self.MyList[i].Size()
-      x,y = self.MyList[i].Coord()
-      self.MyList[i].NewCoord(x, y - h)
-    }
-  }
+	if y+h > self.Height {
+		for i := 0; i < len(self.MyList); i++ {
+			_, h = self.MyList[i].Size()
+			x, y = self.MyList[i].Coord()
+			self.MyList[i].NewCoord(x, y-h)
+		}
+	}
 }
 
 func (self *WifiInfoPage) Click() {
-  /*
-     cur_li = self._MyList[self._PsIndex]
-     print(cur_li._Flag) 
-   */
+	/*
+	   cur_li = self._MyList[self._PsIndex]
+	   print(cur_li._Flag)
+	*/
 }
 
 func (self *WifiInfoPage) TryDisconnect() {
-  var ip string 
+	var ip string
 
-  ip = self.Parent.GetWirelessIP() 
- 
-  if len(ip) >  6 {
-    self.Screen.PushPage(self.DisconnectConfirmPage)
-    self.Screen.Draw()
-    self.Screen.SwapAndShow()
-  }else {
-    fmt.Println("WifiInfoPage TryDisconnect can not get IP,maybe you are offline")
-    return
-  }
+	ip = self.Parent.GetWirelessIP()
+
+	if len(ip) > 6 {
+		self.Screen.PushPage(self.DisconnectConfirmPage)
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	} else {
+		fmt.Println("WifiInfoPage TryDisconnect can not get IP,maybe you are offline")
+		return
+	}
 }
 
 func (self *WifiInfoPage) OnLoadCb() {
 
-  /*
-  self.FootMsg[1]="Disconnect"
-  self.FootMsg[1] = ""
-  */
+	/*
+	  self.FootMsg[1]="Disconnect"
+	  self.FootMsg[1] = ""
+	*/
 
-  self.GenList()  
+	self.GenList()
 }
-
 
 func (self *WifiInfoPage) OnReturnBackCb() {
 
-  self.ReturnToUpLevelPage()
+	self.ReturnToUpLevelPage()
 	self.Screen.Draw()
-	self.Screen.SwapAndShow()  
+	self.Screen.SwapAndShow()
 
 }
 
-func (self *WifiInfoPage) KeyDown(ev *event.Event ) {
+func (self *WifiInfoPage) KeyDown(ev *event.Event) {
 
-  if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
-    self.ReturnToUpLevelPage()
-      self.Screen.Draw()
-      self.Screen.SwapAndShow()
-  }
+	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+		self.ReturnToUpLevelPage()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
 
-  if ev.Data["Key"] == UI.CurKeys["Up"] {
-    self.ScrollUp()
-      self.Screen.Draw()
-      self.Screen.SwapAndShow()
-  }
+	if ev.Data["Key"] == UI.CurKeys["Up"] {
+		self.ScrollUp()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
 
-  if ev.Data["Key"] == UI.CurKeys["Down"] {
-    self.ScrollDown()
-      self.Screen.Draw()
-      self.Screen.SwapAndShow()    
-  }
+	if ev.Data["Key"] == UI.CurKeys["Down"] {
+		self.ScrollDown()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
 
-  if ev.Data["Key"] == UI.CurKeys["Enter"] {
-    self.Click()
-  }
+	if ev.Data["Key"] == UI.CurKeys["Enter"] {
+		self.Click()
+	}
 
-  if ev.Data["Key"] == UI.CurKeys["X"] {
-    self.TryDisconnect()
-  }
+	if ev.Data["Key"] == UI.CurKeys["X"] {
+		self.TryDisconnect()
+	}
 }
 
 func (self *WifiInfoPage) Draw() {
-  self.ClearCanvas()
-    self.Ps.Draw()
+	self.ClearCanvas()
+	self.Ps.Draw()
 
-    for i:=0;i<len(self.MyList);i++ {
-      self.MyList[i].Draw()
-    }
+	for i := 0; i < len(self.MyList); i++ {
+		self.MyList[i].Draw()
+	}
 }
 
+type WifiListSelector struct {
+	UI.PageSelector
+	BackgroundColor *color.Color
 
-type WifiListSelector struct{
-  UI.PageSelector
-    BackgroundColor *color.Color
-
-    Parent *WifiList
+	Parent *WifiList
 }
 
 func NewWifiListSelector() *WifiListSelector {
-p := &WifiListSelector{}
-   p.BackgroundColor = &color.Color{131,199,219,255} //SkinManager().GiveColor('Front')
+	p := &WifiListSelector{}
+	p.BackgroundColor = &color.Color{131, 199, 219, 255} //SkinManager().GiveColor('Front')
 
-   return p  
+	return p
 }
 
 func (self *WifiListSelector) Draw() {
-  idx := self.Parent.PsIndex
-  if idx < len(self.Parent.MyList) {
-    x := self.Parent.MyList[idx].PosX + 11
-    y := self.Parent.MyList[idx].PosY + 1
-    h := self.Parent.MyList[idx].Height - 3
+	idx := self.Parent.PsIndex
+	if idx < len(self.Parent.MyList) {
+		x := self.Parent.MyList[idx].PosX + 11
+		y := self.Parent.MyList[idx].PosY + 1
+		h := self.Parent.MyList[idx].Height - 3
 
-    self.PosX = x
-    self.PosY = y
-    self.Height = h
+		self.PosX = x
+		self.PosY = y
+		self.Height = h
 
-    rect_ := rect.Rect(x,y,self.Width,h)
-    draw.AARoundRect(self.Parent.CanvasHWND,&rect_,self.BackgroundColor,4,0,self.BackgroundColor)
-  }
+		rect_ := rect.Rect(x, y, self.Width, h)
+		draw.AARoundRect(self.Parent.CanvasHWND, &rect_, self.BackgroundColor, 4, 0, self.BackgroundColor)
+	}
 }
 
-type WifiListMessageBox struct{
-  UI.Label
-  Parent *WifiList
+type WifiListMessageBox struct {
+	UI.Label
+	Parent *WifiList
 }
 
-func NewWifiListMessageBox() *WifiListMessageBox{
-p := &WifiListMessageBox{}
-   p.Color = &color.Color{83,83,83,255}
-   return p
+func NewWifiListMessageBox() *WifiListMessageBox {
+	p := &WifiListMessageBox{}
+	p.Color = &color.Color{83, 83, 83, 255}
+	return p
 }
-
 
 func (self *WifiListMessageBox) Draw() {
-  my_text := font.Render(self.FontObj,self.Text,true,self.Color,nil)
+	my_text := font.Render(self.FontObj, self.Text, true, self.Color, nil)
 
-  w := surface.GetWidth(my_text)
-  h := surface.GetHeight(my_text)
+	w := surface.GetWidth(my_text)
+	h := surface.GetHeight(my_text)
 
-  x := (self.Parent.Width - w )/2
-  y := (self.Parent.Height - h)/2
+	x := (self.Parent.Width - w) / 2
+	y := (self.Parent.Height - h) / 2
 
-  padding := 10
+	padding := 10
 
-  white := &color.Color{255,255,255,255}
-  black := &color.Color{0,  0,  0,  255}
+	white := &color.Color{255, 255, 255, 255}
+	black := &color.Color{0, 0, 0, 255}
 
-  rect_ := rect.Rect(x-padding,y-padding,w+padding*2,h+padding*2)
+	rect_ := rect.Rect(x-padding, y-padding, w+padding*2, h+padding*2)
 
-  draw.Rect(self.CanvasHWND,white,&rect_,0)
-  draw.Rect(self.CanvasHWND,black,&rect_,1)
+	draw.Rect(self.CanvasHWND, white, &rect_, 0)
+	draw.Rect(self.CanvasHWND, black, &rect_, 1)
 
-  rect_2 := rect.Rect(x,y,w,h)
-  surface.Blit(self.CanvasHWND,my_text,&rect_2,nil)
-  my_text.Free()
+	rect_2 := rect.Rect(x, y, w, h)
+	surface.Blit(self.CanvasHWND, my_text, &rect_2, nil)
+	my_text.Free()
 }
 
 //---------WifiList---------------------------------
 type BlockCbFunc func()
 
-type WifiList struct{
-  UI.Page
-  WifiPassword string
-  Connecting  bool
-  Scanning    bool
+type WifiList struct {
+	UI.Page
+	WifiPassword string
+	Connecting   bool
+	Scanning     bool
 
-  ShowingMessageBox bool
-  MsgBox   *WifiListMessageBox
-  ConnectTry  int
+	ShowingMessageBox bool
+	MsgBox            *WifiListMessageBox
+	ConnectTry        int
 
-  BlockingUI  bool
-  BlockCb     BlockCbFunc
+	BlockingUI bool
+	BlockCb    BlockCbFunc
 
-  LastStatusMsg string
-  Scroller  *UI.ListScroller
-  ListFontObj  *ttf.Font
+	LastStatusMsg string
+	Scroller      *UI.ListScroller
+	ListFontObj   *ttf.Font
 
-  InfoPage   *WifiInfoPage
+	InfoPage *WifiInfoPage
 
-  MyList []*NetItem 
-  CurEssid  string ///SomeWifi
-	CurBssid  string //00:00:00:00:00:00
-  CurIP     string
-  CurSig    string
+	MyList   []*NetItem
+	CurEssid string ///SomeWifi
+	CurBssid string //00:00:00:00:00:00
+	CurIP    string
+	CurSig   string
 }
 
 func NewWifiList() *WifiList {
-  p:= &WifiList{}
-  p.ListFontObj = UI.Fonts["notosanscjk15"]
-  p.FootMsg = [5]string{"Nav.","Scan","Info","Back","Enter"}
+	p := &WifiList{}
+	p.ListFontObj = UI.Fonts["notosanscjk15"]
+	p.FootMsg = [5]string{"Nav.", "Scan", "Info", "Back", "Enter"}
 
-  return p
+	return p
 }
 
-func (self *WifiList) ShowBox(msg string ) {
-  self.MsgBox.Text = msg 
-  self.ShowingMessageBox = true
-  self.Screen.Draw()
-  self.MsgBox.Draw()
-  self.Screen.SwapAndShow()
+func (self *WifiList) ShowBox(msg string) {
+	self.MsgBox.Text = msg
+	self.ShowingMessageBox = true
+	self.Screen.Draw()
+	self.MsgBox.Draw()
+	self.Screen.SwapAndShow()
 
 }
 
 func (self *WifiList) HideBox() {
-  self.Draw()
-  self.ShowingMessageBox = false
-  self.Screen.SwapAndShow()
+	self.Draw()
+	self.ShowingMessageBox = false
+	self.Screen.SwapAndShow()
 }
 
 func (self *WifiList) GenNetworkList() {
-  self.MyList = self.MyList[:0]
-	
-  start_x := 0 
-  start_y := 0
+	self.MyList = self.MyList[:0]
 
-  var is_active bool
-  var li_idx int
-  li_idx = 0
-	
-	
-  self.WifiScanStarted()
-	
-  if bssList, err := GsScanManager.Scan(); err == nil {
-		
+	start_x := 0
+	start_y := 0
+
+	var is_active bool
+	var li_idx int
+	li_idx = 0
+
+	self.WifiScanStarted()
+
+	if bssList, err := GsScanManager.Scan(); err == nil {
+
 		self.CurEssid = GsScanManager.GetCurrentSSID()
 		self.CurBssid = GsScanManager.GetCurrentBSSID()
-		
-    for _, bss := range bssList {
+
+		for _, bss := range bssList {
 			is_active = false
-			fmt.Println(bss.SSID, " ", bss.BSSID," ",bss.Signal, bss.KeyMgmt)
+			fmt.Println(bss.SSID, " ", bss.BSSID, " ", bss.Signal, bss.KeyMgmt)
 			ni := NewNetItem()
 			ni.Parent = self
-			ni.PosX   = start_x
-			ni.PosY   = start_y + li_idx* NetItemDefaultHeight
-			ni.Width  = UI.Width
+			ni.PosX = start_x
+			ni.PosY = start_y + li_idx*NetItemDefaultHeight
+			ni.Width = UI.Width
 			ni.FontObj = self.ListFontObj
 			ni.Essid = bss.SSID
 			ni.Bssid = bss.BSSID
 			ni.Signal = bss.Signal
-			
+
 			if self.CurBssid == ni.Bssid {
 				is_active = true
 			}
-			
-			ni.Init(is_active)
-			self.MyList = append(self.MyList,ni)
-      
-			li_idx++
-    }
-  }
-	
-  self.WifiScanFinished()
 
-  self.PsIndex = 0
+			ni.Init(is_active)
+			self.MyList = append(self.MyList, ni)
+
+			li_idx++
+		}
+	}
+
+	self.WifiScanFinished()
+
+	self.PsIndex = 0
 }
 
 func (self *WifiList) Disconnect() {
-  self.Connecting = false
-	
-  nmcli_disconnect := []string{"nmcli","con","down",self.CurEssid}
-  UI.ExecCmd( nmcli_disconnect )
+	self.Connecting = false
+
+	nmcli_disconnect := []string{"nmcli", "con", "down", self.CurEssid}
+	UI.ExecCmd(nmcli_disconnect)
 	self.CurEssid = ""
 	self.CurBssid = ""
-	
-  
+
 }
 
 func (self *WifiList) ShutDownConnecting() {
-   
-  self.Connecting= false
-  self.Disconnect()
+
+	self.Connecting = false
+	self.Disconnect()
 }
 
 func (self *WifiList) Rescan(sync bool) { // sync default should be false
-  fmt.Println("start Rescan")
-  self.GenNetworkList()
+	fmt.Println("start Rescan")
+	self.GenNetworkList()
 }
 
 // dbus signal functions
 func (self *WifiList) WifiScanFinished() {
-  if self.Screen.CurrentPage != self {
-    return
-  }
+	if self.Screen.CurrentPage != self {
+		return
+	}
 
-  self.ResetPageSelector()
+	self.ResetPageSelector()
 
-  self.Scanning= false
-  self.HideBox()
+	self.Scanning = false
+	self.HideBox()
 
-  self.BlockingUI = false
-  fmt.Println("dbus says scan finished")
+	self.BlockingUI = false
+	fmt.Println("dbus says scan finished")
 
 }
 
-func (self *WifiList) WifiScanStarted( ) {
-  if self.Screen.CurrentPage != self {
-    return
-  }
+func (self *WifiList) WifiScanStarted() {
+	if self.Screen.CurrentPage != self {
+		return
+	}
 
-  self.Scanning = true
-  self.ShowBox("Wifi scanning...")
-  self.BlockingUI = true
-  fmt.Println("dbus says start scan")
+	self.Scanning = true
+	self.ShowBox("Wifi scanning...")
+	self.BlockingUI = true
+	fmt.Println("dbus says start scan")
 }
-
 
 func (self *WifiList) SaveNetworkList() {
 
 }
+
 //----------------------------------------------------------------------------------
 
-func (self *WifiList) UpdateNetList(state int,info []string ,force_check bool,firstrun bool) { //force_check default ==false, firstrun default == false 
+func (self *WifiList) UpdateNetList(state int, info []string, force_check bool, firstrun bool) { //force_check default ==false, firstrun default == false
 
-  if force_check == true  {
-    self.GenNetworkList()
-    self.SaveNetworkList()
-  }
-  
+	if force_check == true {
+		self.GenNetworkList()
+		self.SaveNetworkList()
+	}
+
 }
 
 func (self *WifiList) UpdateListActive() {
 
-    for i:=0;i<len(self.MyList);i++ {
-      if self.MyList[i].Bssid == self.CurBssid {
-				self.MyList[i].IsActive = true
-			}else {
-				self.MyList[i].IsActive = false
-			}
-    }	
+	for i := 0; i < len(self.MyList); i++ {
+		if self.MyList[i].Bssid == self.CurBssid {
+			self.MyList[i].IsActive = true
+		} else {
+			self.MyList[i].IsActive = false
+		}
+	}
 }
 
 func (self *WifiList) ConfigWireless(password string) {
-  
-  ssid := self.MyList[self.PsIndex].Essid
+
+	ssid := self.MyList[self.PsIndex].Essid
 	fmt.Println(ssid)
 	fmt.Println(password)
-  self.ShowBox("Connecting...")
+	self.ShowBox("Connecting...")
 
 	self.Connecting = true
 
-	out := UI.System(fmt.Sprintf("nmcli dev wifi connect %s password \"%s\"",ssid,password))
-	if strings.Contains(out,"successfully") {
-    self.CurEssid = self.MyList[self.PsIndex].Essid
+	out := UI.System(fmt.Sprintf("nmcli dev wifi connect %s password \"%s\"", ssid, password))
+	if strings.Contains(out, "successfully") {
+		self.CurEssid = self.MyList[self.PsIndex].Essid
 		self.CurBssid = self.MyList[self.PsIndex].Bssid
-    self.MyList[self.PsIndex].Password = password
+		self.MyList[self.PsIndex].Password = password
 		self.ShowBox("Connected")
-	}else {
+	} else {
 		self.ShowBox("Wifi connect error")
 		self.CurEssid = ""
 		self.CurBssid = ""
-  }
-	
+	}
+
 	self.Connecting = false
-	
-  self.UpdateListActive()
-  
+
+	self.UpdateListActive()
+
 }
 
 func (self *WifiList) GetWirelessIP() string {
 
-  cli := fmt.Sprintf( "ip -4 addr show %s | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'",sysgo.WifiDev)
-  out := UI.SystemTrim(cli)
-	
-  return out
-  
+	cli := fmt.Sprintf("ip -4 addr show %s | grep -oP '(?<=inet\\s)\\d+(\\.\\d+){3}'", sysgo.WifiDev)
+	out := UI.SystemTrim(cli)
+
+	return out
+
 }
 
 func (self *WifiList) ScrollUp() {
-  if len(self.MyList) == 0 {
-    return
-  }
+	if len(self.MyList) == 0 {
+		return
+	}
 
-  self.PsIndex -= 1
-  if self.PsIndex < 0 {
-    self.PsIndex=0
-  }
+	self.PsIndex -= 1
+	if self.PsIndex < 0 {
+		self.PsIndex = 0
+	}
 
-  cur_ni := self.MyList[self.PsIndex]//*NetItem
-  if cur_ni.PosY < 0 {
-    for i:=0;i<len(self.MyList);i++ {
-      self.MyList[i].PosY += self.MyList[i].Height
-    }
-  }
+	cur_ni := self.MyList[self.PsIndex] //*NetItem
+	if cur_ni.PosY < 0 {
+		for i := 0; i < len(self.MyList); i++ {
+			self.MyList[i].PosY += self.MyList[i].Height
+		}
+	}
 }
 
 func (self *WifiList) ScrollDown() {
-  if len(self.MyList) == 0 {
-    return 
-  }
+	if len(self.MyList) == 0 {
+		return
+	}
 
-  self.PsIndex += 1
-  if self.PsIndex >= len(self.MyList) {
-    self.PsIndex = len(self.MyList) - 1
-  }
+	self.PsIndex += 1
+	if self.PsIndex >= len(self.MyList) {
+		self.PsIndex = len(self.MyList) - 1
+	}
 
-  cur_ni := self.MyList[self.PsIndex]
-  if cur_ni.PosY + cur_ni.Height > self.Height {
-    for i:=0;i<len(self.MyList);i++ {
-      self.MyList[i].PosY -= self.MyList[i].Height
-    }
-  }
+	cur_ni := self.MyList[self.PsIndex]
+	if cur_ni.PosY+cur_ni.Height > self.Height {
+		for i := 0; i < len(self.MyList); i++ {
+			self.MyList[i].PosY -= self.MyList[i].Height
+		}
+	}
 
 }
 
 func (self *WifiList) AbortedAndReturnToUpLevel() {
-  self.HideBox()
-    self.Screen.FootBar.ResetNavText()
-    self.ReturnToUpLevelPage()
-    self.Screen.Draw()
-    self.Screen.SwapAndShow()
+	self.HideBox()
+	self.Screen.FootBar.ResetNavText()
+	self.ReturnToUpLevelPage()
+	self.Screen.Draw()
+	self.Screen.SwapAndShow()
 }
 
 func (self *WifiList) OnKbdReturnBackCb() {
-  password_inputed := strings.Join(APIOBJ.PasswordPage.Textarea.MyWords,"")
-	fmt.Println("Password inputed: ",password_inputed)
+	password_inputed := strings.Join(APIOBJ.PasswordPage.Textarea.MyWords, "")
+	fmt.Println("Password inputed: ", password_inputed)
 	ip := self.GetWirelessIP()
 	if len(ip) < 6 {
 		self.ConfigWireless(password_inputed)
@@ -638,69 +634,69 @@ func (self *WifiList) OnReturnBackCb() {
 	//fmt.Println("return back")
 }
 
-func (self *WifiList) KeyDown( ev *event.Event  ) {
-  if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+func (self *WifiList) KeyDown(ev *event.Event) {
+	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 
 		//self.ShutDownConnecting()
-    //self.ShowBox("ShutDownConnecting...")
-      self.AbortedAndReturnToUpLevel()
+		//self.ShowBox("ShutDownConnecting...")
+		self.AbortedAndReturnToUpLevel()
 
-  }
+	}
 
-  if ev.Data["Key"] == UI.CurKeys["Up"] {
-    self.ScrollUp()
-    self.Screen.Draw()
-    self.Screen.SwapAndShow()
-  }
+	if ev.Data["Key"] == UI.CurKeys["Up"] {
+		self.ScrollUp()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
 
-  if ev.Data["Key"] == UI.CurKeys["Down"] {
-    self.ScrollDown()
-      self.Screen.Draw()
-      self.Screen.SwapAndShow()
-  }
+	if ev.Data["Key"] == UI.CurKeys["Down"] {
+		self.ScrollDown()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
 
-  if ev.Data["Key"] == UI.CurKeys["Enter"] { // enter to set password,enter is B on GM
-    if len(self.MyList) == 0 {
-      return
-    }
-    if self.MyList[self.PsIndex].IsActive == true {
-      var ip string
-      ip = self.GetWirelessIP()
-      self.ShowBox(ip)
-    }else {
-      self.Screen.PushCurPage()
-      self.Screen.SetCurPage(APIOBJ.PasswordPage)
+	if ev.Data["Key"] == UI.CurKeys["Enter"] { // enter to set password,enter is B on GM
+		if len(self.MyList) == 0 {
+			return
+		}
+		if self.MyList[self.PsIndex].IsActive == true {
+			var ip string
+			ip = self.GetWirelessIP()
+			self.ShowBox(ip)
+		} else {
+			self.Screen.PushCurPage()
+			self.Screen.SetCurPage(APIOBJ.PasswordPage)
 
-      thepass := self.MyList[self.PsIndex].Password
+			thepass := self.MyList[self.PsIndex].Password
 
-      fmt.Println("APIOBJ.PasswordPage.SetPassword ", thepass,len(thepass))
-      APIOBJ.PasswordPage.SetPassword(thepass)
+			fmt.Println("APIOBJ.PasswordPage.SetPassword ", thepass, len(thepass))
+			APIOBJ.PasswordPage.SetPassword(thepass)
 
-      self.Screen.Draw()
-      self.Screen.SwapAndShow()
+			self.Screen.Draw()
+			self.Screen.SwapAndShow()
 
-    }
-  }
+		}
+	}
 
-  if ev.Data["Key"] == UI.CurKeys["X"] {
-    self.Rescan(false)
-  }
+	if ev.Data["Key"] == UI.CurKeys["X"] {
+		self.Rescan(false)
+	}
 
-  if ev.Data["Key"] == UI.CurKeys["Y"] {
-    if len(self.MyList) == 0 {  
-      return
-    }
+	if ev.Data["Key"] == UI.CurKeys["Y"] {
+		if len(self.MyList) == 0 {
+			return
+		}
 		self.InfoPage.BSSID = self.MyList[self.PsIndex].Bssid
 		self.InfoPage.ESSID = self.MyList[self.PsIndex].Essid
 		self.Screen.PushPage(self.InfoPage)
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
-  }
+	}
 
 }
 
 func (self *WifiList) OnLoadCb() {
-	
+
 	ip := self.GetWirelessIP()
 	if len(ip) < 6 {
 		self.CurEssid = ""
@@ -712,71 +708,69 @@ func (self *WifiList) OnLoadCb() {
 
 func (self *WifiList) Init() {
 
-  self.PosX = self.Index * self.Screen.Width
-  self.Width = self.Screen.Width
-  self.Height = self.Screen.Height
+	self.PosX = self.Index * self.Screen.Width
+	self.Width = self.Screen.Width
+	self.Height = self.Screen.Height
 
-  self.CanvasHWND = self.Screen.CanvasHWND
+	self.CanvasHWND = self.Screen.CanvasHWND
 
-  ps := NewWifiListSelector()
-  ps.Parent = self
-  ps.Width = UI.Width - 12
+	ps := NewWifiListSelector()
+	ps.Parent = self
+	ps.Width = UI.Width - 12
 
-  self.Ps = ps
-  self.PsIndex = 0
+	self.Ps = ps
+	self.PsIndex = 0
 
-  msgbox := NewWifiListMessageBox()
-  msgbox.CanvasHWND = self.CanvasHWND
-  msgbox.Init(" ",UI.Fonts["veramono12"],nil)
-  msgbox.Parent = self
+	msgbox := NewWifiListMessageBox()
+	msgbox.CanvasHWND = self.CanvasHWND
+	msgbox.Init(" ", UI.Fonts["veramono12"], nil)
+	msgbox.Parent = self
 
-  self.MsgBox = msgbox
+	self.MsgBox = msgbox
 
-    /*
-       {
-       'fields': [],
-       'name': 'WPA 1/2 (Passphrase)',
-       'optional': [],
-       'protected': [
-       ['apsk', 'Preshared_Key'],
-       ],
-       'required': [
-       ['apsk', 'Preshared_Key'],
-       ],
-       'type': 'wpa-psk',
-       },
-     */
+	/*
+	   {
+	   'fields': [],
+	   'name': 'WPA 1/2 (Passphrase)',
+	   'optional': [],
+	   'protected': [
+	   ['apsk', 'Preshared_Key'],
+	   ],
+	   'required': [
+	   ['apsk', 'Preshared_Key'],
+	   ],
+	   'type': 'wpa-psk',
+	   },
+	*/
 
-   self.Scroller = UI.NewListScroller()
-   self.Scroller.Parent = self
-   self.Scroller.PosX = 2
-   self.Scroller.PosY = 2
-   self.Scroller.Init()
+	self.Scroller = UI.NewListScroller()
+	self.Scroller.Parent = self
+	self.Scroller.PosX = 2
+	self.Scroller.PosY = 2
+	self.Scroller.Init()
 
-   self.InfoPage = NewWifiInfoPage()
-   self.InfoPage.Screen = self.Screen
-   self.InfoPage.Name = "Wifi info"
-	 self.InfoPage.Parent = self
-   self.InfoPage.Init()
+	self.InfoPage = NewWifiInfoPage()
+	self.InfoPage.Screen = self.Screen
+	self.InfoPage.Name = "Wifi info"
+	self.InfoPage.Parent = self
+	self.InfoPage.Init()
 
 }
 
 func (self *WifiList) Draw() {
-  self.ClearCanvas()
+	self.ClearCanvas()
 
-  if len(self.MyList) == 0 {
-    return
-  }
+	if len(self.MyList) == 0 {
+		return
+	}
 
-  self.Ps.Draw()
+	self.Ps.Draw()
 
-  for _,v := range self.MyList {
-    v.Draw()
-  }  
+	for _, v := range self.MyList {
+		v.Draw()
+	}
 
-  self.Scroller.UpdateSize( len(self.MyList)*NetItemDefaultHeight, self.PsIndex*NetItemDefaultHeight)
-  self.Scroller.Draw()
+	self.Scroller.UpdateSize(len(self.MyList)*NetItemDefaultHeight, self.PsIndex*NetItemDefaultHeight)
+	self.Scroller.Draw()
 
 }
-
-
