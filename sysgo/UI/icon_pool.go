@@ -38,6 +38,7 @@ func (self *IconPool) Init() {
 				keyname := strings.Split(f.Name(), ".")
 				if len(keyname) > 1 {
 					self.Icons[keyname[0]] = image.Load(self.GameShellIconPath + "/" + f.Name())
+					
 				}
 			}
 		}
@@ -48,8 +49,32 @@ func (self *IconPool) GetImgSurf(keyname string) *sdl.Surface {
 	if _, ok := self.Icons[keyname]; ok {
 		return self.Icons[keyname]
 	} else {
-		fmt.Println("IconPool GetImgSurf ", keyname, "  failed")
-		return nil
+		icon_file := self.GameShellIconPath+"/"+keyname+".png"
+		if IsAFile(icon_file) {
+			self.Icons[keyname] = image.Load(icon_file)
+			return self.Icons[keyname]
+		}else {
+			fmt.Println("IconPool GetImgSurf ", keyname, "  failed")
+			return nil
+		}
+	}
+}
+
+func (self *IconPool) Width(keyname string) int {
+	if _,ok := self.Icons[keyname]; ok {
+		return int(self.Icons[keyname].W)
+	}else {
+		fmt.Println("IconPool lookup ", keyname, "  failed")
+		return 0
+	}
+}
+
+func (self *IconPool) Height(keyname string) int {
+	if _,ok := self.Icons[keyname]; ok {
+		return int(self.Icons[keyname].W)
+	}else {
+		fmt.Println("IconPool lookup ", keyname, "  failed")
+		return 0
 	}
 }
 

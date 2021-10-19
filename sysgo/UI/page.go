@@ -177,7 +177,8 @@ type PageInterface interface {
 
 	SetIconIndex(idx int)
 	GetIconIndex() int
-
+	RefreshPsIndex()
+	
 	Coord() (int, int)
 	NewCoord(x, y int)
 	Size() (int, int)
@@ -957,6 +958,15 @@ func (self *Page) SetPsIndex(idx int) {
 
 func (self *Page) GetPsIndex() int {
 	return self.PsIndex
+}
+
+func (self *Page) RefreshPsIndex() {
+	if len(self.MyList) == 0 {
+		self.SetPsIndex(0)
+	}
+	if self.GetPsIndex() > len(self.MyList) -1 {
+		self.SetPsIndex( len(self.MyList) - 1)
+	}
 }
 
 func (self *Page) SetIconIndex(idx int) {
