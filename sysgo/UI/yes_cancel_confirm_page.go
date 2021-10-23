@@ -8,6 +8,7 @@ import (
 
 	"github.com/cuu/gogame/event"
 	//"github.com/cuu/gogame/time"
+	
 )
 
 type Func func()
@@ -33,13 +34,13 @@ func NewYesCancelConfirmPage() *YesCancelConfirmPage {
 
 func (self *YesCancelConfirmPage) KeyDown(ev *event.Event) {
 
-	if UI.IsKeyMenuOrB(ev.Data["Key"]) {
+	if IsKeyMenuOrB(ev.Data["Key"]) {
 		self.ReturnToUpLevelPage()
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
 	}
 
-	if UI.IsKeyStartOrA(ev.Data["Key"]) {
+	if IsKeyStartOrA(ev.Data["Key"]) {
 		if self.StartOrAEvent != nil {
 			self.StartOrAEvent()
 			self.ReturnToUpLevelPage()

@@ -32,6 +32,8 @@ var (
 	CurPowerLevel = "performance"
 	Lang          = "English"
 	WifiDev       = "wlan0"
+
+	Aria2Url      = "ws://localhost:6800/jsonrpc"
 )
 
 func init() {

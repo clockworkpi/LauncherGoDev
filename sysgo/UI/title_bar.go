@@ -1,6 +1,7 @@
 package UI
 
 import (
+	"context"
 	"bufio"
 	"fmt"
 	"io/ioutil"
@@ -14,6 +15,8 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 
+	"github.com/zyxar/argo/rpc"
+	
 	"github.com/cuu/gogame/draw"
 	"github.com/cuu/gogame/font"
 	"github.com/cuu/gogame/rect"
@@ -137,6 +140,34 @@ func NewTitleBar() *TitleBar {
 
 }
 
+func (self *TitleBar) Redraw() {
+	self.UpdateDownloadStatus()
+	SwapAndShow()
+}
+
+func (self *TitleBar) UpdateDownloadStatus() {
+	
+	rpcc, err := rpc.New(context.Background(), sysgo.Aria2Url, "", gotime.Second, nil)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return
+	}
+
+	if resp,err := rpcc.GetGlobalStat();err == nil {
+		num_active,_ := strconv.Atoi(resp.NumActive)
+		
+		if num_active > 0 {
+			self.Icons["dlstatus"].SetIconIndex(1)
+		}else if num_active == 0 {
+			self.Icons["dlstatus"].SetIconIndex(0)
+		}
+	}
+	
+	
+	defer rpcc.Close()
+
+}
+
 func (self *TitleBar) RoundRobinCheck() {
 	for {
 
@@ -144,6 +175,7 @@ func (self *TitleBar) RoundRobinCheck() {
 			self.CheckBatteryStat()
 			self.CheckBluetooth()
 			self.UpdateWifiStrength()
+			self.UpdateDownloadStatus()
 			SwapAndShow()
 
 		} else if self.InLowBackLight >= 0 {
@@ -153,7 +185,7 @@ func (self *TitleBar) RoundRobinCheck() {
 				self.CheckBatteryStat()
 				self.CheckBluetooth()
 				self.UpdateWifiStrength()
-
+				self.UpdateDownloadStatus()
 				self.InLowBackLight = 0 // reset
 			}
 
@@ -416,6 +448,17 @@ func (self *TitleBar) Init(main_screen *MainScreen) {
 
 	self.Icons["round_corners"] = round_corners
 
+	dlstatus := NewTitleBarIconItem()
+	dlstatus.MyType = ICON_TYPES["STAT"]
+	dlstatus.Parent = self
+	if FileExists(self.icon_base_path + "dlstatus18.png") {
+		dlstatus.ImageName = self.icon_base_path + "dlstatus18.png"
+	}
+	dlstatus.Adjust(start_x+self.IconWidth+self.IconWidth+8, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2, self.IconWidth, self.IconHeight, 0)
+	self.Icons["dlstatus"] = dlstatus
+
+	self.UpdateDownloadStatus()
+	
 	if self.IsWifiConnectedNow() {
 		print("wifi is connected")
 	} else {

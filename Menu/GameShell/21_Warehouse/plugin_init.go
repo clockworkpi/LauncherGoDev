@@ -16,11 +16,11 @@ import (
 /******************************************************************************/
 type WareHousePlugin struct {
 	UI.Plugin
-	MainPage *WareHousePage
+	MainPage *WareHouse
 }
 
 func (self *WareHousePlugin) Init(main_screen *UI.MainScreen) {
-	self.MainPage = NewWareHousePage()
+	self.MainPage = NewWareHouse()
 	self.MainPage.SetScreen(main_screen)
 	self.MainPage.SetName("Tiny cloud")
 	self.MainPage.Init()

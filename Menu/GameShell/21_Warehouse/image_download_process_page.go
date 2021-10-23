@@ -4,13 +4,21 @@ import (
 	"fmt"
 	"os"
 	gotime "time"
-	"encoding/json"
+	"strings"
+	"path"
+	
+	//"encoding/json"
 
 	"github.com/veandco/go-sdl2/ttf"
+	"github.com/veandco/go-sdl2/sdl"
+	
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 	"github.com/cuu/gogame/image"
 	"github.com/cuu/gogame/draw"
 	"github.com/cuu/gogame/color"
+	"github.com/cuu/gogame/event"
+	"github.com/cuu/gogame/surface"
+
 	"github.com/cuu/grab"
 )
 
@@ -32,7 +40,7 @@ type ImageDownloadProcessPage struct {
 	req        *grab.Request
 	URL        string
 	Value      int
-	LoadingLabel *UI.LabelInterface
+	LoadingLabel UI.LabelInterface
 
 	Img        *sdl.Surface
 	Downloading chan bool
@@ -57,11 +65,12 @@ func (self *ImageDownloadProcessPage) Init() {
 	self.Height = self.Screen.Height
 
 	self.CanvasHWND = self.Screen.CanvasHWND
-	self.LoadingLabel = UI.NewLabel()
-	self.LoadingLabel.SetCanvasHWND(self.CanvasHWND)
-	self.LoadingLabel.Init("Loading",self.ListFontObj,nil)
-	self.LoadingLabel.SetColor(self.TextColor)
-
+	LoadingLabel := UI.NewLabel()
+	LoadingLabel.SetCanvasHWND(self.CanvasHWND)
+	LoadingLabel.Init("Loading",self.ListFontObj,nil)
+	LoadingLabel.SetColor(self.TextColor)
+	self.LoadingLabel = LoadingLabel
+	
 	self.Downloader = grab.NewClient()
 	self.Downloading = make(chan bool)
 }
@@ -77,8 +86,8 @@ func (self *ImageDownloadProcessPage) OnLoadCb() {
 	self.Screen.Draw()
 	self.Screen.SwapAndShow()
 
-	parts := strings.Split(self.URL,"/")
-	filename := strings.TrimSpace(parts[len(parts)-1])
+	//parts := strings.Split(self.URL,"/")
+	//filename := strings.TrimSpace(parts[len(parts)-1])
 	local_dir := strings.Split(self.URL,"raw.githubusercontent.com")
 	home_path, _ := os.UserHomeDir()
 	
@@ -108,7 +117,7 @@ func (self *ImageDownloadProcessPage) OnLoadCb() {
 
 func (self *ImageDownloadProcessPage) UpdateProcessInterval(ms int) {
 	
-	t := gotime.NewTicker(ms * time.Millisecond)
+	t := gotime.NewTicker(gotime.Duration(ms) * gotime.Millisecond)
 	defer t.Stop()
 
 	for {
@@ -122,7 +131,7 @@ func (self *ImageDownloadProcessPage) UpdateProcessInterval(ms int) {
 		case <-self.resp.Done:
 			// download is complete
 			break
-		case v:= <-self.Downloading
+		case v:= <-self.Downloading:
 			if v == false {
 				t.Stop()
 				break
@@ -148,8 +157,8 @@ func (self *ImageDownloadProcessPage) UpdateProcessInterval(ms int) {
 		}
 
 		dl_file := path.Join("/tmp",filename)
-		if UI.IsDirectory( Path.Base(local_menu_file) ) == false {
-			merr := os.MkdirAll( Path.Base(local_menu_file), os.ModePerm)
+		if UI.IsDirectory( path.Base(local_menu_file) ) == false {
+			merr := os.MkdirAll( path.Base(local_menu_file), os.ModePerm)
 			if merr != nil {
 				panic(merr)
 			}
@@ -173,7 +182,7 @@ func (self *ImageDownloadProcessPage) UpdateProcessInterval(ms int) {
 
 func (self *ImageDownloadProcessPage) KeyDown(ev  *event.Event) {
 
-	if IsKeyMenuOrB(ev.Data["Key")) {
+	if UI.IsKeyMenuOrB(ev.Data["Key"]) {
 
 		self.Downloading <- false
 
@@ -186,12 +195,14 @@ func (self *ImageDownloadProcessPage) KeyDown(ev  *event.Event) {
 
 func (self *ImageDownloadProcessPage) Draw() {
 	self.ClearCanvas()
-	self.LoadingLabel.NewCoord( (UI.Width - self.LoadingLabel.Width)/2,(UI.Height-44)/2);
+	w,_ := self.LoadingLabel.Size()
+	self.LoadingLabel.NewCoord( (UI.Width - w)/2,(UI.Height-44)/2);
 	self.LoadingLabel.Draw()
 	if self.Img != nil {
-		self.CanvasHWND.Blit(self.Img,draw.MidRect(UI.Width/2,(UI.Height-44)/2,
-			self.Img.Width,self.Img.Height,
-			UI.Width,UI.Height-44))
+		surface.Blit(self.CanvasHWND,
+			self.Img,
+			draw.MidRect(UI.Width/2,(UI.Height-44)/2,int(self.Img.W),int(self.Img.H),UI.Width,UI.Height-44),
+			nil)
 	}
 }
 

@@ -1,12 +1,31 @@
 package Warehouse
 
 import (
+	"context"
 	"fmt"
 	"log"
-	
+	gotime "time"
+	"strconv"
+	"strings"
+	"os"
+	"io/ioutil"
+	"path/filepath"
+	"encoding/json"
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
 	
+	"github.com/zyxar/argo/rpc"
+
+	//"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/ttf"
+	"github.com/cuu/gogame/surface"
+	"github.com/cuu/gogame/time"
+	"github.com/cuu/gogame/event"
+	"github.com/cuu/gogame/rect"
+	
+	"github.com/cuu/grab"
+	"github.com/clockworkpi/LauncherGoDev/sysgo"
+	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 )
 
 type WareHouse struct {
@@ -15,6 +34,7 @@ type WareHouse struct {
 
 	ListFontObj15 *ttf.Font
 	ListFontObj12 *ttf.Font
+	Icons  map[string]UI.IconItemInterface
 	
 	BGwidth     int
 	BGheight    int
@@ -22,9 +42,27 @@ type WareHouse struct {
 	Scroller    *UI.ListScroller
 	RemovePage *UI.YesCancelConfirmPage
 	Keyboard   *UI.Keyboard
-	
+	PreviewPage *ImageDownloadProcessPage
+	LoadHousePage *LoadHousePage
+
 	WareHouseDB string
 	MyStack  *WareHouseStack
+	
+	rpcc               rpc.Client
+	rpcSecret          string
+	rpcURI             string
+
+	Aria2DownloadingGid     string // the Downloading Gid of aria2c
+	
+	Downloading  chan bool        
+
+	Downloader *grab.Client
+	resp       *grab.Response
+	req        *grab.Request
+
+	RefreshTicker *gotime.Ticker
+	ScrolledCnt   int
+	
 }
 
 func NewWareHouse() *WareHouse {
@@ -32,12 +70,13 @@ func NewWareHouse() *WareHouse {
 	p := &WareHouse{}
 	p.ListFontObj12 = UI.MyLangManager.TrFont("notosanscjk12")
 	p.ListFontObj15 = UI.MyLangManager.TrFont("varela15")
-
+	p.Icons = make(map[string]UI.IconItemInterface)
+	
 	p.FootMsg = [5]string{"Nav","Update","Up","Back","Select"}
 
 	p.WareHouseDB = "foo.db"
 
-	p.BGWidth = 320
+	p.BGwidth = 320
 	p.BGheight = 240-24-20
 	
 	p.MyStack = NewWareHouseStack()
@@ -48,25 +87,70 @@ func NewWareHouse() *WareHouse {
 	repo["type"]  = "source"
 
 	p.MyStack.Push(repo)
+
+	p.rpcURI = sysgo.Aria2Url
 	
 	return p
 }
 
-func (self*WareHouse) UpdateProcessInterval(ms int) {
-	dirty := false
+func (self *WareHouse) GetAria2DownloadingPercent(url string) int {
 	
+	if resp,err := self.rpcc.TellActive();err == nil {
+		for _,v := range resp {
+			if uris,err := self.rpcc.GetURIs(v.Gid); err == nil {
+				for _,x := range uris {
+					if x.URI == url {
+						comp_len,_ := strconv.ParseInt(v.CompletedLength,10,64)
+						totl_len,_ := strconv.ParseInt(v.TotalLength,10,64)
+						pct := float64(comp_len)/float64(totl_len)
+						pct = pct * 100.0
+						return int(pct)
+					}
+				}	
+			}
+		}
+	}
+	return -1;///None
 }
+func (self *WareHouse) UpdateProcessInterval(ms int) {
+	dirty := false
+	for {
+		select {
+		case <- self.RefreshTicker.C:
+			for _,i := range self.MyList {
+				x := i.(*WareHouseListItem)
+				if x.Type == "launcher" || x.Type == "pico8" || x.Type == "tic80" {
+					percent := self.GetAria2DownloadingPercent(x.Value["file"])
+					if percent < 0 {
+						x.SetSmallText("")
+					}else {
+						x.SetSmallText(fmt.Sprintf("%d%%",percent))
+						dirty = true
+					}
+				}
+			}
+
+			if self.Screen.CurPage() == self && dirty == true {
+				self.Screen.Draw()
+				self.Screen.SwapAndShow()
+			}
+			dirty = false
+		}
+	}
+}
+
 
 func (self *WareHouse) SyncWareHouse() []map[string]string {
 	db, err := sql.Open("sqlite3", self.WareHouseDB)
 	if err != nil {
 		log.Fatal(err)
+		return nil
 	}
 	defer db.Close()
 
 	
 	//id,title,file,type
-	rows, err = db.Query("select * from warehouse")
+	rows, err := db.Query("select * from warehouse")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -85,7 +169,7 @@ func (self *WareHouse) SyncWareHouse() []map[string]string {
 			log.Fatal(err)
 		}
 
-		w_dbt := m = make(map[string]string)
+		w_dbt :=  make(map[string]string)
 		w_dbt["title"] = title
 		w_dbt["file"]  = file
 		w_dbt["type"] = type_
@@ -99,12 +183,13 @@ func (self *WareHouse) SyncTasks() []map[string]string {
 	db, err := sql.Open("sqlite3", self.WareHouseDB)
 	if err != nil {
 		log.Fatal(err)
+		return nil
 	}
 	defer db.Close()
 
 	
 	//id,gid,title,file,type,status,totalLength,completedLength,fav
-	rows, err = db.Query("select * from tasks")
+	rows, err := db.Query("select * from tasks")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -158,7 +243,7 @@ func (self *WareHouse) SyncList()  {
 	stk := self.MyStack.Last()
 	stk_len := self.MyStack.Length()
 
-	repos = append(repos, stk)
+	repos = append(repos, stk.(map[string]string))
 	
 	add_new_house := make(map[string]string)
 	add_new_house["title"]  = "Add new warehouse..."
@@ -180,8 +265,8 @@ func (self *WareHouse) SyncList()  {
 		repos = append(repos,add_new_house)
 	}
 
-	for i, u := range repos {
-		li := WareHouseListItem{}
+	for _, u := range repos {
+		li := &WareHouseListItem{}
 		li.Parent = self
 		li.PosX = start_x
 		li.PosY = start_y + last_height
@@ -190,7 +275,8 @@ func (self *WareHouse) SyncList()  {
 		li.Fonts["small"] = self.ListFontObj12
 		li.ReadOnly = true
 		li.Type = u["type"]
-		li.init(u["title"])
+		li.Value = u
+		li.Init(u["title"])
 
 		if stk_len > 1 {
 			remote_file_url := u["file"]
@@ -240,8 +326,8 @@ func (self *WareHouse) Init()  {
 		self.Width = self.Screen.Width //equal to screen width
 		self.Height = self.Screen.Height
 
-		done := NewIconItem()
-		done.ImgSurf = UI.MyIconPool.GetImgSurf()
+		done := UI.NewIconItem()
+		done.ImgSurf = UI.MyIconPool.GetImgSurf("done")
 		done.MyType = UI.ICON_TYPES["STAT"]
 		done.Parent = self
 
@@ -252,8 +338,6 @@ func (self *WareHouse) Init()  {
 		self.Ps = ps
 		self.PsIndex = 0
 
-		self.SyncList()
-
 		self.Scroller = UI.NewListScroller()
 		self.Scroller.Parent = self
 		self.Scroller.PosX = self.Width - 10
@@ -261,9 +345,607 @@ func (self *WareHouse) Init()  {
 		self.Scroller.Init()
 		self.Scroller.SetCanvasHWND(self.CanvasHWND)
 
+		self.RemovePage = UI.NewYesCancelConfirmPage()
+		self.RemovePage.Screen = self.Screen
+		self.RemovePage.StartOrAEvent = self.RemoveGame
+		self.RemovePage.Name = "Are you sure?"
 		
+		self.Keyboard = UI.NewKeyboard()
+		self.Keyboard.Name = "Enter warehouse addr"
+		self.Keyboard.FootMsg = [5]string{"Nav.","Add","ABC","Backspace","Enter"}
+		self.Keyboard.Screen = self.Screen
+		self.Keyboard.Init()
+
+		self.PreviewPage = NewImageDownloadProcessPage()
+		self.PreviewPage.Screen = self.Screen
+		self.PreviewPage.Name ="Preview"
+		self.PreviewPage.Init()
+
+		self.LoadHousePage = NewLoadHousePage()
+		self.LoadHousePage.Screen = self.Screen
+		self.LoadHousePage.Name = "Warehouse"
+		self.LoadHousePage.Parent = self
+		self.LoadHousePage.Init()
 		
+		rpcc, err := rpc.New(context.Background(),
+			self.rpcURI,
+			self.rpcSecret,
+			gotime.Second, AppNotifier{Parent:self})
+		
+    if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(2)
+    }
+		self.rpcc = rpcc
+		self.Downloader = grab.NewClient()
+		self.Downloading = make(chan bool)
+
+		self.RefreshTicker = gotime.NewTicker(500 * gotime.Millisecond)
+		//self.RefreshTicker.Stop()
+		go self.UpdateProcessInterval(500)
 		
 	}
 
+}
+
+func (self *WareHouse) ResetHouse() {
+	if self.PsIndex > len(self.MyList) -1 {
+		return
+	}
+	cur_li := self.MyList[self.PsIndex].(*WareHouseListItem)
+	home_path, _ := os.UserHomeDir()
+	
+	if cur_li.Value["type"] == "source" {
+		remote_file_url := cur_li.Value["file"]
+		parts := strings.Split(remote_file_url,"raw.githubusercontent.com")
+		menu_file := parts[1]
+		local_menu_file := fmt.Sprintf("%s/aria2download%s",home_path,menu_file)
+		local_menu_file_path := filepath.Dir(local_menu_file)
+		
+		fmt.Println(local_menu_file)
+		local_jsons,err := filepath.Glob(local_menu_file_path+"/**/*.json")
+		if err != nil {
+			fmt.Println(err)
+		}
+		if UI.FileExists(local_menu_file) {
+			os.Remove(local_menu_file)
+		}
+		if UI.FileExists(local_menu_file+".aria2") {
+			os.Remove(local_menu_file+".aria2")
+		}
+
+		for _,x :=  range local_jsons {
+			os.Remove(x)
+		}
+
+		self.Screen.MsgBox.SetText("Done")
+		self.Screen.MsgBox.Draw()
+		self.Screen.SwapAndShow()
+		
+	}
+}
+
+func (self *WareHouse) LoadHouse() {
+	if self.PsIndex > len(self.MyList) -1 {
+		return
+	}
+
+	cur_li := self.MyList[self.PsIndex].(*WareHouseListItem)
+	if cur_li.Value["type"] == "source" || cur_li.Value["type"] == "dir" {
+		self.LoadHousePage.URL = cur_li.Value["file"]
+		self.Screen.PushPage(self.LoadHousePage)
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
+	
+}
+
+func (self *WareHouse) PreviewGame() {
+	if self.PsIndex > len(self.MyList) -1 {
+		return
+	}
+
+	cur_li := self.MyList[self.PsIndex].(*WareHouseListItem)
+
+	if cur_li.Value["type"] == "launcher" ||
+		cur_li.Value["type"] == "pico8" ||
+		cur_li.Value["type"] == "tic80" {
+
+		if _,ok := cur_li.Value["shots"];ok {
+			fmt.Println(cur_li.Value["shots"])
+			self.PreviewPage.URL = cur_li.Value["shots"]
+			self.Screen.PushPage(self.PreviewPage)
+			self.Screen.Draw()
+			self.Screen.SwapAndShow()
+		}
+	}
+}
+//check if an Url is downloading in aria2c
+func (self *WareHouse) UrlIsDownloading(url string) (string,bool) {
+	if resp,err := self.rpcc.TellActive();err == nil {
+		for _,v := range resp {
+			if uris,err := self.rpcc.GetURIs(v.Gid);err == nil {
+				for _,x := range uris {
+					if x.URI == url {
+						return v.Gid,true
+					}
+				}
+			}
+		}
+	}
+	return "",false
+}
+
+func (self *WareHouse) RemoveGame() {
+	if self.PsIndex > len(self.MyList) -1 {
+		return
+	}
+	cur_li := self.MyList[self.PsIndex].(*WareHouseListItem)
+
+	fmt.Println("Remove cur_li._Value",cur_li.Value)
+	home_path, _ := os.UserHomeDir()
+	
+	if cur_li.Value["type"] == "source" {
+		db, err := sql.Open("sqlite3", self.WareHouseDB)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
+		_, err = db.Exec(fmt.Sprintf("DELETE FROM warehouse WHERE file = '%s'",
+			cur_li.Value["file"]))
+		
+		if err != nil {
+			log.Fatal(err)
+		}
+		
+	} else if cur_li.Value["type"] == "launcher" ||
+		cur_li.Value["type"] == "pico8" ||
+		cur_li.Value["type"] == "tic80" {
+
+		remote_file_url := cur_li.Value["file"]
+		parts := strings.Split(remote_file_url,"raw.githubusercontent.com")
+		menu_file := parts[1]
+		local_menu_file := fmt.Sprintf("%s/aria2download%s",home_path,menu_file)
+		local_menu_file_path := filepath.Dir(local_menu_file)
+
+		gid,ret := self.UrlIsDownloading(remote_file_url)
+		if ret == true {
+			self.rpcc.Remove(gid)
+		}
+
+		if UI.FileExists(local_menu_file)  {
+			os.Remove(local_menu_file)
+		}
+		if UI.FileExists(local_menu_file+".aria2") {
+			os.Remove(local_menu_file+".aria2")
+		}
+		if UI.FileExists(filepath.Join(local_menu_file_path,cur_li.Value["title"])) {
+			os.RemoveAll(filepath.Join(local_menu_file_path,cur_li.Value["title"]))
+		}
+		
+	}
+}
+
+func (self *WareHouse) Click() {
+	if self.PsIndex > len(self.MyList) -1 {
+		return
+	}
+	cur_li := self.MyList[self.PsIndex].(*WareHouseListItem)
+	home_path, _ := os.UserHomeDir()
+	fmt.Println("cur_li._Value",cur_li.Value)
+
+	if cur_li.Value["type"] == "source" || cur_li.Value["type"] == "dir" {
+		remote_file_url := cur_li.Value["file"]
+		parts := strings.Split(remote_file_url,"raw.githubusercontent.com")//assume master branch
+		menu_file := parts[1]
+		local_menu_file := fmt.Sprintf("%s/aria2download%s",home_path,menu_file)
+		fmt.Println(local_menu_file)
+		if UI.FileExists(local_menu_file) == false {
+			self.LoadHouse()
+		}else {
+			//read the local_menu_file,push into stack,display menu
+			self.Aria2DownloadingGid = ""
+			var result WareHouseIndex
+			jsonFile, err := os.Open(local_menu_file)
+			
+			if err != nil {
+        fmt.Println(err)
+				self.Screen.MsgBox.SetText("Open House failed")
+				self.Screen.MsgBox.Draw()
+				self.Screen.SwapAndShow()
+				
+			}else {
+				defer jsonFile.Close()
+				
+				byteValue, _ := ioutil.ReadAll(jsonFile)
+				json.Unmarshal(byteValue, &result)
+				
+				for _, repo := range result.List {
+					self.MyStack.Push(repo)
+				}
+
+				self.SyncList()
+				self.Screen.Draw()
+				self.Screen.SwapAndShow()
+			}
+
+			
+		}
+	} else if cur_li.Value["type"] == "add_house" {
+		fmt.Println("show keyboard to add warehouse")
+		self.Screen.PushCurPage()
+		self.Screen.SetCurPage(self.Keyboard)
+		
+	} else {
+		//download the game probably
+		remote_file_url := cur_li.Value["file"]
+		parts := strings.Split(remote_file_url,"raw.githubusercontent.com")//assume master branch
+		menu_file := parts[1]
+		local_menu_file := fmt.Sprintf("%s/aria2download%s",home_path,menu_file)
+
+		if UI.FileExists(local_menu_file) == false {
+			gid,ret := self.UrlIsDownloading(remote_file_url)
+			if ret == false {
+				gid,err := self.rpcc.AddURI([]string{remote_file_url},"out:"+menu_file)
+				if err != nil {
+					log.Fatal(err)
+				}else {
+					self.Aria2DownloadingGid = gid
+				}
+			} else {
+				fmt.Println(self.rpcc.TellStatus(gid,"status","totalLength","completedLength"))
+				self.Screen.MsgBox.SetText("Getting the game now")
+				self.Screen.MsgBox.Draw()
+				self.Screen.SwapAndShow()
+				time.BlockDelay(800)
+				self.Screen.TitleBar.Redraw()
+			}
+		}else {
+			fmt.Println("file downloaded") //maybe check it if is installed fst,then execute it
+			if cur_li.Value["type"] == "launcher" && cur_li.ReadOnly == false {
+				local_menu_file_path := filepath.Dir(local_menu_file)
+				game_sh := filepath.Join(local_menu_file_path,cur_li.Value["title"],cur_li.Value["title"]+".sh")
+
+				fmt.Println("run game: ",game_sh, UI.FileExists(game_sh))
+				self.Screen.RunEXE(game_sh)
+					
+			}
+			if cur_li.Value["type"] == "pico8" &&  cur_li.ReadOnly == false {
+				if UI.FileExists("/home/cpi/games/PICO-8/pico-8/pico8") {
+					game_sh := "/home/cpi/launcher/Menu/GameShell/50_PICO-8/PICO-8.sh"
+					self.Screen.RunEXE(game_sh) //pico8 manages its games self
+				}
+			}
+			if cur_li.Value["type"] == "tic80" && cur_li.ReadOnly == false {
+				game_sh := "/home/cpi/apps/Menu/51_TIC-80/TIC-80.sh"
+				self.Screen.RunEXE(game_sh)
+			}
+		}
+	}
+}
+
+func (self *WareHouse) OnAria2CompleteCb(gid string) {
+	fmt.Println("OnAria2CompleteCb", gid)
+	self.SyncList()
+	self.Screen.Draw()
+	self.Screen.SwapAndShow()
+	
+	if gid == self.Aria2DownloadingGid {
+		self.Aria2DownloadingGid = ""
+	}
+}
+
+func (self *WareHouse) raw_github_com(url string) (bool,string) {
+	if strings.HasPrefix(url,"github.com") == false {
+		return false,""
+	}
+
+	parts := strings.Split(url,"/")
+
+	if len(parts) != 3 {
+		return false, ""
+	}
+	str := []string{"https://raw.githubusercontent.com",
+		parts[1],
+		parts[2],
+		"master/index.json"}
+	
+	return true,strings.Join(str,"/")
+	
+}
+
+	
+func (self *WareHouse)  OnKbdReturnBackCb() {
+	inputed:= strings.Join(self.Keyboard.Textarea.MyWords,"")
+	inputed = strings.Replace(inputed,"http://","",-1)
+	inputed = strings.Replace(inputed,"https://","",-1)
+
+	if strings.HasSuffix(inputed,".git") {
+		inputed = inputed[:len(inputed)-4]
+	}
+	if strings.HasSuffix(inputed,"/") {
+		inputed = inputed[:len(inputed)-1]
+	}
+
+	fmt.Println("last: ",inputed)
+	db, err := sql.Open("sqlite3", self.WareHouseDB)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	defer db.Close()
+	
+	stmt, err := db.Prepare("SELECT count(*) FROM warehouse WHERE title= ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	var cnt_str string
+	cnt := 0
+	err = stmt.QueryRow(inputed).Scan(&cnt_str)
+	if err != nil {
+		log.Fatal(err)
+	}else {
+		cnt,_= strconv.Atoi(cnt_str)
+	}
+	
+	if cnt > 0 {
+		self.Screen.MsgBox.SetText("Warehouse existed")
+		self.Screen.MsgBox.Draw()
+		self.Screen.SwapAndShow()
+	} else {
+		if strings.Contains(inputed,"github.com/clockworkpi/warehouse") {
+			self.Screen.MsgBox.SetText("Warehouse existed")
+			self.Screen.MsgBox.Draw()
+			self.Screen.SwapAndShow()
+		}else {
+			valid_,_url := self.raw_github_com(inputed)
+			
+			if valid_ == false {
+				self.Screen.MsgBox.SetText("Warehouse url error!")
+				self.Screen.MsgBox.Draw()
+				self.Screen.SwapAndShow()
+			} else {
+				sql_insert := fmt.Sprintf("INSERT INTO warehouse(title,file,type) VALUES('%s','%s','source');",
+					inputed,_url)
+				_, err = db.Exec(sql_insert)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				self.SyncList()
+				self.Screen.Draw()
+				self.Screen.SwapAndShow()
+			}
+		}
+	}	
+}
+
+func (self *WareHouse) OnLoadCb() {
+
+	if self.MyStack.Length() == 1 {
+		self.FootMsg[2] = "Remove"
+		self.FootMsg[1] = "Update"
+	}else {
+		self.FootMsg[2] = "Remove"
+		self.FootMsg[1] = "Preview"		
+	}
+
+	self.RefreshTicker = gotime.NewTicker(500 * gotime.Millisecond)
+	
+	self.SyncList()
+}
+
+
+func (self *WareHouse)  OnReturnBackCb() {
+	if self.MyStack.Length() == 1 {
+		self.FootMsg[2] = "Remove"
+		self.FootMsg[1] = "Update"
+	}else {
+		self.FootMsg[2] = "Remove"
+		self.FootMsg[1] = "Preview"
+	}
+
+	self.SyncList()
+	self.RestoreScrolled()
+	
+	self.Screen.Draw()
+	self.Screen.SwapAndShow()
+	
+}
+
+func (self *WareHouse) ScrollDown() {
+	if len(self.MyList) == 0 {
+		return
+	}
+	self.PsIndex += 1
+
+	if self.PsIndex >= len(self.MyList) {
+		self.PsIndex = len(self.MyList) - 1
+	}
+
+	cur_li := self.MyList[self.PsIndex]
+	x, y := cur_li.Coord()
+	_, h := cur_li.Size()
+	
+	if y+h > self.Height {
+		for i, _ := range self.MyList {
+			x, y = self.MyList[i].Coord()
+			_, h = self.MyList[i].Size()
+			self.MyList[i].NewCoord(x, y-h)
+		}
+		
+		self.ScrolledCnt -= h
+	}
+}
+
+func (self *WareHouse) ScrollUp() {
+	if len(self.MyList) == 0 {
+		return
+	}
+
+	self.PsIndex -= 1
+
+	if self.PsIndex < 0 {
+		self.PsIndex = 0
+	}
+
+	cur_li := self.MyList[self.PsIndex]
+	x, y := cur_li.Coord()
+	_, h := cur_li.Size()
+	if y < 0 {
+		for i, _ := range self.MyList {
+			x, y = self.MyList[i].Coord()
+			_, h = self.MyList[i].Size()
+			self.MyList[i].NewCoord(x, y+h)
+		}
+
+		self.ScrolledCnt += h
+	}
+
+}
+
+func (self *WareHouse) RestoreScrolled() {
+	for i,_ := range self.MyList {
+		x,y := self.MyList[i].Coord()
+		self.MyList[i].NewCoord(x, y+ self.ScrolledCnt)
+	}
+}
+
+func (self *WareHouse) KeyDown(ev *event.Event) {
+	if UI.IsKeyMenuOrB(ev.Data["Key"]) {
+		if self.MyStack.Length() > 1 {
+			self.MyStack.Pop()
+			if self.MyStack.Length() == 1 {
+				self.FootMsg[2] = "Remove"
+				self.FootMsg[1] = "Update"
+				
+			}else {
+				self.FootMsg[2] = "Remove"
+				self.FootMsg[1] = "Preview"
+				if self.MyStack.Length() == 2 {
+					self.FootMsg[2] = ""
+					self.FootMsg[1] = ""
+				}
+			}
+
+			self.SyncList()
+			self.Screen.Draw()
+			self.Screen.SwapAndShow()
+		}else if self.MyStack.Length() == 1 {
+			self.ReturnToUpLevelPage()
+			self.Screen.Draw()
+			self.Screen.SwapAndShow()
+			self.RefreshTicker.Stop()
+		}
+	}
+	
+	if UI.IsKeyStartOrA(ev.Data["Key"]) {
+		self.Click()
+		if self.MyStack.Length() == 1 {
+			self.FootMsg[2] = "Remove"
+			self.FootMsg[1] = "Update"
+		}else {
+			self.FootMsg[2] = "Remove"
+			self.FootMsg[1] = "Preview"
+			if self.MyStack.Length() == 2 {
+				self.FootMsg[2] = ""
+				self.FootMsg[1] = ""
+			}
+		}
+
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
+
+	if ev.Data["Key"] == UI.CurKeys["X"] {
+		if self.PsIndex <= len(self.MyList) -1 {
+			cur_li := self.MyList[self.PsIndex].(*WareHouseListItem)
+			if cur_li.Type != "dir" {
+				if self.MyStack.Length() ==1 && self.PsIndex == 0 {
+					//pass
+				}else {
+					self.Screen.PushPage(self.RemovePage)
+					self.RemovePage.StartOrAEvent = self.RemoveGame
+					self.Screen.Draw()
+					self.Screen.SwapAndShow()
+				}
+			}
+			return
+		}
+		self.SyncList()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
+
+	if ev.Data["Key"] == UI.CurKeys["Y"] {
+		if self.MyStack.Length() == 1 {
+			self.ResetHouse()
+		}else {
+			self.PreviewGame()
+		}
+	}
+
+	if ev.Data["Key"] == UI.CurKeys["Up"] {
+		self.ScrollUp()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
+
+	if ev.Data["Key"] == UI.CurKeys["Down"] {
+		self.ScrollDown()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}	
+	
+}
+
+func (self *WareHouse) Draw() {
+
+	self.ClearCanvas()
+	if len(self.MyList) == 0 {
+		return
+	} else {
+		if len(self.MyList) * UI.DefaultInfoPageListItemHeight > self.Height {
+			_,h := self.Ps.Size()
+			self.Ps.NewSize(self.Width - 11,h)
+			self.Ps.Draw()
+			for _,v := range self.MyList {
+				_,y := v.Coord()
+				if y > self.Height + self.Height/2 {
+					break
+				}
+				if y < 0 {
+					continue
+				}
+				v.Draw()
+			}
+
+			self.Scroller.UpdateSize(len(self.MyList)*UI.DefaultInfoPageListItemHeight,self.PsIndex*UI.DefaultInfoPageListItemHeight)
+			self.Scroller.Draw()
+		}else {
+			_,h := self.Ps.Size()
+			self.Ps.NewSize(self.Width,h)
+			self.Ps.Draw()
+			for _,v := range self.MyList {
+				_,y := v.Coord()
+				if y > self.Height + self.Height/2 {
+					break
+				}
+				if y < 0 {
+					continue
+				}
+				v.Draw()
+			}	
+		}	
+	}
+	
+	if self.HWND != nil {
+		surface.Fill(self.HWND, UI.MySkinManager.GiveColor("White"))
+		rect_ := rect.Rect(self.PosX, self.PosY, self.Width, self.Height)
+		surface.Blit(self.HWND, self.CanvasHWND, &rect_, nil)
+	}
+	
+	
 }

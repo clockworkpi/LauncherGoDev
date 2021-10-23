@@ -3,14 +3,18 @@ package Warehouse
 import (
 	"fmt"
 	"os"
+	"io/ioutil"
 	gotime "time"
+	"strings"
 	"encoding/json"
+	"path"
 	
 	"github.com/veandco/go-sdl2/ttf"
 	
-	"github.com/cuu/gogame/image"
-	"github.com/cuu/gogame/draw"
+	//"github.com/cuu/gogame/image"
+	//"github.com/cuu/gogame/draw"
 	"github.com/cuu/gogame/color"
+	"github.com/cuu/gogame/event"
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 	"github.com/cuu/grab"
 )
@@ -27,7 +31,7 @@ type LoadHousePage struct {
 	
 	URL  string
 	Downloading chan bool
-	LoadingLabel *UI.LabelInterface
+	LoadingLabel UI.LabelInterface
 
 	Parent *WareHouse
 }
@@ -69,8 +73,8 @@ func (self *LoadHousePage) OnLoadCb() {
 	self.Screen.Draw()
 	self.Screen.SwapAndShow()
 
-	parts := strings.Split(self.URL,"/")
-	filename := strings.TrimSpace(parts[len(parts)-1])
+	//parts := strings.Split(self.URL,"/")
+	//filename := strings.TrimSpace(parts[len(parts)-1])
 	local_dir := strings.Split(self.URL,"raw.githubusercontent.com")
 	home_path, _ := os.UserHomeDir()
 	
@@ -88,7 +92,7 @@ func (self *LoadHousePage) OnLoadCb() {
 			}
 			defer jsonFile.Close()
 			byteValue, _ := ioutil.ReadAll(jsonFile)
-			json.Unmarshal([]byte(JSON), &result)
+			json.Unmarshal(byteValue, &result)
 			
 			for _, repo := range result.List {
 				self.Parent.MyStack.Push(repo)
@@ -98,7 +102,7 @@ func (self *LoadHousePage) OnLoadCb() {
 		} else {
 			self.req,_ = grab.NewRequest("/tmp",self.URL)
 			self.resp = self.Downloader.Do(self.req)
-
+	
 			for len(self.Downloading) > 0 {
 				<-self.Downloading
 			}
@@ -111,7 +115,7 @@ func (self *LoadHousePage) OnLoadCb() {
 }
 
 func (self *LoadHousePage) UpdateProcessInterval(ms int) {
-	t := gotime.NewTicker(ms * time.Millisecond)
+	t := gotime.NewTicker(gotime.Duration(ms) * gotime.Millisecond)
 	defer t.Stop()
 
 	for {
@@ -125,7 +129,7 @@ func (self *LoadHousePage) UpdateProcessInterval(ms int) {
 		case <-self.resp.Done:
 			// download is complete
 			break
-		case v:= <-self.Downloading
+		case v:= <-self.Downloading:
 			if v == false {
 				t.Stop()
 				break
@@ -133,7 +137,7 @@ func (self *LoadHousePage) UpdateProcessInterval(ms int) {
 		}		
 	}
 	
-	dst_filename := self.resp.Filename
+	//dst_filename := self.resp.Filename
 
 	if err := self.resp.Err(); err == nil {//download successfully
 		home_path, _ := os.UserHomeDir()
@@ -150,8 +154,8 @@ func (self *LoadHousePage) UpdateProcessInterval(ms int) {
 				home_path,menu_file)
 		}
 		dl_file := path.Join("/tmp",filename)
-		if UI.IsDirectory( Path.Base(local_menu_file) ) == false {
-			merr := os.MkdirAll( Path.Base(local_menu_file), os.ModePerm)
+		if UI.IsDirectory( path.Base(local_menu_file) ) == false {
+			merr := os.MkdirAll( path.Base(local_menu_file), os.ModePerm)
 			if merr != nil {
 				panic(merr)
 			}
@@ -166,7 +170,7 @@ func (self *LoadHousePage) UpdateProcessInterval(ms int) {
 		}
 		defer jsonFile.Close()
 		byteValue, _ := ioutil.ReadAll(jsonFile)
-		json.Unmarshal([]byte(JSON), &result)
+		json.Unmarshal(byteValue, &result)
 		
 		for _, repo := range result.List {
 			self.Parent.MyStack.Push(repo)
@@ -184,11 +188,26 @@ func (self *LoadHousePage) UpdateProcessInterval(ms int) {
 
 func (self *LoadHousePage) Leave() {
 
-	self.Download <- false
+	self.Downloading <- false
 	
 	self.ReturnToUpLevelPage()
 	self.Screen.Draw()
 	self.Screen.SwapAndShow()
 	self.URL = ""
+	
+}
+
+func (self *LoadHousePage) KeyDown(ev *event.Event) {
+	if UI.IsKeyMenuOrB(ev.Data["Key"]) {
+		self.Leave()
+	}
+	
+}
+
+func (self *LoadHousePage) Draw() {
+	self.ClearCanvas()
+	w,_ := self.LoadingLabel.Size()
+	self.LoadingLabel.NewCoord( (UI.Width - w)/2,(UI.Height-44)/2);
+	self.LoadingLabel.Draw()
 	
 }

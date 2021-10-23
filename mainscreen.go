@@ -16,17 +16,21 @@ import (
 	"github.com/go-ini/ini"
 
 	"github.com/yookoala/realpath"
-
-	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings"
-	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/98_TinyCloud"
-	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/99_PowerOFF"
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI/Emulator"
+	
+	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings"
+	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/21_Warehouse"
+	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/98_TinyCloud"
+	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/99_PowerOFF"
+	
+	
 )
 
 var (
 	UIPluginList = []*UI.UIPlugin{
 		&UI.UIPlugin{1, "", "Menu/GameShell/10_Settings", "Settings", &Settings.APIOBJ},
+		&UI.UIPlugin{1, "", "Menu/GameShell/21_Warehouse", "Warehouse", &Warehouse.APIOBJ},
 		&UI.UIPlugin{1, "", "Menu/GameShell/98_TinyCloud", "TinyCloud", &TinyCloud.APIOBJ},
 		&UI.UIPlugin{1, "", "Menu/GameShell/99_PowerOFF", "PowerOFF", &PowerOFF.APIOBJ},
 	}
