@@ -21,6 +21,10 @@ import (
 	"github.com/cuu/grab"
 )
 
+type WareHouseIndex struct {
+    List []map[string]string `json:"list"`
+}
+
 type LoadHousePage struct {
 	UI.Page
 	ListFontObj *ttf.Font

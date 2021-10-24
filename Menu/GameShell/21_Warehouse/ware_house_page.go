@@ -373,7 +373,7 @@ func (self *WareHouse) Init()  {
 		self.Keyboard.FootMsg = [5]string{"Nav.","Add","ABC","Backspace","Enter"}
 		self.Keyboard.Screen = self.Screen
 		self.Keyboard.Init()
-		self.Keyboard.SetPassword("github.com/cuu/warehouse")
+		self.Keyboard.SetPassword("github.com/clockworkpi/warehouse")
 		self.Keyboard.Caller = self
 		
 		self.PreviewPage = NewImageDownloadProcessPage()
