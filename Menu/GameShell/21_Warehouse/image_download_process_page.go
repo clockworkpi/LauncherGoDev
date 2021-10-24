@@ -72,9 +72,16 @@ func (self *ImageDownloadProcessPage) Init() {
 	self.LoadingLabel = LoadingLabel
 	
 	self.Downloader = grab.NewClient()
-	self.Downloading = make(chan bool)
+	self.Downloading = make(chan bool,1)
 }
 
+func (self *ImageDownloadProcessPage) SetDownloading(v bool) {
+	for len(self.Downloading) > 0 {
+		<- self.Downloading
+	}
+
+	self.Downloading <- v
+}
 
 func (self *ImageDownloadProcessPage) OnLoadCb() {
 
@@ -104,10 +111,8 @@ func (self *ImageDownloadProcessPage) OnLoadCb() {
 			
 			self.req,_ = grab.NewRequest("/tmp",self.URL)
 			self.resp = self.Downloader.Do(self.req)
-			for len(self.Downloading) > 0 {
-				<-self.Downloading
-			}
-			self.Downloading <- true
+			
+			self.SetDownloading(true)
 			
 			go self.UpdateProcessInterval(400)
 			
@@ -116,10 +121,10 @@ func (self *ImageDownloadProcessPage) OnLoadCb() {
 }
 
 func (self *ImageDownloadProcessPage) UpdateProcessInterval(ms int) {
-	
+	ms_total := 0
 	t := gotime.NewTicker(gotime.Duration(ms) * gotime.Millisecond)
 	defer t.Stop()
-
+L:
 	for {
 		select {
 		case <-t.C:
@@ -127,14 +132,17 @@ func (self *ImageDownloadProcessPage) UpdateProcessInterval(ms int) {
 				self.resp.BytesComplete(),
 				self.resp.Size,
 				100*self.resp.Progress())
-
+			ms_total += ms
+			if(ms_total > 10000) {
+				fmt.Println("Get preview image timeout")
+				break L
+			}
 		case <-self.resp.Done:
 			// download is complete
-			break
+			break L
 		case v:= <-self.Downloading:
 			if v == false {
-				t.Stop()
-				break
+				break L
 			}
 		}
 	}
@@ -184,7 +192,7 @@ func (self *ImageDownloadProcessPage) KeyDown(ev  *event.Event) {
 
 	if UI.IsKeyMenuOrB(ev.Data["Key"]) {
 
-		self.Downloading <- false
+		self.SetDownloading(false)
 
 		self.ReturnToUpLevelPage()
 		self.Screen.Draw()

@@ -1,7 +1,7 @@
 package UI
 
 import (
-	//"fmt"
+	"fmt"
 	//"os"
 	//"path/filepath"
 	//"strings"
@@ -24,7 +24,8 @@ func NewYesCancelConfirmPage() *YesCancelConfirmPage {
 	p := &YesCancelConfirmPage{}
 	p.FootMsg = [5]string{"Nav","","","Cancel","Yes"}
 	p.ConfirmText = MyLangManager.Tr("Awaiting Input")
-
+	p.ListFont = MyLangManager.TrFont("veramono20")
+	
 	p.StartOrAEvent = nil
 	p.KeyXEvent = nil
 	p.KeyYEvent = nil
@@ -42,8 +43,11 @@ func (self *YesCancelConfirmPage) KeyDown(ev *event.Event) {
 
 	if IsKeyStartOrA(ev.Data["Key"]) {
 		if self.StartOrAEvent != nil {
+			fmt.Println("StartOrA yes or no")
 			self.StartOrAEvent()
 			self.ReturnToUpLevelPage()
+		}else {
+			fmt.Println("StartOrA nil")
 		}
 	}
 

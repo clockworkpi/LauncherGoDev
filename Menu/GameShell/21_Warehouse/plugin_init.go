@@ -19,10 +19,12 @@ type WareHousePlugin struct {
 	MainPage *WareHouse
 }
 
+var aria2dl_folder = "%s/aria2downloads%s"
+
 func (self *WareHousePlugin) Init(main_screen *UI.MainScreen) {
 	self.MainPage = NewWareHouse()
 	self.MainPage.SetScreen(main_screen)
-	self.MainPage.SetName("Tiny cloud")
+	self.MainPage.SetName("Warehouse")
 	self.MainPage.Init()
 }
 

@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"encoding/json"
+	"reflect"
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
 	
@@ -228,6 +229,12 @@ func (self *WareHouse) SyncTasks() []map[string]string {
 	return ret	
 }
 
+func IsSlice(v interface{}) bool {
+	if reflect.TypeOf(v).Kind() == reflect.Slice || reflect.TypeOf(v).Kind() == reflect.Array {
+		return true
+	}
+	return false
+}
 
 func (self *WareHouse) SyncList()  {
 
@@ -240,10 +247,17 @@ func (self *WareHouse) SyncList()  {
 
 	var repos []map[string]string
 
+	
+	fmt.Printf("SyncList: %+v\n", self.MyStack)
+	
 	stk := self.MyStack.Last()
 	stk_len := self.MyStack.Length()
 
-	repos = append(repos, stk.(map[string]string))
+	if IsSlice(stk) {
+		repos = append(repos, stk.([]map[string]string)...)
+	}else {
+		repos = append(repos, stk.(map[string]string))
+	}
 	
 	add_new_house := make(map[string]string)
 	add_new_house["title"]  = "Add new warehouse..."
@@ -266,7 +280,8 @@ func (self *WareHouse) SyncList()  {
 	}
 
 	for _, u := range repos {
-		li := &WareHouseListItem{}
+		fmt.Printf("%+v\n",u)
+		li := NewWareHouseListItem()
 		li.Parent = self
 		li.PosX = start_x
 		li.PosY = start_y + last_height
@@ -285,7 +300,8 @@ func (self *WareHouse) SyncList()  {
 			if err != nil {
 				log.Fatal( err )
 			}
-			local_menu_file := fmt.Sprintf("%s/aria2download%s",home_path,menu_file)
+			local_menu_file := fmt.Sprintf(aria2dl_folder,home_path,menu_file)
+			fmt.Println("for loop ",local_menu_file)
 			if UI.FileExists(local_menu_file) {
 				li.ReadOnly = false
 			}else {
@@ -350,12 +366,16 @@ func (self *WareHouse) Init()  {
 		self.RemovePage.StartOrAEvent = self.RemoveGame
 		self.RemovePage.Name = "Are you sure?"
 		
+		self.RemovePage.Init()
+		
 		self.Keyboard = UI.NewKeyboard()
 		self.Keyboard.Name = "Enter warehouse addr"
 		self.Keyboard.FootMsg = [5]string{"Nav.","Add","ABC","Backspace","Enter"}
 		self.Keyboard.Screen = self.Screen
 		self.Keyboard.Init()
-
+		self.Keyboard.SetPassword("github.com/cuu/warehouse")
+		self.Keyboard.Caller = self
+		
 		self.PreviewPage = NewImageDownloadProcessPage()
 		self.PreviewPage.Screen = self.Screen
 		self.PreviewPage.Name ="Preview"
@@ -399,7 +419,7 @@ func (self *WareHouse) ResetHouse() {
 		remote_file_url := cur_li.Value["file"]
 		parts := strings.Split(remote_file_url,"raw.githubusercontent.com")
 		menu_file := parts[1]
-		local_menu_file := fmt.Sprintf("%s/aria2download%s",home_path,menu_file)
+		local_menu_file := fmt.Sprintf(aria2dl_folder,home_path,menu_file)
 		local_menu_file_path := filepath.Dir(local_menu_file)
 		
 		fmt.Println(local_menu_file)
@@ -467,11 +487,14 @@ func (self *WareHouse) UrlIsDownloading(url string) (string,bool) {
 			if uris,err := self.rpcc.GetURIs(v.Gid);err == nil {
 				for _,x := range uris {
 					if x.URI == url {
+						fmt.Println(x.URI," ",url)
 						return v.Gid,true
 					}
 				}
 			}
 		}
+	}else {
+		log.Fatal(err)
 	}
 	return "",false
 }
@@ -480,6 +503,7 @@ func (self *WareHouse) RemoveGame() {
 	if self.PsIndex > len(self.MyList) -1 {
 		return
 	}
+	fmt.Println("RemoveGame")
 	cur_li := self.MyList[self.PsIndex].(*WareHouseListItem)
 
 	fmt.Println("Remove cur_li._Value",cur_li.Value)
@@ -505,7 +529,7 @@ func (self *WareHouse) RemoveGame() {
 		remote_file_url := cur_li.Value["file"]
 		parts := strings.Split(remote_file_url,"raw.githubusercontent.com")
 		menu_file := parts[1]
-		local_menu_file := fmt.Sprintf("%s/aria2download%s",home_path,menu_file)
+		local_menu_file := fmt.Sprintf(aria2dl_folder,home_path,menu_file)
 		local_menu_file_path := filepath.Dir(local_menu_file)
 
 		gid,ret := self.UrlIsDownloading(remote_file_url)
@@ -532,14 +556,14 @@ func (self *WareHouse) Click() {
 	}
 	cur_li := self.MyList[self.PsIndex].(*WareHouseListItem)
 	home_path, _ := os.UserHomeDir()
-	fmt.Println("cur_li._Value",cur_li.Value)
+	fmt.Println("Click cur_li._Value",cur_li.Value)
 
 	if cur_li.Value["type"] == "source" || cur_li.Value["type"] == "dir" {
 		remote_file_url := cur_li.Value["file"]
 		parts := strings.Split(remote_file_url,"raw.githubusercontent.com")//assume master branch
 		menu_file := parts[1]
-		local_menu_file := fmt.Sprintf("%s/aria2download%s",home_path,menu_file)
-		fmt.Println(local_menu_file)
+		local_menu_file := fmt.Sprintf(aria2dl_folder,home_path,menu_file)
+		fmt.Println("warehouse click: ",local_menu_file)
 		if UI.FileExists(local_menu_file) == false {
 			self.LoadHouse()
 		}else {
@@ -559,11 +583,8 @@ func (self *WareHouse) Click() {
 				
 				byteValue, _ := ioutil.ReadAll(jsonFile)
 				json.Unmarshal(byteValue, &result)
+				self.MyStack.Push(result.List)
 				
-				for _, repo := range result.List {
-					self.MyStack.Push(repo)
-				}
-
 				self.SyncList()
 				self.Screen.Draw()
 				self.Screen.SwapAndShow()
@@ -581,17 +602,28 @@ func (self *WareHouse) Click() {
 		remote_file_url := cur_li.Value["file"]
 		parts := strings.Split(remote_file_url,"raw.githubusercontent.com")//assume master branch
 		menu_file := parts[1]
-		local_menu_file := fmt.Sprintf("%s/aria2download%s",home_path,menu_file)
-
+		local_menu_file := fmt.Sprintf(aria2dl_folder,home_path,menu_file)
+		fmt.Println("Click on game ", local_menu_file)
+		
 		if UI.FileExists(local_menu_file) == false {
 			gid,ret := self.UrlIsDownloading(remote_file_url)
 			if ret == false {
-				gid,err := self.rpcc.AddURI([]string{remote_file_url},"out:"+menu_file)
+				
+				outfile := struct {
+					Out    string `json:"out"`
+					
+				}{Out:menu_file}
+				
+				gid,err := self.rpcc.AddURI([]string{remote_file_url},outfile)
+				
 				if err != nil {
 					log.Fatal(err)
 				}else {
+					fmt.Println("Warehouse Click game is downloading, ",gid)
+					fmt.Println(remote_file_url)
 					self.Aria2DownloadingGid = gid
 				}
+				
 			} else {
 				fmt.Println(self.rpcc.TellStatus(gid,"status","totalLength","completedLength"))
 				self.Screen.MsgBox.SetText("Getting the game now")
@@ -601,7 +633,7 @@ func (self *WareHouse) Click() {
 				self.Screen.TitleBar.Redraw()
 			}
 		}else {
-			fmt.Println("file downloaded") //maybe check it if is installed fst,then execute it
+			fmt.Println("file downloaded ", cur_li.Value) //maybe check it if is installed fst,then execute it
 			if cur_li.Value["type"] == "launcher" && cur_li.ReadOnly == false {
 				local_menu_file_path := filepath.Dir(local_menu_file)
 				game_sh := filepath.Join(local_menu_file_path,cur_li.Value["title"],cur_li.Value["title"]+".sh")
@@ -656,6 +688,7 @@ func (self *WareHouse) raw_github_com(url string) (bool,string) {
 
 	
 func (self *WareHouse)  OnKbdReturnBackCb() {
+	
 	inputed:= strings.Join(self.Keyboard.Textarea.MyWords,"")
 	inputed = strings.Replace(inputed,"http://","",-1)
 	inputed = strings.Replace(inputed,"https://","",-1)
@@ -746,7 +779,7 @@ func (self *WareHouse)  OnReturnBackCb() {
 		self.FootMsg[2] = "Remove"
 		self.FootMsg[1] = "Preview"
 	}
-
+	
 	self.SyncList()
 	self.RestoreScrolled()
 	
@@ -904,6 +937,12 @@ func (self *WareHouse) KeyDown(ev *event.Event) {
 func (self *WareHouse) Draw() {
 
 	self.ClearCanvas()
+	if self.PsIndex > len(self.MyList) -1 {
+		self.PsIndex = len(self.MyList) -1
+	}
+	if self.PsIndex < 0 {
+		self.PsIndex = 0
+	}
 	if len(self.MyList) == 0 {
 		return
 	} else {
@@ -913,7 +952,7 @@ func (self *WareHouse) Draw() {
 			self.Ps.Draw()
 			for _,v := range self.MyList {
 				_,y := v.Coord()
-				if y > self.Height + self.Height/2 {
+				if y > (self.Height + self.Height/2) {
 					break
 				}
 				if y < 0 {

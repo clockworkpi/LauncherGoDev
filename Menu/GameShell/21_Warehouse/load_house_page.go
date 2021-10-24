@@ -8,6 +8,7 @@ import (
 	"strings"
 	"encoding/json"
 	"path"
+	"path/filepath"
 	
 	"github.com/veandco/go-sdl2/ttf"
 	
@@ -15,6 +16,7 @@ import (
 	//"github.com/cuu/gogame/draw"
 	"github.com/cuu/gogame/color"
 	"github.com/cuu/gogame/event"
+	"github.com/cuu/gogame/time"
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 	"github.com/cuu/grab"
 )
@@ -60,8 +62,16 @@ func (self *LoadHousePage) Init() {
 	self.LoadingLabel.SetColor(self.TextColor)
 
 	self.Downloader = grab.NewClient()
-	self.Downloading = make(chan bool)
+	self.Downloading = make(chan bool,1)
 	
+}
+
+func (self *LoadHousePage) SetDownloading(v bool) {
+	for len(self.Downloading) > 0 {
+		<- self.Downloading
+	}
+
+	self.Downloading <- v
 }
 
 func (self *LoadHousePage) OnLoadCb() {
@@ -77,7 +87,7 @@ func (self *LoadHousePage) OnLoadCb() {
 	//filename := strings.TrimSpace(parts[len(parts)-1])
 	local_dir := strings.Split(self.URL,"raw.githubusercontent.com")
 	home_path, _ := os.UserHomeDir()
-	
+	fmt.Println("LoadHouse OnLoadCb")
 	if len(local_dir) > 1 {
 		menu_file := local_dir[1]
 		local_menu_file := fmt.Sprintf("%s/aria2downloads%s",
@@ -93,21 +103,16 @@ func (self *LoadHousePage) OnLoadCb() {
 			defer jsonFile.Close()
 			byteValue, _ := ioutil.ReadAll(jsonFile)
 			json.Unmarshal(byteValue, &result)
-			
-			for _, repo := range result.List {
-				self.Parent.MyStack.Push(repo)
-			}
+			self.Parent.MyStack.Push(result.List)
 			
 			self.Leave()
 		} else {
+			
 			self.req,_ = grab.NewRequest("/tmp",self.URL)
 			self.resp = self.Downloader.Do(self.req)
-	
-			for len(self.Downloading) > 0 {
-				<-self.Downloading
-			}
-			
-			self.Downloading <- true
+
+			self.SetDownloading(true)
+			fmt.Println("Start Download index json to /tmp,grab")
 			go self.UpdateProcessInterval(400)
 		}
 		
@@ -115,9 +120,10 @@ func (self *LoadHousePage) OnLoadCb() {
 }
 
 func (self *LoadHousePage) UpdateProcessInterval(ms int) {
+	ms_total := 0
 	t := gotime.NewTicker(gotime.Duration(ms) * gotime.Millisecond)
 	defer t.Stop()
-
+L:
 	for {
 		select {
 		case <-t.C:
@@ -125,20 +131,25 @@ func (self *LoadHousePage) UpdateProcessInterval(ms int) {
 				self.resp.BytesComplete(),
 				self.resp.Size,
 				100*self.resp.Progress())
-
+			ms_total += ms
+			if(ms_total > 5000) {
+				fmt.Println("LoadHouse Timeout")
+				break L
+			}
 		case <-self.resp.Done:
 			// download is complete
-			break
-		case v:= <-self.Downloading:
+			fmt.Println("Grab Download House done")
+			break L
+		case v:= <- self.Downloading:
 			if v == false {
-				t.Stop()
-				break
+				break L
 			}
 		}		
 	}
 	
-	//dst_filename := self.resp.Filename
-
+	dst_filename := self.resp.Filename
+	fmt.Println("dst_filename ",dst_filename)
+	
 	if err := self.resp.Err(); err == nil {//download successfully
 		home_path, _ := os.UserHomeDir()
 		parts := strings.Split(self.URL,"/")
@@ -154,14 +165,21 @@ func (self *LoadHousePage) UpdateProcessInterval(ms int) {
 				home_path,menu_file)
 		}
 		dl_file := path.Join("/tmp",filename)
-		if UI.IsDirectory( path.Base(local_menu_file) ) == false {
-			merr := os.MkdirAll( path.Base(local_menu_file), os.ModePerm)
+		fmt.Println("dl_file: ",dl_file)
+		fmt.Println(local_menu_file)
+
+		
+		if UI.IsDirectory( filepath.Dir(local_menu_file) ) == false {
+			merr := os.MkdirAll( filepath.Dir(local_menu_file), os.ModePerm)
 			if merr != nil {
 				panic(merr)
 			}
 		}
 
 		UI.CopyFile(dl_file,local_menu_file)
+		
+		os.Remove(dl_file)
+		
 		var result WareHouseIndex
 		jsonFile, err := os.Open(local_menu_file)
 		if err != nil {
@@ -171,24 +189,22 @@ func (self *LoadHousePage) UpdateProcessInterval(ms int) {
 		defer jsonFile.Close()
 		byteValue, _ := ioutil.ReadAll(jsonFile)
 		json.Unmarshal(byteValue, &result)
-		
-		for _, repo := range result.List {
-			self.Parent.MyStack.Push(repo)
-		}
-
+		self.Parent.MyStack.Push(result.List)		
 		self.Leave()
 		
 	} else {
+		fmt.Println(err)
 		self.Screen.MsgBox.SetText("Fetch house failed")
 		self.Screen.MsgBox.Draw()
 		self.Screen.SwapAndShow()
+		time.BlockDelay(500)
 	}
 	
 }
 
 func (self *LoadHousePage) Leave() {
 
-	self.Downloading <- false
+	self.SetDownloading(false)
 	
 	self.ReturnToUpLevelPage()
 	self.Screen.Draw()

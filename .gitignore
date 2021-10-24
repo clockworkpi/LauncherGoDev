@@ -24,3 +24,6 @@ screenshots/*
 .pcsx/*
 *.log
 
+app-local.ini
+*.db
+app

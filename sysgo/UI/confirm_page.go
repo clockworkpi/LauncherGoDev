@@ -67,7 +67,7 @@ type ConfirmPage struct {
 
 func NewConfirmPage() *ConfirmPage {
 	p := &ConfirmPage{}
-	p.ListFont = Fonts["veramono20"]
+	p.ListFont = MyLangManager.TrFont("veramono20")
 	p.FootMsg = [5]string{"Nav", "", "", "Cancel", "Yes"}
 	p.ConfirmText = "Confirm?"
 

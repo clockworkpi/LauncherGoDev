@@ -13,7 +13,7 @@ type WareHouseListItem struct {
 	
 	Type  string
 	Value map[string]string
-	Parent *WareHouse
+	
 	
 }
 
@@ -86,7 +86,7 @@ func (self *WareHouseListItem) Draw() {
 
 	if self.Type == "source" || self.Type == "dir" {
 		_,h := self.Icons["ware"].Size()
-		self.Icons["ware"].NewCoord(4,(self.Height - h)/2)
+		self.Icons["ware"].NewCoord(4,self.PosY + (self.Height - h)/2)
 		self.Icons["ware"].DrawTopLeft()
 	}
 
@@ -96,13 +96,13 @@ func (self *WareHouseListItem) Draw() {
 			_icon = "appdling"
 		}
 		_,h := self.Icons[_icon].Size()
-		self.Icons[_icon].NewCoord(4,(self.Height - h )/2)
+		self.Icons[_icon].NewCoord(4,self.PosY + (self.Height - h )/2)
 		self.Icons[_icon].DrawTopLeft()
 	}
 
 	if self.Type == "add_house" {
 		_,h := self.Icons["add"].Size()
-		self.Icons["add"].NewCoord(4,(self.Height - h)/2)
+		self.Icons["add"].NewCoord(4,self.PosY+(self.Height - h)/2)
 		self.Icons["add"].DrawTopLeft()
 	}
 
