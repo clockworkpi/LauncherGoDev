@@ -260,6 +260,7 @@ func PreparationInAdv() {
 }
 
 func release_self_fds() {
+	/*
 	fds_flags := []string{"pipe", "socket:", ".ttf"}
 	file_paths, err := filepath.Glob("/proc/self/fd/*")
 	if err != nil {
@@ -288,6 +289,7 @@ func release_self_fds() {
 			}
 		}
 	}
+	*/
 }
 
 func run() int {
