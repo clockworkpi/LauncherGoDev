@@ -473,7 +473,7 @@ func (self *WifiList) Disconnect() {
 	cli := "nmcli -t -f NAME c show --active"
 	out := UI.SystemTrim(cli)
 	
-	cli = fmt.Sprintf("nmcli con down \"%s\"",out)
+	cli = fmt.Sprintf("sudo nmcli con down \"%s\"",out)
 
 	UI.System(cli)
 	
@@ -555,7 +555,7 @@ func (self *WifiList) ConfigWireless(password string) {
 
 	self.Connecting = true
 
-	out := UI.System(fmt.Sprintf("nmcli dev wifi connect %s password \"%s\"", ssid, password))
+	out := UI.System(fmt.Sprintf("sudo nmcli dev wifi connect %s password \"%s\"", ssid, password))
 	if strings.Contains(out, "successfully") {
 		self.CurEssid = self.MyList[self.PsIndex].Essid
 		self.CurBssid = self.MyList[self.PsIndex].Bssid
