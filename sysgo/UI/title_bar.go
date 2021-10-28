@@ -217,7 +217,7 @@ func (self *TitleBar) UpdateWifiStrength() {
 
 func (t *TitleBar) GetWifiStrength() int {
 	qua := 0
-	cli := fmt.Sprintf("iwconfig %s | grep Signal | /usr/bin/awk '{print $4}' | /usr/bin/cut -d'=' -f2", sysgo.WifiDev)
+	cli := fmt.Sprintf("sudo iwconfig %s | grep Signal | /usr/bin/awk '{print $4}' | /usr/bin/cut -d'=' -f2", sysgo.WifiDev)
 	out := System(cli)
 	if len(out) > 2 {
 		if strings.Contains(out, "No") == false {
