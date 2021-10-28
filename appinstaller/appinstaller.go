@@ -94,7 +94,8 @@ func main() {
 	defer rpcc.Close()
 	
 	for {
-
+		select{
+		}
 	}
 }
 
