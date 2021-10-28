@@ -377,7 +377,7 @@ func run() int {
 
 				exec_app_cmd := "cd " + filepath.Dir(ev.Data["Msg"][:space_break_pos]) + ";"
 				exec_app_cmd += ev.Data["Msg"]
-				exec_app_cmd += "; sync & cd " + UI.GetExePath() + "; " + os.Args[0] + ";"
+				exec_app_cmd += "; sync & cd " + UI.GetExePath() + "; " + os.Args[0] + ">/tmp/x.log;"
 				fmt.Println(exec_app_cmd)
 				release_self_fds()
 				cmd := exec.Command("/bin/sh", "-c", exec_app_cmd)
