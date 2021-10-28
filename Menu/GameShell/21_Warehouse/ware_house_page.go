@@ -115,6 +115,7 @@ func (self *WareHouse) GetAria2DownloadingPercent(url string) int {
 }
 func (self *WareHouse) UpdateProcessInterval(ms int) {
 	dirty := false
+L:
 	for {
 		select {
 		case <- self.RefreshTicker.C:
@@ -136,6 +137,10 @@ func (self *WareHouse) UpdateProcessInterval(ms int) {
 				self.Screen.SwapAndShow()
 			}
 			dirty = false
+		case v:= <- self.Downloading:
+			if v== false {
+				break L
+			}
 		}
 	}
 }
@@ -398,14 +403,23 @@ func (self *WareHouse) Init()  {
     }
 		self.rpcc = rpcc
 		self.Downloader = grab.NewClient()
-		self.Downloading = make(chan bool)
+		self.Downloading = make(chan bool,1)
 
 		self.RefreshTicker = gotime.NewTicker(500 * gotime.Millisecond)
 		//self.RefreshTicker.Stop()
+		self.SetDownloading(true)
 		go self.UpdateProcessInterval(500)
 		
 	}
 
+}
+
+func (self *WareHouse) SetDownloading(v bool) {
+	for len(self.Downloading) > 0 {
+		<- self.Downloading
+	}
+
+	self.Downloading <- v
 }
 
 func (self *WareHouse) ResetHouse() {
@@ -753,6 +767,17 @@ func (self *WareHouse)  OnKbdReturnBackCb() {
 			}
 		}
 	}	
+}
+
+func (self *WareHouse) OnExitCb() {
+	
+	if self.RefreshTicker != nil {
+		self.RefreshTicker.Stop()
+	}
+
+	self.SetDownloading(false)
+	self.rpcc.Close()
+	
 }
 
 func (self *WareHouse) OnLoadCb() {
