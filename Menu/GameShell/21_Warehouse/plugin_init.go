@@ -19,7 +19,7 @@ type WareHousePlugin struct {
 	MainPage *WareHouse
 }
 
-var aria2dl_folder = "%s/aria2downloads%s"
+var aria2dl_folder = "%s/aria2download%s"
 
 func (self *WareHousePlugin) Init(main_screen *UI.MainScreen) {
 	self.MainPage = NewWareHouse()

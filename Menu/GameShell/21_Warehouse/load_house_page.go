@@ -94,7 +94,7 @@ func (self *LoadHousePage) OnLoadCb() {
 	fmt.Println("LoadHouse OnLoadCb")
 	if len(local_dir) > 1 {
 		menu_file := local_dir[1]
-		local_menu_file := fmt.Sprintf("%s/aria2downloads%s",
+		local_menu_file := fmt.Sprintf(aria2dl_folder,
 			home_path,menu_file)
 
 		if UI.FileExists(local_menu_file) {
@@ -165,7 +165,7 @@ L:
 		
 		if len(local_dir) > 1 {
 			menu_file = local_dir[1]
-			local_menu_file = fmt.Sprintf("%s/aria2downloads%s",
+			local_menu_file = fmt.Sprintf(aria2dl_folder,
 				home_path,menu_file)
 		}
 		dl_file := path.Join("/tmp",filename)

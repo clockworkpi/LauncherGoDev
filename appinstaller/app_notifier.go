@@ -119,7 +119,7 @@ func InstallGame(msg rpc.StatusInfo) {
 	}
 
 	menu_file := parts[1]
-	local_menu_file := fmt.Sprintf("%s/aria2downloads%s",home_path,menu_file)
+	local_menu_file := fmt.Sprintf("%s/aria2download%s",home_path,menu_file)
 	local_menu_file_path := filepath.Dir(local_menu_file)
 
 	if fileExists(local_menu_file) {
