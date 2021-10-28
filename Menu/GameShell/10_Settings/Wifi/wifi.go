@@ -468,9 +468,15 @@ func (self *WifiList) GenNetworkList() {
 
 func (self *WifiList) Disconnect() {
 	self.Connecting = false
+  //nmcli -t -f NAME c show --active
+	//nmcli con down
+	cli := "nmcli -t -f NAME c show --active"
+	out := UI.SystemTrim(cli)
+	
+	cli = fmt.Sprintf("nmcli con down \"%s\"",out)
 
-	nmcli_disconnect := []string{"nmcli", "con", "down", self.CurEssid}
-	UI.ExecCmd(nmcli_disconnect)
+	UI.System(cli)
+	
 	self.CurEssid = ""
 	self.CurBssid = ""
 
