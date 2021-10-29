@@ -61,7 +61,6 @@ type WareHouse struct {
 	resp       *grab.Response
 	req        *grab.Request
 
-	RefreshTicker *gotime.Ticker
 	ScrolledCnt   int
 	
 }
@@ -75,7 +74,7 @@ func NewWareHouse() *WareHouse {
 	
 	p.FootMsg = [5]string{"Nav","Update","Up","Back","Select"}
 
-	p.WareHouseDB = "foo.db"
+	p.WareHouseDB = sysgo.SQLDB
 
 	p.BGwidth = 320
 	p.BGheight = 240-24-20
@@ -115,10 +114,12 @@ func (self *WareHouse) GetAria2DownloadingPercent(url string) int {
 }
 func (self *WareHouse) UpdateProcessInterval(ms int) {
 	dirty := false
+	RefreshTicker := gotime.NewTicker(gotime.Duration(ms)*gotime.Millisecond)
+	defer RefreshTicker.Stop()
 L:
 	for {
 		select {
-		case <- self.RefreshTicker.C:
+		case <- RefreshTicker.C:
 			for _,i := range self.MyList {
 				x := i.(*WareHouseListItem)
 				if x.Type == "launcher" || x.Type == "pico8" || x.Type == "tic80" {
@@ -405,11 +406,6 @@ func (self *WareHouse) Init()  {
 		self.Downloader = grab.NewClient()
 		self.Downloading = make(chan bool,1)
 
-		self.RefreshTicker = gotime.NewTicker(500 * gotime.Millisecond)
-		//self.RefreshTicker.Stop()
-		self.SetDownloading(true)
-		go self.UpdateProcessInterval(500)
-		
 	}
 
 }
@@ -771,10 +767,6 @@ func (self *WareHouse)  OnKbdReturnBackCb() {
 
 func (self *WareHouse) OnExitCb() {
 	
-	if self.RefreshTicker != nil {
-		self.RefreshTicker.Stop()
-	}
-
 	self.SetDownloading(false)
 	self.rpcc.Close()
 	
@@ -790,7 +782,8 @@ func (self *WareHouse) OnLoadCb() {
 		self.FootMsg[1] = "Preview"		
 	}
 
-	self.RefreshTicker = gotime.NewTicker(500 * gotime.Millisecond)
+	self.SetDownloading(true)
+	go self.UpdateProcessInterval(500)
 	
 	self.SyncList()
 }
@@ -895,7 +888,7 @@ func (self *WareHouse) KeyDown(ev *event.Event) {
 			self.ReturnToUpLevelPage()
 			self.Screen.Draw()
 			self.Screen.SwapAndShow()
-			self.RefreshTicker.Stop()
+			self.SetDownloading(false)//shutdown UpdateProcessInterval
 		}
 	}
 	

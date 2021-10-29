@@ -31,7 +31,6 @@ type CounterScreen struct {
 
 	inter_counter int //
 
-	TheTicker    *gotime.Ticker
 	TickerStoped chan bool
 }
 
@@ -52,15 +51,16 @@ func NewCounterScreen() *CounterScreen {
 }
 
 func (self *CounterScreen) Interval() {
-
+	TheTicker :=  gotime.NewTicker(500 * gotime.Millisecond)
+	defer TheTicker.Stop()
+	L:	
 	for {
 		select {
-		case <-self.TheTicker.C:
+		case <-TheTicker.C:
 			self.inter_counter += 1
 
 			if self.Number == 0 {
 				self.Counting = false
-				self.TheTicker.Stop()
 				fmt.Println("do the real shutdown")
 
 				if sysgo.CurKeySet != "PC" {
@@ -71,7 +71,7 @@ func (self *CounterScreen) Interval() {
 
 				}
 
-				break
+				break L
 			}
 
 			if self.inter_counter >= 2 {
@@ -88,7 +88,7 @@ func (self *CounterScreen) Interval() {
 
 			}
 		case <-self.TickerStoped:
-			break
+			break L
 		}
 	}
 
@@ -104,8 +104,6 @@ func (self *CounterScreen) StartCounter() {
 
 	self.Counting = true
 
-	self.TheTicker = gotime.NewTicker(500 * gotime.Millisecond)
-
 	go self.Interval()
 
 }
@@ -119,7 +117,6 @@ func (self *CounterScreen) StopCounter() {
 	self.Number = 0
 	self.inter_counter = 0
 
-	self.TheTicker.Stop()
 	self.TickerStoped <- true
 
 }

@@ -32,8 +32,9 @@ var (
 	CurPowerLevel = "performance"
 	Lang          = "English"
 	WifiDev       = "wlan0"
-
+	
 	Aria2Url      = "ws://localhost:6800/jsonrpc"
+	SQLDB         = "foo.db" //Sqlite3
 )
 
 func init() {

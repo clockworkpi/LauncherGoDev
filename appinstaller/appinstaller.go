@@ -71,6 +71,20 @@ func InitSql() {
 		log.Printf("%q: %s\n",err,sqlStmt)
 		return
 	}
+	
+	sqlStmt = `
+	 CREATE TABLE IF NOT EXISTS wifi      (
+                                        id integer PRIMARY KEY,
+                                        essid text NOT NULL,
+                                        pass  text NOT NULL
+                                        );
+                                        `
+	_,err = db.Exec(sqlStmt)
+	if err != nil {
+		log.Printf("%q: %s\n",err,sqlStmt)
+		return
+	}
+	
 }
 
 func main() {

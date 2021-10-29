@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"syscall"
+	//"syscall"
 	//"encoding/json"
 	"github.com/veandco/go-sdl2/sdl"
 	gotime "time"

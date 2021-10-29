@@ -4,14 +4,17 @@ package Wifi
 
 import (
 	"fmt"
-	//"strconv"
+	"strconv"
 	"strings"
 	//"os"
 	// "os/exec"
 	// gotime "time"
-
+	"log"
 	//"github.com/godbus/dbus"
-
+	
+	"database/sql"
+	_ "github.com/mattn/go-sqlite3"
+	
 	"github.com/veandco/go-sdl2/ttf"
 
 	"github.com/clockworkpi/LauncherGoDev/sysgo"
@@ -521,9 +524,67 @@ func (self *WifiList) WifiScanStarted() {
 }
 
 func (self *WifiList) SaveNetworkList() {
+	
+}
+
+func (self *WifiList) SaveWifiPassword(essid,password string) {
+
+	db, err := sql.Open("sqlite3", sysgo.SQLDB)
+	if err != nil {
+		log.Fatal(err)
+		return 
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare("select count(*) from wifi where essid = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	var count string
+	err = stmt.QueryRow(essid).Scan(&count)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cnt,_ := strconv.Atoi(count)
+	if cnt > 0 {
+		_,err = db.Exec("update wifi set pass= :pass where essid = :essid",sql.Named("pass",password),sql.Named("essid",essid))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}else {
+		_,err = db.Exec("insert into wifi(essid,pass) values(:essid,:pass)",sql.Named("essid",essid),sql.Named("pass",password))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 }
 
+func (self *WifiList) LoadWifiPassword(essid string) string {
+	db, err := sql.Open("sqlite3", sysgo.SQLDB)
+	if err != nil {
+		log.Fatal(err)
+		return ""
+	}
+	defer db.Close()
+	
+	stmt, err := db.Prepare("select pass from wifi where essid = ?")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+	
+	password := ""
+	
+	err = stmt.QueryRow(essid).Scan(&password)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return password
+}
 //----------------------------------------------------------------------------------
 
 func (self *WifiList) UpdateNetList(state int, info []string, force_check bool, firstrun bool) { //force_check default ==false, firstrun default == false
@@ -560,6 +621,7 @@ func (self *WifiList) ConfigWireless(password string) {
 		self.CurEssid = self.MyList[self.PsIndex].Essid
 		self.CurBssid = self.MyList[self.PsIndex].Bssid
 		self.MyList[self.PsIndex].Password = password
+		self.SaveWifiPassword(ssid,password)
 		self.ShowBox("Connected")
 	} else {
 		self.ShowBox("Wifi connect error")
@@ -673,7 +735,7 @@ func (self *WifiList) KeyDown(ev *event.Event) {
 			self.Screen.PushCurPage()
 			self.Screen.SetCurPage(APIOBJ.PasswordPage)
 
-			thepass := self.MyList[self.PsIndex].Password
+			thepass := self.LoadWifiPassword(self.MyList[self.PsIndex].Essid)
 
 			fmt.Println("APIOBJ.PasswordPage.SetPassword ", thepass, len(thepass))
 			APIOBJ.PasswordPage.SetPassword(thepass)
