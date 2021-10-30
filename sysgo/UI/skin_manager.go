@@ -26,7 +26,7 @@ func NewSkinManager() *SkinManager {
 
 func (self *SkinManager) ConvertToRGB(hexstr string) *color.Color {
 	if len(hexstr) < 7 || string(hexstr[0]) != "#" { // # 00 00 00
-		log.Fatalf("ConvertToRGB hex string format error %s", hexstr)
+		log.Printf("ConvertToRGB hex string format error %s\n", hexstr)
 		//fmt.Printf("ConvertToRGB hex string format error %s", hexstr)
 		return nil
 	}

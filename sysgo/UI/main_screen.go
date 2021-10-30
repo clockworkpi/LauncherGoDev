@@ -286,7 +286,7 @@ func (self *MainScreen) ExtraName(name string) string {
 func (self *MainScreen) IsExecPackage(dirname string) bool {
 	files, err := ioutil.ReadDir(dirname)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return false
 	}
 
@@ -306,7 +306,7 @@ func (self *MainScreen) IsPluginPackage(dirname string) bool {
 	ret := false
 	files, err := ioutil.ReadDir(dirname)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return false
 	}
 
@@ -328,7 +328,7 @@ func (self *MainScreen) IsEmulatorPackage(dirname string) bool {
 	ret := false
 	files, err := ioutil.ReadDir(dirname)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return false
 	}
 

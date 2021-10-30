@@ -538,25 +538,27 @@ func (self *WifiList) SaveWifiPassword(essid,password string) {
 
 	stmt, err := db.Prepare("select count(*) from wifi where essid = ?")
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 	defer stmt.Close()
 	var count string
 	err = stmt.QueryRow(essid).Scan(&count)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		count = "0"
 	}
 
 	cnt,_ := strconv.Atoi(count)
 	if cnt > 0 {
 		_,err = db.Exec("update wifi set pass= :pass where essid = :essid",sql.Named("pass",password),sql.Named("essid",essid))
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 	}else {
 		_,err = db.Exec("insert into wifi(essid,pass) values(:essid,:pass)",sql.Named("essid",essid),sql.Named("pass",password))
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 	}
 
@@ -569,20 +571,18 @@ func (self *WifiList) LoadWifiPassword(essid string) string {
 		return ""
 	}
 	defer db.Close()
-	
-	stmt, err := db.Prepare("select pass from wifi where essid = ?")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
-	
-	password := ""
-	
-	err = stmt.QueryRow(essid).Scan(&password)
-	if err != nil {
-		log.Fatal(err)
-	}
 
+	password := ""
+	stmt, err := db.Prepare("select pass from wifi where essid = ?")
+	defer stmt.Close()
+	if err != nil {
+		log.Println(err)
+	}else {
+		err = stmt.QueryRow(essid).Scan(&password)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 	return password
 }
 //----------------------------------------------------------------------------------

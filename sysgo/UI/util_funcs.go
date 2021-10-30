@@ -102,7 +102,7 @@ func IsAFile(path string) bool {
 func MakeExecutable(path string) {
 	fileInfo, err := os.Stat(path)
 	if err != nil {
-		log.Fatalf("os.Stat %s failed", path)
+		log.Printf("os.Stat %s failed\n", path)
 		return
 	}
 	mode := fileInfo.Mode()

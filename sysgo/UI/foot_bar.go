@@ -194,7 +194,7 @@ func (self *FootBar) UpdateNavText(texts string) {
 func (self *FootBar) SetLabelTexts(texts [5]string) {
 	keynames := [5]string{"nav", "x", "y", "a", "b"}
 	if len(texts) < 5 {
-		log.Fatal("SetLabelTexts texts length error")
+		log.Println("SetLabelTexts texts length error")
 		return
 	}
 

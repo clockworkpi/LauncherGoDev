@@ -504,7 +504,7 @@ func (self *WareHouse) UrlIsDownloading(url string) (string,bool) {
 			}
 		}
 	}else {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return "",false
 }
@@ -529,7 +529,7 @@ func (self *WareHouse) RemoveGame() {
 			cur_li.Value["file"]))
 		
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		
 	} else if cur_li.Value["type"] == "launcher" ||
@@ -627,7 +627,7 @@ func (self *WareHouse) Click() {
 				gid,err := self.rpcc.AddURI([]string{remote_file_url},outfile)
 				
 				if err != nil {
-					log.Fatal(err)
+					log.Println(err)
 				}else {
 					fmt.Println("Warehouse Click game is downloading, ",gid)
 					fmt.Println(remote_file_url)
@@ -719,16 +719,18 @@ func (self *WareHouse)  OnKbdReturnBackCb() {
 	defer db.Close()
 	
 	stmt, err := db.Prepare("SELECT count(*) FROM warehouse WHERE title= ?")
+	defer stmt.Close()
+	
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer stmt.Close()
-
+	
 	var cnt_str string
 	cnt := 0
 	err = stmt.QueryRow(inputed).Scan(&cnt_str)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		cnt_str = "0"
 	}else {
 		cnt,_= strconv.Atoi(cnt_str)
 	}
@@ -754,7 +756,7 @@ func (self *WareHouse)  OnKbdReturnBackCb() {
 					inputed,_url)
 				_, err = db.Exec(sql_insert)
 				if err != nil {
-					log.Fatal(err)
+					log.Println(err)
 				}
 
 				self.SyncList()

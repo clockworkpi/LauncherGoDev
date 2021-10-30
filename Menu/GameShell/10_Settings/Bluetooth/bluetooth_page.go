@@ -667,7 +667,7 @@ func (self *BluetoothPage) GenNetworkList() {
 
 		props, err := v.GetProperties()
 		if err != nil {
-			log.Fatalf("%s: Failed to get properties: %s", v.Path, err.Error())
+			log.Printf("%s: Failed to get properties: %s\n", v.Path, err.Error())
 			return
 		}
 
