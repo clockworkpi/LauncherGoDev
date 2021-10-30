@@ -478,7 +478,8 @@ func (self *WifiList) Disconnect() {
 	
 	cli = fmt.Sprintf("sudo nmcli con down \"%s\"",out)
 
-	UI.System(cli)
+	out = UI.System(cli)
+	log.Println(out)
 	
 	self.CurEssid = ""
 	self.CurBssid = ""
@@ -615,8 +616,10 @@ func (self *WifiList) ConfigWireless(password string) {
 	self.ShowBox("Connecting...")
 
 	self.Connecting = true
-
-	out := UI.System(fmt.Sprintf("sudo nmcli dev wifi connect %s password \"%s\"", ssid, password))
+	cli := fmt.Sprintf("sudo nmcli dev wifi connect %s password \"%s\"", ssid, password)
+	log.Println(cli)
+	out := UI.System(cli)
+	log.Println(out)
 	if strings.Contains(out, "successfully") {
 		self.CurEssid = self.MyList[self.PsIndex].Essid
 		self.CurBssid = self.MyList[self.PsIndex].Bssid
@@ -692,9 +695,11 @@ func (self *WifiList) AbortedAndReturnToUpLevel() {
 func (self *WifiList) OnKbdReturnBackCb() {
 	password_inputed := strings.Join(APIOBJ.PasswordPage.Textarea.MyWords, "")
 	fmt.Println("Password inputed: ", password_inputed)
-	ip := self.GetWirelessIP()
-	if len(ip) < 6 {
+	
+	if len(password_inputed) > 4 {
 		self.ConfigWireless(password_inputed)
+	}else {
+		log.Println("wifi password length too short ",len(password_inputed))
 	}
 }
 
