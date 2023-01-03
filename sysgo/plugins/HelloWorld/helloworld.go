@@ -1,7 +1,7 @@
 package main
 
 import (
-	"../../UI"
+	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 )
 
 type HelloWorldPage struct {
