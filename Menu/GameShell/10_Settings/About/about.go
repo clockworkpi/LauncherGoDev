@@ -309,13 +309,6 @@ func (self *AboutPage) Init() {
 
 		self.Icons["bg"] = bgpng
 
-		self.CpuInfo()
-		self.MemInfo()
-		self.CpuMhz()
-		self.Uname()
-
-		self.GenList()
-
 		self.Scroller = UI.NewListScroller()
 
 		self.Scroller.Parent = self
@@ -347,6 +340,12 @@ func (self *AboutPage) OnLoadCb() {
 	self.Scrolled = 0
 	self.PosY = 0
 	self.DrawOnce = false
+        self.CpuInfo()
+        self.MemInfo()
+        self.CpuMhz()
+        self.Uname()
+
+        self.GenList()
 }
 
 func (self *AboutPage) OnReturnBackCb() {

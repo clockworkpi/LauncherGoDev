@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	//"syscall"
+	"syscall"
 	//"encoding/json"
 	"github.com/veandco/go-sdl2/sdl"
 	gotime "time"
@@ -260,7 +260,7 @@ func PreparationInAdv() {
 }
 
 func release_self_fds() {
-	/*
+	
 	fds_flags := []string{"pipe", "socket:", ".ttf"}
 	file_paths, err := filepath.Glob("/proc/self/fd/*")
 	if err != nil {
@@ -289,7 +289,7 @@ func release_self_fds() {
 			}
 		}
 	}
-	*/
+	
 }
 
 func run() int {
