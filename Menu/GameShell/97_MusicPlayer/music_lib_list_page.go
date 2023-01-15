@@ -2,6 +2,7 @@ package MusicPlayer
 
 import (
 	//"fmt"
+	"path/filepath"
 
 	"github.com/cuu/gogame/event"
 	"github.com/cuu/gogame/rect"
@@ -9,8 +10,12 @@ import (
 	"github.com/veandco/go-sdl2/ttf"
 
 	"github.com/cuu/gogame/color"
-
+	
+	"github.com/clockworkpi/LauncherGoDev/sysgo"
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
+
+	"github.com/fhs/gompd/v2/mpd"
+
 )
 
 type MusicLibListPage struct {
@@ -61,10 +66,88 @@ func NewMusicLibListPage() *MusicLibListPage {
 
 func (self *MusicLibListPage) OnLoadCb() {
 	self.PosY = 0
+	self.SyncList("/")
 }
 
 func (self *MusicLibListPage) SetCoords() {
 
+}
+
+func (self *MusicLibListPage) SyncList(path string) {
+	conn, err := mpd.Dial("unix", sysgo.MPD_socket)
+        if err != nil {
+                log.Fatalln(err)
+        }
+        
+	defer conn.Close()
+	
+	self.MyList = nil
+
+	start_x := 0
+	start_y := 0
+	hasparent :=0 
+
+	atts, err := conn.ListInfo(path)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	
+	if self.MyStack.Length() > 0 {
+		hasparent = 1
+                li := NewMusicLibListPageListItem()
+                li.Parent = self
+                li.PosX = start_x
+                li.PosY = start_y
+                li.Width = UI.Width
+                li.Fonts["normal"] = self.ListFontObj
+                li.Init("[..]")
+		li.MyType = UI.ICON_TYPES["DIR"]
+                self.MyList = append(self.MyList, li)		
+	}
+
+	if len(atts) == 0 {
+		log.Println("no songs")
+		return
+	}
+	
+	for i, m := range atts {
+
+		li : NewMusicLibListPageListItem()
+		li.Parent = self
+                li.PosX = start_x
+                li.PosY = start_y + (i+hasparent)*li.Height
+                li.Width = UI.Width
+                li.Fonts["normal"] = self.ListFont
+                li.MyType = UI.ICON_TYPES["FILE"]
+		
+		init_val := "NoName"
+
+		val, ok := m["directory"]
+		if ok {
+			li.MyType = UI.ICON_TYPES["DIR"]
+			init_val = filepath.Base(m["directory"])
+			li.Path = m["directory"]
+		}
+
+		val, ok = m["file"]
+		if ok {
+			li.MyType = UI.ICON_TYPES["FILE"]
+			li.Path = m["file"]
+
+			val2, ok2 := m["Title"]
+			if ok2  && len(val2) > 4{
+				init_val = val2
+			}else{
+				init_val = val
+			}
+		}
+
+		li.Init(init_val)
+		self.MyList = append(self.MyList, li)
+
+	}
+	
 }
 
 func (self *MusicLibListPage) Init() {
