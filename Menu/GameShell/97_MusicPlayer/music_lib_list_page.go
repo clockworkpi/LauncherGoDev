@@ -123,15 +123,13 @@ func (self *MusicLibListPage) SyncList(path string) {
 		
 		init_val := "NoName"
 
-		val, ok := m["directory"]
-		if ok {
+		if val, ok := m["directory"] ; ok {
 			li.MyType = UI.ICON_TYPES["DIR"]
 			init_val = filepath.Base(m["directory"])
 			li.Path = m["directory"]
 		}
 
-		val, ok = m["file"]
-		if ok {
+		if val, ok = m["file"]; ok {
 			li.MyType = UI.ICON_TYPES["FILE"]
 			li.Path = m["file"]
 
