@@ -22,6 +22,7 @@ require (
 )
 
 require (
+	github.com/fhs/gompd/v2 v2.3.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/moutend/go-wca v0.2.0 // indirect

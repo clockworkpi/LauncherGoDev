@@ -1,16 +1,18 @@
 package MusicPlayer
 
 import (
-	//"fmt"
-
+	"fmt"
+	"log"
 	"github.com/cuu/gogame/event"
 	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/surface"
 	"github.com/veandco/go-sdl2/ttf"
 
 	"github.com/cuu/gogame/color"
-
+	"github.com/clockworkpi/LauncherGoDev/sysgo"
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
+
+	"github.com/fhs/gompd/v2/mpd"
 )
 
 type MusicPlayerPage struct {
@@ -23,15 +25,16 @@ type MusicPlayerPage struct {
 
 	IP     string
 	
-	MyMusicLibListPage *MusicLibListPage
+	MyMusicLibListPage *MusicLibListPage //also use the MpdClient *mpd.Client
 
-        MyList   []UI.ListItemInterface
-	MyStack        *MusicLibStack
+        //MyList   []UI.ListItemInterface
+	MyStack        *UI.FolderStack
         BGwidth  int
         BGheight int //70	
         Scroller *UI.ListScroller
         Scrolled int
 
+	MpdClient *mpd.Client
 }
 
 func NewMusicPlayerPage() *MusicPlayerPage {
@@ -62,6 +65,24 @@ func NewMusicPlayerPage() *MusicPlayerPage {
 
 func (self *MusicPlayerPage) OnLoadCb() {
 	self.PosY = 0
+
+	if self.MpdClient == nil {
+	        conn, err := mpd.Dial("unix", sysgo.MPD_socket)
+	        if err != nil {
+                	log.Fatalln(err)
+        	}
+		self.MpdClient = conn
+
+		fmt.Println("Start mpd client")
+	}
+}
+
+func (self *MusicPlayerPage) OnPopUpCb() {
+	if self.MpdClient != nil {
+		self.MpdClient.Close()
+		self.MpdClient = nil
+		fmt.Println("Close mpd client")
+	}
 }
 
 func (self *MusicPlayerPage) SetCoords() {
@@ -124,6 +145,9 @@ func (self *MusicPlayerPage) Init() {
         self.MyMusicLibListPage.Name = "Music Library"
         self.MyMusicLibListPage.Parent = self
         self.MyMusicLibListPage.Init()
+
+	self.MyStack = UI.NewFolderStack()
+	self.MyStack.SetRootPath("/")
 }
 
 func (self *MusicPlayerPage) KeyDown(ev *event.Event) {

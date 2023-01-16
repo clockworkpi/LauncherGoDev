@@ -2,6 +2,7 @@ package MusicPlayer
 
 import (
 	//"fmt"
+	"log"
 	"path/filepath"
 
 	"github.com/cuu/gogame/event"
@@ -11,11 +12,11 @@ import (
 
 	"github.com/cuu/gogame/color"
 	
-	"github.com/clockworkpi/LauncherGoDev/sysgo"
+//	"github.com/clockworkpi/LauncherGoDev/sysgo"
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 
-	"github.com/fhs/gompd/v2/mpd"
-
+//	"github.com/fhs/gompd/v2/mpd"
+	
 )
 
 type MusicLibListPage struct {
@@ -28,14 +29,15 @@ type MusicLibListPage struct {
 
 	IP     string
 
-        MyList   []UI.ListItemInterface
-	MyStack        *MusicLibStack
+        //MyList   []UI.ListItemInterface
+	MyStack        *UI.FolderStack
         BGwidth  int
         BGheight int //70	
         Scroller *UI.ListScroller
         Scrolled int
+	
+        Parent *MusicPlayerPage// also use the MpdClient from 
 
-        Parent *MusicPlayerPage
 }
 
 func NewMusicLibListPage() *MusicLibListPage {
@@ -74,12 +76,7 @@ func (self *MusicLibListPage) SetCoords() {
 }
 
 func (self *MusicLibListPage) SyncList(path string) {
-	conn, err := mpd.Dial("unix", sysgo.MPD_socket)
-        if err != nil {
-                log.Fatalln(err)
-        }
-        
-	defer conn.Close()
+	conn := self.Parent.MpdClient
 	
 	self.MyList = nil
 
@@ -113,25 +110,25 @@ func (self *MusicLibListPage) SyncList(path string) {
 	
 	for i, m := range atts {
 
-		li : NewMusicLibListPageListItem()
+		li := NewMusicLibListPageListItem()
 		li.Parent = self
                 li.PosX = start_x
                 li.PosY = start_y + (i+hasparent)*li.Height
                 li.Width = UI.Width
-                li.Fonts["normal"] = self.ListFont
+                li.Fonts["normal"] = self.ListFontObj
                 li.MyType = UI.ICON_TYPES["FILE"]
 		
 		init_val := "NoName"
 
 		if val, ok := m["directory"] ; ok {
 			li.MyType = UI.ICON_TYPES["DIR"]
-			init_val = filepath.Base(m["directory"])
-			li.Path = m["directory"]
+			init_val = filepath.Base(val)
+			li.Path = val
 		}
 
-		if val, ok = m["file"]; ok {
+		if val, ok := m["file"]; ok {
 			li.MyType = UI.ICON_TYPES["FILE"]
-			li.Path = m["file"]
+			li.Path = val
 
 			val2, ok2 := m["Title"]
 			if ok2  && len(val2) > 4{
@@ -162,7 +159,9 @@ func (self *MusicLibListPage) Init() {
 	self.Width = self.Screen.Width
 	self.Height = self.Screen.Height
 
-	ps := UI.NewInfoPageSelector()
+	ps := NewListPageSelector()
+        ps.Parent = self
+
         ps.Width = UI.Width - 12
         ps.PosX = 2
         ps.Parent = self
@@ -195,14 +194,66 @@ func (self *MusicLibListPage) Init() {
         self.Scroller.PosY = 2
         self.Scroller.Init()
 
+	self.MyStack = UI.NewFolderStack()
+	self.MyStack.SetRootPath("/")
+
+}
+
+func (self *MusicLibListPage) Click() {
+	self.RefreshPsIndex()
+	
+        if  len(self.MyList) == 0 {
+                return
+        }
+
+	cur_li := self.MyList[self.PsIndex].(*MusicLibListPageListItem)
+	
+        if cur_li.MyType == UI.ICON_TYPES["DIR"] {
+            if cur_li.Path == "[..]" {
+                self.MyStack.Pop()
+                self.SyncList( self.MyStack.Last() )
+                self.PsIndex = 0
+	    } else {
+                self.MyStack.Push( cur_li.Path )
+                self.SyncList( self.MyStack.Last() )
+                self.PsIndex = 0
+            }
+    	}
+
+        if cur_li.MyType == UI.ICON_TYPES["FILE"] {
+            //addfile(cur_li.Path)
+            //PlayListPage.SyncList()
+            //print("add" , cur_li._Path)
+	}
+
+        self.Screen.Draw()
+        self.Screen.SwapAndShow()	
+
 }
 
 func (self *MusicLibListPage) KeyDown(ev *event.Event) {
+	
         if ev.Data["Key"] == UI.CurKeys["Left"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
                 self.ReturnToUpLevelPage()
                 self.Screen.Draw()
                 self.Screen.SwapAndShow()
         }
+
+
+        if ev.Data["Key"] == UI.CurKeys["Up"] {
+
+                self.ScrollUp()
+                self.Screen.Draw()
+                self.Screen.SwapAndShow()
+        }
+
+        if ev.Data["Key"] == UI.CurKeys["Down"] {
+
+                self.ScrollDown()
+                self.Screen.Draw()
+                self.Screen.SwapAndShow()
+        }
+
 
 	return
 }
@@ -213,6 +264,37 @@ func (self *MusicLibListPage) Draw() {
         if len(self.MyList) == 0 {
                 self.Icons["bg"].NewCoord(self.Width/2, self.Height/2)
                 self.Icons["bg"].Draw()
+	}else {
+		if len(self.MyList)*UI.DefaultInfoPageListItemHeight > self.Height {
+			self.Ps.(*ListPageSelector).Width = self.Width - 11
+	                self.Ps.Draw()
+
+			for _, v := range self.MyList {
+	                        if v.(*MusicLibListPageListItem).PosY > self.Height+self.Height/2 {
+        	                        break
+	                        }
+
+        	                if v.(*MusicLibListPageListItem).PosY < 0 {
+                	                continue
+                        	}
+
+	                        v.Draw()				
+			}
+
+		} else{
+	                self.Ps.(*ListPageSelector).Width = self.Width
+        	        self.Ps.Draw()
+                	for _, v := range self.MyList {
+                        	if v.(*MusicLibListPageListItem).PosY > self.Height+self.Height/2 {
+                                	break
+	                        }
+
+        	                if v.(*MusicLibListPageListItem).PosY < 0 {
+                	                continue
+                       	 	}
+	                        v.Draw()
+	                }
+		}
 	}
 
         if self.HWND != nil {

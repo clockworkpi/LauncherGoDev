@@ -5,7 +5,7 @@ import (
 
 	//	"math"
 	//"reflect"
-	"sync"
+//	"sync"
 
 	"github.com/veandco/go-sdl2/sdl"
 
@@ -18,54 +18,6 @@ import (
 	"github.com/clockworkpi/LauncherGoDev/sysgo/easings"
 	"github.com/cuu/gogame/transform"
 )
-
-type element struct {
-	data interface{}
-	next *element
-}
-
-type PageStack struct {
-	lock *sync.Mutex
-	head *element
-	Size int
-}
-
-func (stk *PageStack) Push(data interface{}) {
-	stk.lock.Lock()
-
-	element := new(element)
-	element.data = data
-	temp := stk.head
-	element.next = temp
-	stk.head = element
-	stk.Size++
-
-	stk.lock.Unlock()
-}
-
-func (stk *PageStack) Pop() interface{} {
-	if stk.head == nil {
-		return nil
-	}
-	stk.lock.Lock()
-	r := stk.head.data
-	stk.head = stk.head.next
-	stk.Size--
-
-	stk.lock.Unlock()
-
-	return r
-}
-
-func (stk *PageStack) Length() int {
-	return stk.Size
-}
-
-func NewPageStack() *PageStack {
-	stk := new(PageStack)
-	stk.lock = &sync.Mutex{}
-	return stk
-}
 
 type PageSelectorInterface interface {
 	Init(x, y, w, h, alpha int)
@@ -208,6 +160,7 @@ type PageInterface interface {
 	OnReturnBackCb()
 	OnKbdReturnBackCb()
 	OnExitCb()
+	OnPopUpCb()
 
 	//	IconClick()
 	ResetPageSelector()
@@ -806,13 +759,15 @@ func (self *Page) IconClick() {
 }
 
 func (self *Page) ReturnToUpLevelPage() {
+
+	self.Screen.CurrentPage.OnPopUpCb()
+
 	pop_page := self.Screen.MyPageStack.Pop()
 	if pop_page != nil {
 		page_ := pop_page.(PageInterface)
 		page_.Draw()
 		self.Screen.CurrentPage = page_
 		self.Screen.CurrentPage.OnReturnBackCb()
-
 	} else {
 		if self.Screen.MyPageStack.Length() == 0 {
 			if len(self.Screen.Pages) > 0 {
@@ -824,6 +779,7 @@ func (self *Page) ReturnToUpLevelPage() {
 			}
 		}
 	}
+
 }
 
 func (self *Page) ClearCanvas() {
@@ -919,9 +875,12 @@ func (self *Page) OnReturnBackCb() {
 }
 
 func (self *Page) OnExitCb() {
-
+	//MainScreen will call every page's OnExitCb when launchego ready to exit(0) 
 }
-
+func (self *Page) OnPopUpCb(){
+	//happend when page switching 
+	//use self.Screen.Current.OnPopUpCb to call the current custom Page's OnPopUpCb ,not this empty one
+}
 func (self *Page) Draw() {
 	self.ClearCanvas()
 	self.DrawIcons()

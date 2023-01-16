@@ -398,13 +398,16 @@ func (self *WareHouse) Init()  {
 			self.rpcSecret,
 			gotime.Second, AppNotifier{Parent:self})
 		
-    if err != nil {
+	    	if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(2)
-    }
+		}
+
 		self.rpcc = rpcc
 		self.Downloader = grab.NewClient()
 		self.Downloading = make(chan bool,1)
+
+		self.Screen.HookExitCb(self)
 
 	}
 
@@ -768,7 +771,6 @@ func (self *WareHouse)  OnKbdReturnBackCb() {
 }
 
 func (self *WareHouse) OnExitCb() {
-	
 	self.SetDownloading(false)
 	self.rpcc.Close()
 	

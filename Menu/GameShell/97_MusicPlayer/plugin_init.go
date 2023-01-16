@@ -11,18 +11,23 @@ import (
 	*/
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 	//"github.com/clockworkpi/LauncherGoDev/sysgo/DBUS"
+	"github.com/fhs/gompd/v2/mpd"
+
 )
 
 /******************************************************************************/
 type MusicPlayerPlugin struct {
 	UI.Plugin
 	MusicPlayerPage *MusicPlayerPage
+	MpdClient *mpd.Client
 }
 
 func (self *MusicPlayerPlugin) Init(main_screen *UI.MainScreen) {
 	self.MusicPlayerPage = NewMusicPlayerPage()
 	self.MusicPlayerPage.SetScreen(main_screen)
 	self.MusicPlayerPage.SetName("Music Player")
+	self.MpdClient = nil
+	self.MusicPlayerPage.MpdClient = self.MpdClient
 	self.MusicPlayerPage.Init()
 }
 

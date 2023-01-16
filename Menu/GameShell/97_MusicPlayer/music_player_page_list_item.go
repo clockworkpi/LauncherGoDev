@@ -1,23 +1,23 @@
 package MusicPlayer
 
 import (
-        "fmt"
+        //"fmt"
         //"io/ioutil"
         //"path/filepath"
         "github.com/veandco/go-sdl2/ttf"
-        "runtime"
-        "strconv"
-        "strings"
+        //"runtime"
+        //"strconv"
+        //"strings"
         //"github.com/mitchellh/go-homedir"
 
-        "github.com/clockworkpi/LauncherGoDev/sysgo"
+        //"github.com/clockworkpi/LauncherGoDev/sysgo"
         "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
         "github.com/cuu/gogame/color"
         "github.com/cuu/gogame/draw"
-        "github.com/cuu/gogame/event"
-        "github.com/cuu/gogame/rect"
-        "github.com/cuu/gogame/surface"
-        "github.com/cuu/gogame/time"
+        //"github.com/cuu/gogame/event"
+        //"github.com/cuu/gogame/rect"
+        //"github.com/cuu/gogame/surface"
+        //"github.com/cuu/gogame/time"
 )
 
 type MusicPlayPageListItem struct {
@@ -25,7 +25,7 @@ type MusicPlayPageListItem struct {
 
         Active bool
 	Value  string
-	MyType string
+	MyType int
 	Path  string
 }
 
@@ -49,8 +49,8 @@ func (self *MusicPlayPageListItem) Draw() {
         self.Labels["Text"].NewCoord(x, self.PosY+(self.Height-h)/2)
 
         if self.Active == true {
-                self.Parent.(*MusicPlayPage).Icons["sys"].NewCoord(self.Parent.(*MusicPlayPage).Width-30, self.PosY+5)
-                self.Parent.(*MusicPlayPage).Icons["sys"].Draw()
+                self.Parent.(*MusicPlayerPage).Icons["sys"].NewCoord(self.Parent.(*MusicPlayerPage).Width-30, self.PosY+5)
+                self.Parent.(*MusicPlayerPage).Icons["sys"].Draw()
         }
 
         self.Labels["Text"].SetBold(self.Active)

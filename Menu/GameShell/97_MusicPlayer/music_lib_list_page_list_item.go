@@ -1,23 +1,23 @@
 package MusicPlayer
 
 import (
-        "fmt"
+//        "fmt"
         //"io/ioutil"
         //"path/filepath"
         "github.com/veandco/go-sdl2/ttf"
-        "runtime"
-        "strconv"
-        "strings"
+//        "runtime"
+//        "strconv"
+//        "strings"
         //"github.com/mitchellh/go-homedir"
 
-        "github.com/clockworkpi/LauncherGoDev/sysgo"
+ ///       "github.com/clockworkpi/LauncherGoDev/sysgo"
         "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
         "github.com/cuu/gogame/color"
         "github.com/cuu/gogame/draw"
-        "github.com/cuu/gogame/event"
-        "github.com/cuu/gogame/rect"
-        "github.com/cuu/gogame/surface"
-        "github.com/cuu/gogame/time"
+//        "github.com/cuu/gogame/event"
+//        "github.com/cuu/gogame/rect"
+//        "github.com/cuu/gogame/surface"
+//        "github.com/cuu/gogame/time"
 )
 
 type MusicLibListPageListItem struct {
@@ -25,7 +25,7 @@ type MusicLibListPageListItem struct {
 
         Active bool
 	Value  string
-	MyType string
+	MyType int
 	Path  string
 }
 

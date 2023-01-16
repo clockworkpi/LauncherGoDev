@@ -32,7 +32,7 @@ type DownloadProcessPage struct {
 
 	URLColor  *color.Color
 	TextColor *color.Color
-	TheTicker *gotime.Ticker
+	//TheTicker *gotime.Ticker
 
 	Downloader *grab.Client
 	resp       *grab.Response
@@ -95,9 +95,9 @@ func (self *DownloadProcessPage) Init() {
 func (self *DownloadProcessPage) OnExitCb() {
 
 	//Stop Ticker and the Grab
-	if self.TheTicker != nil {
-		self.TheTicker.Stop()
-	}
+	//if self.TheTicker != nil {
+	//	self.TheTicker.Stop()
+	//}
 
 }
 

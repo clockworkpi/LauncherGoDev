@@ -38,6 +38,7 @@ type ScreenInterface interface {
 	IsPluginPackage(dirname string) bool
 	KeyDown(ev *event.Event)
 	OnExitCb()
+	HookExitCb()
 	PushCurPage()
 	PushPage(pg PageInterface)
 	RunEXE(cmdpath string)
@@ -160,10 +161,13 @@ func (self *MessageBox) Draw() {
 type MainScreen struct {
 	Widget
 	Pages     []PageInterface
+	Child     []PageInterface
+
 	PageMax   int
 	PageIndex int
 
 	MyPageStack *PageStack
+
 	CurrentPage PageInterface
 	CanvasHWND  *sdl.Surface
 	HWND        *sdl.Surface
@@ -181,6 +185,7 @@ type MainScreen struct {
 
 	LastKey     string
 	LastKeyDown gotime.Time
+
 }
 
 func NewMainScreen() *MainScreen {
@@ -377,8 +382,16 @@ func (self *MainScreen) RunEXE(cmdpath string) {
 
 }
 
+func (self *MainScreen) HookExitCb( page PageInterface) {
+	self.Child = append(self.Child,page)
+}
+
 func (self *MainScreen) OnExitCb() {
-	self.CurrentPage.OnExitCb()
+	PageLen := len(self.Child)
+
+        for i := 0; i < PageLen; i++ {
+		self.Child[i].OnExitCb()
+	}
 }
 
 func (self *MainScreen) KeyDown(ev *event.Event) {

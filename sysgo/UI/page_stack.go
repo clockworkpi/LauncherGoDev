@@ -1,21 +1,21 @@
-package MusicPlayer
+package UI
 
 import (
 	"sync"
 )
 
 type element struct {
-	data interface{}
-	next *element
+        data interface{}
+        next *element
 }
 
-type MusicLibStack struct {
-	lock *sync.Mutex
-	head *element
-	Size int
+type PageStack struct {
+	lock     *sync.Mutex
+	head     *element
+	Size     int
 }
 
-func (stk *MusicLibStack) Push(data interface{}) {
+func (stk *PageStack) Push(data interface{}) {
 	stk.lock.Lock()
 
 	element := new(element)
@@ -28,7 +28,7 @@ func (stk *MusicLibStack) Push(data interface{}) {
 	stk.lock.Unlock()
 }
 
-func (stk *MusicLibStack) Pop() interface{} {
+func (stk *PageStack) Pop() interface{} {
 	if stk.head == nil {
 		return nil
 	}
@@ -42,23 +42,21 @@ func (stk *MusicLibStack) Pop() interface{} {
 	return r
 }
 
-func (stk *MusicLibStack) Length() int {
+func (stk *PageStack) Length() int {
 	return stk.Size
 }
 
-func (stk *MusicLibStack) Last() string {
-	idx := stk.Length() -1
+func (stk *PageStack) Last() interface{} {
+	idx := stk.Length() - 1
 	if idx < 0 {
-		return "/"
+		return nil
 	} else {
-		return stk.head.data.(string)
+		return stk.head.data
 	}
 }
 
-func NewMusicLibStack() *MusicLibStack {
-	stk := new(MusicLibStack)
+func NewPageStack() *PageStack {
+	stk := new(PageStack)
 	stk.lock = &sync.Mutex{}
 	return stk
 }
-
-
