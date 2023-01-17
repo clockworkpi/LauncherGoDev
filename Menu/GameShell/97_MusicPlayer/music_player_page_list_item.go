@@ -27,6 +27,8 @@ type MusicPlayPageListItem struct {
 	Value  string
 	MyType int
 	Path  string
+
+	PlayingProcess int
 }
 
 func NewMusicPlayPageListItem() *MusicPlayPageListItem {
@@ -47,15 +49,30 @@ func (self *MusicPlayPageListItem) Draw() {
         w, h := self.Labels["Text"].Size()
 
         self.Labels["Text"].NewCoord(x, self.PosY+(self.Height-h)/2)
+	
 
-        if self.Active == true {
-                self.Parent.(*MusicPlayerPage).Icons["sys"].NewCoord(self.Parent.(*MusicPlayerPage).Width-30, self.PosY+5)
-                self.Parent.(*MusicPlayerPage).Icons["sys"].Draw()
-        }
+	if self.MyType == UI.ICON_TYPES["DIR"] &&  self.Path != "[..]" {
+		sys_icon := self.Parent.(*MusicPlayerPage).Icons["sys"]
+		sys_icon.IconIndex = 0.
+		sys_icon.NewCoord(self.PosX+12,self.PosY + ( self.Height - sys_icon.Height)/2 + sys_icon.Height /2)
+                sys_icon.Draw()		
+	}
 
+	if self.MyType == UI.ICON_TYPES["FILE"] {
+		sys_icon := self.Parent.(*MusicPlayerPage).Icons["sys"]
+		sys_icon.IconIndex = 1
+		sys_icon.NewCoord(self.PosX+12,self.PosY + ( self.Height - sys_icon.Height)/2 + sys_icon.Height /2)
+		sys_icon.Draw()
+	}
+
+        self.Labels["Text"].Active = self.Active
+
+	self.Labels["Text"].NewCoord(x, self.PosY+(self.Height-h)/2)
+	
         self.Labels["Text"].SetBold(self.Active)
         self.Labels["Text"].Draw()
-
+	
+	/*
         if _, ok := self.Labels["Small"]; ok {
                 x, _ = self.Labels["Small"].Coord()
                 w, h = self.Labels["Small"].Size()
@@ -64,10 +81,16 @@ func (self *MusicPlayPageListItem) Draw() {
                 self.Labels["Small"].Draw()
 
         }
-
-        canvas_ := self.Parent.GetCanvasHWND()
-        draw.Line(canvas_, &color.Color{169, 169, 169, 255},
+	*/
+        canvas_ := self.Parent.GetCanvasHWND()	
+        draw.Line(canvas_, UI.MySkinManager.GiveColor("Line"),
                 self.PosX, self.PosY+self.Height-1,
                 self.PosX+self.Width, self.PosY+self.Height-1, 1)
 
+	if self.PlayingProcess > 0 {
+		seek_posx := int(self.Width * self.PlayingProcess/100.0)	
+		draw.Line(canvas_, UI.MySkinManager.GiveColor("Active"),
+                	self.PosX, self.PosY+self.Height-2,
+	                self.PosX+seek_posx, self.PosY+self.Height-2, 2)
+	}
 }

@@ -93,6 +93,59 @@ func (self *MusicPlayerPage) SetLabels() {
 
 }
 
+func (self *MusicPlayerPage) SyncList() {
+	conn := self.MpdClient
+	start_x := 0
+	start_y := 0
+
+	if conn == nil {
+		return
+	}
+	
+	self.MyList = nil
+
+	play_list,_ := conn.PlaylistInfo(-1,-1)
+
+	for i,v := range play_list {
+		li := NewMusicPlayPageListItem()
+		li.Parent = self
+		li.PosX = start_x
+		li.PosY = start_y + UI.DefaultInfoPageListItemHeight * i  
+		li.Width = UI.Width
+		li.Fonts["normal"] = self.ListFontObj
+		
+		if val,ok:=v["Title"]; ok {
+			li.Init(val)
+
+			if val2,ok2 := v["file"]; ok2 {
+				li.Path = val2
+			}
+		}else {
+			if val2,ok2 := v["file"]; ok2 {
+				li.Init(filepath.Base(val2))
+				li.Path = val2
+			}else{
+				li.Init("NoName")
+			}
+		}
+		
+		li.Labels["Text"].PosX = 7
+		self.MyList = append(self.MyList, li)
+	}
+	
+	self.SyncPlaying()
+}
+
+func (self *MusicPlayerPage) SyncPlaying() {
+	conn := self.MpdClient
+
+	for i,_ := range self.MyList {
+		self.MyList[i].(*MusicPlayPageListItem).Active = false
+		self.MyList[i].(*MusicPlayPageListItem).PlayingProcess = 0
+	}
+
+}
+
 func (self *MusicPlayerPage) Init() {
 	if self.Screen == nil {
 		panic("No Screen")

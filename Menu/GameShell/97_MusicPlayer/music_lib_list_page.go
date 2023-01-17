@@ -221,9 +221,13 @@ func (self *MusicLibListPage) Click() {
     	}
 
         if cur_li.MyType == UI.ICON_TYPES["FILE"] {
-            //addfile(cur_li.Path)
-            //PlayListPage.SyncList()
-            //print("add" , cur_li._Path)
+		conn := self.Parent.MpdClient
+		conn.Add(cur_li.Path)
+		self.Parent.SyncList()	
+	        //addfile(cur_li.Path)
+            	//PlayListPage.SyncList()
+            	//print("add" , cur_li._Path)
+
 	}
 
         self.Screen.Draw()
