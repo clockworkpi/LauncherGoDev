@@ -12,7 +12,7 @@ import (
 
         //"github.com/clockworkpi/LauncherGoDev/sysgo"
         "github.com/clockworkpi/LauncherGoDev/sysgo/UI"
-        "github.com/cuu/gogame/color"
+        //"github.com/cuu/gogame/color"
         "github.com/cuu/gogame/draw"
         //"github.com/cuu/gogame/event"
         //"github.com/cuu/gogame/rect"
@@ -46,26 +46,27 @@ func NewMusicPlayPageListItem() *MusicPlayPageListItem {
 func (self *MusicPlayPageListItem) Draw() {
 
         x, _ := self.Labels["Text"].Coord()
-        w, h := self.Labels["Text"].Size()
+        _, h := self.Labels["Text"].Size()
 
         self.Labels["Text"].NewCoord(x, self.PosY+(self.Height-h)/2)
 	
 
 	if self.MyType == UI.ICON_TYPES["DIR"] &&  self.Path != "[..]" {
 		sys_icon := self.Parent.(*MusicPlayerPage).Icons["sys"]
-		sys_icon.IconIndex = 0.
-		sys_icon.NewCoord(self.PosX+12,self.PosY + ( self.Height - sys_icon.Height)/2 + sys_icon.Height /2)
+		_,h := sys_icon.Size()
+		sys_icon.SetIconIndex(0)
+		sys_icon.NewCoord(self.PosX+12,self.PosY + ( self.Height - h)/2 + h/2)
                 sys_icon.Draw()		
 	}
 
 	if self.MyType == UI.ICON_TYPES["FILE"] {
 		sys_icon := self.Parent.(*MusicPlayerPage).Icons["sys"]
-		sys_icon.IconIndex = 1
-		sys_icon.NewCoord(self.PosX+12,self.PosY + ( self.Height - sys_icon.Height)/2 + sys_icon.Height /2)
+		_,h := sys_icon.Size()
+		sys_icon.SetIconIndex(1)
+		sys_icon.NewCoord(self.PosX+12,self.PosY + ( self.Height - h)/2 + h /2)
 		sys_icon.Draw()
 	}
 
-        self.Labels["Text"].Active = self.Active
 
 	self.Labels["Text"].NewCoord(x, self.PosY+(self.Height-h)/2)
 	

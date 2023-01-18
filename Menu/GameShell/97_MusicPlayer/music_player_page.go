@@ -2,6 +2,7 @@ package MusicPlayer
 
 import (
 	"fmt"
+	"path/filepath"
 	"log"
 	"github.com/cuu/gogame/event"
 	"github.com/cuu/gogame/rect"
@@ -128,8 +129,8 @@ func (self *MusicPlayerPage) SyncList() {
 				li.Init("NoName")
 			}
 		}
-		
-		li.Labels["Text"].PosX = 7
+		x,_ := li.Labels["Text"].Coord()	
+		li.Labels["Text"].NewCoord(x,7)
 		self.MyList = append(self.MyList, li)
 	}
 	
@@ -143,7 +144,10 @@ func (self *MusicPlayerPage) SyncPlaying() {
 		self.MyList[i].(*MusicPlayPageListItem).Active = false
 		self.MyList[i].(*MusicPlayPageListItem).PlayingProcess = 0
 	}
+	current_song,_ := conn.CurrentSong()
+	if len(current_song) > 0 {
 
+	}
 }
 
 func (self *MusicPlayerPage) Init() {
