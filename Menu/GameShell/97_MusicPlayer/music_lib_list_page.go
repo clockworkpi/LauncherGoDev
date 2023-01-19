@@ -1,7 +1,7 @@
 package MusicPlayer
 
 import (
-	//"fmt"
+	"fmt"
 	"log"
 	"path/filepath"
 
@@ -224,9 +224,7 @@ func (self *MusicLibListPage) Click() {
 		conn := self.Parent.MpdClient
 		conn.Add(cur_li.Path)
 		self.Parent.SyncList()	
-	        //addfile(cur_li.Path)
-            	//PlayListPage.SyncList()
-            	//print("add" , cur_li._Path)
+            	fmt.Println("add" , cur_li.Path)
 
 	}
 
@@ -237,12 +235,11 @@ func (self *MusicLibListPage) Click() {
 
 func (self *MusicLibListPage) KeyDown(ev *event.Event) {
 	
-        if ev.Data["Key"] == UI.CurKeys["Left"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+        if UI.IsKeyMenuOrB(ev.Data["Key"]) || ev.Data["Key"] == UI.CurKeys["Left"] {
                 self.ReturnToUpLevelPage()
                 self.Screen.Draw()
                 self.Screen.SwapAndShow()
         }
-
 
         if ev.Data["Key"] == UI.CurKeys["Up"] {
 
@@ -258,6 +255,9 @@ func (self *MusicLibListPage) KeyDown(ev *event.Event) {
                 self.Screen.SwapAndShow()
         }
 
+	if UI.IsKeyStartOrA(ev.Data["Key"]) {
+		self.Click()
+	}
 
 	return
 }
@@ -284,6 +284,9 @@ func (self *MusicLibListPage) Draw() {
 
 	                        v.Draw()				
 			}
+
+                self.Scroller.UpdateSize( len(self.MyList)*UI.DefaultInfoPageListItemHeight, self.PsIndex*UI.DefaultInfoPageListItemHeight)
+                self.Scroller.Draw()
 
 		} else{
 	                self.Ps.(*ListPageSelector).Width = self.Width

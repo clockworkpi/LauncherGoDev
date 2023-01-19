@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"log"
+	"strconv"
+	"strings"
 	"github.com/cuu/gogame/event"
 	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/surface"
@@ -36,6 +38,9 @@ type MusicPlayerPage struct {
         Scrolled int
 
 	MpdClient *mpd.Client
+
+	CurSongTime string
+	CurSongName string
 }
 
 func NewMusicPlayerPage() *MusicPlayerPage {
@@ -60,6 +65,8 @@ func NewMusicPlayerPage() *MusicPlayerPage {
 	p.BGwidth = 56
 	p.BGheight = 70
 	
+	p.CurSongTime = "0:0"
+
 	
 	return p
 }
@@ -76,6 +83,8 @@ func (self *MusicPlayerPage) OnLoadCb() {
 
 		fmt.Println("Start mpd client")
 	}
+
+	self.SyncList()
 }
 
 func (self *MusicPlayerPage) OnPopUpCb() {
@@ -84,6 +93,10 @@ func (self *MusicPlayerPage) OnPopUpCb() {
 		self.MpdClient = nil
 		fmt.Println("Close mpd client")
 	}
+}
+
+func (self *MusicPlayerPage) OnReturnBackCb() {
+	self.SyncList()
 }
 
 func (self *MusicPlayerPage) SetCoords() {
@@ -146,7 +159,29 @@ func (self *MusicPlayerPage) SyncPlaying() {
 	}
 	current_song,_ := conn.CurrentSong()
 	if len(current_song) > 0 {
+		if val,ok := current_song["song"]; ok{
+			posid, _ := strconv.Atoi(val)
+			if posid < len(self.MyList) {
+				if state,ok2 := current_song["state"]; ok2 {
+					if state == "stop" {
+						self.MyList[posid].(*MusicPlayPageListItem).Active = false
+					}else{
+						self.MyList[posid].(*MusicPlayPageListItem).Active = true
+					}
+				}
 
+				if song_time,ok3 := current_song["time"]; ok3 {
+					self.CurSongTime = song_time
+					times := strings.Split(self.CurSongTime,":")
+					if len(times) > 1{
+						cur,_ := strconv.ParseFloat(times[0],64)
+						end,_ := strconv.ParseFloat(times[1],64)
+						pos := int( (cur/end)*100.0 )
+						self.MyList[posid].(*MusicPlayPageListItem).PlayingProcess = pos
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -164,12 +199,12 @@ func (self *MusicPlayerPage) Init() {
 	self.Width = self.Screen.Width
 	self.Height = self.Screen.Height
 
-	ps := UI.NewInfoPageSelector()
-        ps.Width = UI.Width - 12
-        ps.PosX = 2
+	//ps := UI.NewInfoPageSelector()
+	ps := NewListPageSelector()
+        //ps.Width = UI.Width - 12
         ps.Parent = self
-
         self.Ps = ps
+
         self.PsIndex = 0
 
 	bgpng := UI.NewIconItem()
@@ -218,6 +253,21 @@ func (self *MusicPlayerPage) KeyDown(ev *event.Event) {
 		self.Screen.Draw()
 		self.Screen.SwapAndShow()
 	}
+
+        if ev.Data["Key"] == UI.CurKeys["Up"] {
+
+                self.ScrollUp()
+                self.Screen.Draw()
+                self.Screen.SwapAndShow()
+        }
+
+        if ev.Data["Key"] == UI.CurKeys["Down"] {
+
+                self.ScrollDown()
+                self.Screen.Draw()
+                self.Screen.SwapAndShow()
+        }
+
 	return
 }
 
@@ -227,8 +277,42 @@ func (self *MusicPlayerPage) Draw() {
         if len(self.MyList) == 0 {
                 self.Icons["bg"].NewCoord(self.Width/2, self.Height/2)
                 self.Icons["bg"].Draw()
-        }
+        }else {
+                if len(self.MyList)*UI.DefaultInfoPageListItemHeight > self.Height {
+                        self.Ps.(*ListPageSelector).Width = self.Width - 11
+                        self.Ps.Draw()
 
+                        for _, v := range self.MyList {
+                                if v.(*MusicPlayPageListItem).PosY > self.Height+self.Height/2 {
+                                        break
+                                }
+
+                                if v.(*MusicPlayPageListItem).PosY < 0 {
+                                        continue
+                                }
+
+                                v.Draw()
+                        }
+
+                self.Scroller.UpdateSize( len(self.MyList)*UI.DefaultInfoPageListItemHeight, self.PsIndex*UI.DefaultInfoPageListItemHeight)
+                self.Scroller.Draw()
+
+                } else{
+                        self.Ps.(*ListPageSelector).Width = self.Width
+                        self.Ps.Draw()
+                        for _, v := range self.MyList {
+                                if v.(*MusicPlayPageListItem).PosY > self.Height+self.Height/2 {
+                                        break
+                                }
+
+                                if v.(*MusicPlayPageListItem).PosY < 0 {
+                                        continue
+                                }
+                                v.Draw()
+                        }
+                }
+	}
+	
         if self.HWND != nil {
                 surface.Fill(self.HWND, UI.MySkinManager.GiveColor("White"))
                 rect_ := rect.Rect(self.PosX, self.PosY, self.Width, self.Height)
