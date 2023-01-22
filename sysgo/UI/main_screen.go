@@ -411,7 +411,18 @@ func (self *MainScreen) KeyDown(ev *event.Event) {
 	self.LastKey = ev.Data["Key"]
 
 }
+func (self *MainScreen) ShowMsg(content string, blocktime int) {
+	self.MsgBox.SetText(content)
+        self.MsgBox.Draw()
+        self.SwapAndShow()
 
+	if blocktime > 0 {
+		time.BlockDelay(blocktime)
+		self.CurrentPage.Draw()
+		self.SwapAndShow()
+	}
+
+}
 func (self *MainScreen) DrawRun() {
 	self.MsgBox.SetText("Launching....")
 	self.MsgBox.Draw()

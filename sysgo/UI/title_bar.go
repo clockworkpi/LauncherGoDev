@@ -132,7 +132,7 @@ func NewTitleBar() *TitleBar {
 
 	t.icon_base_path = SkinMap("sysgo/gameshell/titlebar_icons/")
 
-	t.TitleFont = Fonts["varela16"]
+	t.TitleFont = Fonts["notosanscjk15"]
 	t.TimeFont = Fonts["varela12"]
 
 	t.InLowBackLight = -1
@@ -293,15 +293,15 @@ func (self *TitleBar) SetSoundVolume(vol int) {
 func (self *TitleBar) CheckBatteryStat() {
 	bat_segs := [][]int{[]int{0, 6}, []int{7, 15}, []int{16, 20}, []int{21, 30}, []int{31, 50}, []int{51, 60}, []int{61, 80}, []int{81, 90}, []int{91, 100}}
 
+	self.Icons["battery"] = self.Icons["battery_unknown"]
+
 	if FileExists(sysgo.Battery) == false {
-		self.Icons["battery"] = self.Icons["battery_unknown"]
 		return
 	}
 
 	file, err := os.Open(sysgo.Battery)
 	if err != nil {
 		fmt.Println("Could not open file ", sysgo.Battery)
-		self.Icons["battery"] = self.Icons["battery_unknown"]
 		return
 	}
 
@@ -520,7 +520,7 @@ func (self *TitleBar) GetLocalTime() gotime.Time {
 func (self *TitleBar) Draw(title string) {
 	self.ClearCanvas()
 	self.Title = title
-
+	
 	cur_time := jodaTime.Format("HH:mm", self.GetLocalTime())
 
 	time_text_w, time_text_h := font.Size(self.TimeFont, cur_time)
@@ -529,12 +529,10 @@ func (self *TitleBar) Draw(title string) {
 	title_text_surf := font.Render(self.TitleFont, self.Title, true, self.SkinManager.GiveColor("Text"), nil)
 
 	surface.Blit(self.CanvasHWND, title_text_surf, draw.MidRect(title_text_w/2+self.LOffset, title_text_h/2+(self.BarHeight-title_text_h)/2, title_text_w, title_text_h, Width, Height), nil)
-	title_text_surf.Free()
 
 	time_text_surf := font.Render(self.TimeFont, cur_time, true, self.SkinManager.GiveColor("Text"), nil)
 	surface.Blit(self.CanvasHWND, time_text_surf, draw.MidRect(Width-time_text_w/2-self.ROffset, time_text_h/2+(self.BarHeight-time_text_h)/2, time_text_w, time_text_h, Width, Height), nil)
 
-	time_text_surf.Free()
 
 	start_x := Width - time_text_w - self.ROffset - self.IconWidth*3 // close to the time_text
 
@@ -574,4 +572,7 @@ func (self *TitleBar) Draw(title string) {
 		rect_ := rect.Rect(self.PosX, self.PosY, self.Width, self.Height)
 		surface.Blit(self.HWND, self.CanvasHWND, &rect_, nil)
 	}
+
+	title_text_surf.Free()
+	time_text_surf.Free()
 }

@@ -51,7 +51,7 @@ func NewMusicPlayerPage() *MusicPlayerPage {
 
 	p.Align = UI.ALIGN["SLeft"]
 
-	p.FootMsg = [5]string{"Nav","Remove","RTA","Back","Play/Pause"}
+	p.FootMsg = [5]string{"Nav","Remove","","Back","Play/Pause"}
 
 
 	p.URLColor = UI.MySkinManager.GiveColor("URL")
@@ -185,6 +185,22 @@ func (self *MusicPlayerPage) SyncPlaying() {
 	}
 }
 
+func (self *MusicPlayerPage) InPlayList(path string) bool {
+	if self.MyList == nil || len(self.MyList) == 0 {
+		return false
+	}
+
+	for _,v := range self.MyList {
+		///fmt.Println(v.(*MusicPlayPageListItem).Path, path)
+
+		if v.(*MusicPlayPageListItem).Path == path {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (self *MusicPlayerPage) Init() {
 	if self.Screen == nil {
 		panic("No Screen")
@@ -234,7 +250,7 @@ func (self *MusicPlayerPage) Init() {
 	
 	self.MyMusicLibListPage = NewMusicLibListPage()
         self.MyMusicLibListPage.Screen = self.Screen
-        self.MyMusicLibListPage.Name = "Music Library"
+        self.MyMusicLibListPage.Name = "Music library"
         self.MyMusicLibListPage.Parent = self
         self.MyMusicLibListPage.Init()
 
@@ -267,7 +283,12 @@ func (self *MusicPlayerPage) KeyDown(ev *event.Event) {
                 self.Screen.Draw()
                 self.Screen.SwapAndShow()
         }
-
+	if ev.Data["Key"] == UI.CurKeys["X"] {
+		self.MpdClient.Delete(self.PsIndex,-1)
+		self.SyncList()
+		self.Screen.Draw()
+		self.Screen.SwapAndShow()
+	}
 	return
 }
 

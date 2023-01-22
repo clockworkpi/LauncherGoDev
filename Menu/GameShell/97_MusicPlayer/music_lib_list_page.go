@@ -66,16 +66,21 @@ func NewMusicLibListPage() *MusicLibListPage {
 	return p
 }
 
+
 func (self *MusicLibListPage) OnLoadCb() {
-	self.PosY = 0
-	self.SyncList("/")
+//	self.PosY = 0
+	if self.MyList == nil || len(self.MyList) == 0 {
+		self.MyStack.Clear()
+		self.SyncList("/")
+	}
 }
 
 func (self *MusicLibListPage) SetCoords() {
-
 }
 
 func (self *MusicLibListPage) SyncList(path string) {
+	fmt.Println("SyncList: ",path)
+	fmt.Println(self.MyStack)
 	conn := self.Parent.MpdClient
 	
 	self.MyList = nil
@@ -98,6 +103,7 @@ func (self *MusicLibListPage) SyncList(path string) {
                 li.PosY = start_y
                 li.Width = UI.Width
                 li.Fonts["normal"] = self.ListFontObj
+		li.Path = "[..]"
                 li.Init("[..]")
 		li.MyType = UI.ICON_TYPES["DIR"]
                 self.MyList = append(self.MyList, li)		
@@ -235,7 +241,7 @@ func (self *MusicLibListPage) Click() {
 
 func (self *MusicLibListPage) KeyDown(ev *event.Event) {
 	
-        if UI.IsKeyMenuOrB(ev.Data["Key"]) || ev.Data["Key"] == UI.CurKeys["Left"] {
+        if UI.IsKeyMenuOrA(ev.Data["Key"]) || ev.Data["Key"] == UI.CurKeys["Left"] {
                 self.ReturnToUpLevelPage()
                 self.Screen.Draw()
                 self.Screen.SwapAndShow()
@@ -255,10 +261,14 @@ func (self *MusicLibListPage) KeyDown(ev *event.Event) {
                 self.Screen.SwapAndShow()
         }
 
-	if UI.IsKeyStartOrA(ev.Data["Key"]) {
+	if ev.Data["Key"] == UI.CurKeys["B"] {
 		self.Click()
 	}
 
+	if ev.Data["Key"] == UI.CurKeys["Y"] {
+		self.Screen.ShowMsg("Scan...",300)
+		self.OnLoadCb()
+	}
 	return
 }
 
@@ -274,6 +284,13 @@ func (self *MusicLibListPage) Draw() {
 	                self.Ps.Draw()
 
 			for _, v := range self.MyList {
+				v.(*MusicLibListPageListItem).Active = false
+
+				if self.Parent.InPlayList( v.(*MusicLibListPageListItem).Path) {
+					v.(*MusicLibListPageListItem).Active = true
+					fmt.Println("in PlayList: ",v.(*MusicLibListPageListItem).Path)
+				}
+
 	                        if v.(*MusicLibListPageListItem).PosY > self.Height+self.Height/2 {
         	                        break
 	                        }
@@ -292,6 +309,13 @@ func (self *MusicLibListPage) Draw() {
 	                self.Ps.(*ListPageSelector).Width = self.Width
         	        self.Ps.Draw()
                 	for _, v := range self.MyList {
+                                v.(*MusicLibListPageListItem).Active = false
+
+                                if self.Parent.InPlayList( v.(*MusicLibListPageListItem).Path) {
+                                        v.(*MusicLibListPageListItem).Active = true
+                                        fmt.Println("in PlayList: ",v.(*MusicLibListPageListItem).Path)
+                                }
+
                         	if v.(*MusicLibListPageListItem).PosY > self.Height+self.Height/2 {
                                 	break
 	                        }

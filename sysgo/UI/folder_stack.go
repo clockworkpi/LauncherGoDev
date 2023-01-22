@@ -54,7 +54,11 @@ func (stk *FolderStack) Last() string {
 		return stk.head.data.(string)
 	}
 }
-
+func (stk *FolderStack) Clear() {
+	for stk.Length() > 0 {
+		stk.Pop()
+	}
+}
 func NewFolderStack() *FolderStack {
 	stk := new(FolderStack)
 	stk.lock = &sync.Mutex{}

@@ -48,10 +48,27 @@ func (self *MusicLibListPageListItem) Draw() {
 
         self.Labels["Text"].NewCoord(x, self.PosY+(self.Height-h)/2)
 
+	if self.MyType == UI.ICON_TYPES["DIR"] && self.Path != "[..]" {
+	    sys_icon := self.Parent.(*MusicLibListPage).Icons["sys"]
+            sys_icon.SetIconIndex(0)
+	    _,h := sys_icon.Size()
+            sys_icon.NewCoord(self.Width - 12,self.PosY+ (self.Height - h)/2+h/2)
+            sys_icon.Draw()
+	}
+
+        if self.MyType == UI.ICON_TYPES["FILE"] {
+	    sys_icon := self.Parent.(*MusicLibListPage).Icons["sys"]
+            sys_icon.SetIconIndex(1)
+	    _,h := sys_icon.Size()
+            sys_icon.NewCoord(self.Width-12,self.PosY+ (self.Height - h)/2+h/2)
+            sys_icon.Draw()
+	}
+	/*
         if self.Active == true {
                 self.Parent.(*MusicLibListPage).Icons["sys"].NewCoord(self.Parent.(*MusicLibListPage).Width-30, self.PosY+5)
                 self.Parent.(*MusicLibListPage).Icons["sys"].Draw()
         }
+	*/
 
         self.Labels["Text"].SetBold(self.Active)
         self.Labels["Text"].Draw()

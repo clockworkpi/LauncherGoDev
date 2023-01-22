@@ -70,6 +70,15 @@ func IsKeyStartOrA(key string) bool {
 	return key == CurKeys["Start"] || key == CurKeys["A"]
 }
 
+func IsKeyStartOrB(key string) bool {
+        return key == CurKeys["Start"] || key == CurKeys["B"]
+}
+
 func IsKeyMenuOrB(key string) bool {
 	return key == CurKeys["Menu"] || key == CurKeys["B"]
 }
+
+func IsKeyMenuOrA(key string) bool {
+        return key == CurKeys["Menu"] || key == CurKeys["A"]
+}
+

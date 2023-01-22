@@ -25,7 +25,7 @@ type MusicPlayerPlugin struct {
 func (self *MusicPlayerPlugin) Init(main_screen *UI.MainScreen) {
 	self.MusicPlayerPage = NewMusicPlayerPage()
 	self.MusicPlayerPage.SetScreen(main_screen)
-	self.MusicPlayerPage.SetName("Music Player")
+	self.MusicPlayerPage.SetName("Music player")
 	self.MpdClient = nil
 	self.MusicPlayerPage.MpdClient = self.MpdClient
 	self.MusicPlayerPage.Init()
