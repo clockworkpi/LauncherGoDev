@@ -62,19 +62,16 @@ func (self *BleForgetConfirmPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["B"] {
 		self.SnapMsg("Deleting")
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 
 		time.BlockDelay(400)
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 
 	}
 }
@@ -310,8 +307,7 @@ func (self *BleInfoPage) TryToForget() {
 		time.BlockDelay(400)
 
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 
 	} else {
 
@@ -327,17 +323,14 @@ func (self *BleInfoPage) TryToDisconnect() {
 	if is_connected {
 
 		self.Screen.FootBar.UpdateNavText("Disconnecting")
-		self.Screen.MsgBox.SetText("Disconnecting")
-		self.Screen.MsgBox.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.ShowMsg("Disconnecting",0)
 
 		self.MyDevice.Disconnect()
 
 		time.BlockDelay(350)
 
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 
 		self.Screen.FootBar.ResetNavText()
 	}
@@ -369,22 +362,19 @@ func (self *BleInfoPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Up"] {
 
 		self.ScrollUp()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Down"] {
 
 		self.ScrollDown()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 	if ev.Data["Key"] == UI.CurKeys["Enter"] {
 		self.Click()
@@ -512,9 +502,8 @@ func NewBluetoothPage() *BluetoothPage {
 func (self *BluetoothPage) ShowBox(msg string) {
 	self.MsgBox.Text = msg
 	self.ShowingMessageBox = true
-	self.Screen.Draw()
-	self.MsgBox.Draw()
-	self.Screen.SwapAndShow()
+
+	self.Screen.ShowMsg(msg,0)
 }
 
 func (self *BluetoothPage) HideBox() {
@@ -562,8 +551,7 @@ func (self *BluetoothPage) AbortedAndReturnToUpLevel() {
 	self.HideBox()
 	self.Screen.FootBar.ResetNavText()
 	self.ReturnToUpLevelPage()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 
 }
 
@@ -816,8 +804,7 @@ func (self *BluetoothPage) KeyDown(ev *event.Event) {
 
 		self.HideBox()
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 
 		self.Screen.FootBar.ResetNavText()
 	}
@@ -825,15 +812,13 @@ func (self *BluetoothPage) KeyDown(ev *event.Event) {
 	if ev.Data["Key"] == UI.CurKeys["Up"] {
 
 		self.ScrollUp()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Down"] {
 
 		self.ScrollDown()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["X"] {
@@ -854,8 +839,7 @@ func (self *BluetoothPage) KeyDown(ev *event.Event) {
 		self.InfoPage.MyDevice = self.MyList[self.PsIndex].(*NetItem).Device
 
 		self.Screen.PushPage(self.InfoPage)
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["B"] {

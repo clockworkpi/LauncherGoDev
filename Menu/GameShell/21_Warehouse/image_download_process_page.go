@@ -85,8 +85,7 @@ func (self *ImageDownloadProcessPage) OnLoadCb() {
 	}
 
 	self.ClearCanvas()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 
 	//parts := strings.Split(self.URL,"/")
 	//filename := strings.TrimSpace(parts[len(parts)-1])
@@ -100,8 +99,7 @@ func (self *ImageDownloadProcessPage) OnLoadCb() {
 
 		if UI.FileExists(local_menu_file) {
 			self.Img = image.Load(local_menu_file)
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 		}else {
 			
 			self.req,_ = grab.NewRequest("/tmp",self.URL)
@@ -174,8 +172,7 @@ L:
 	if UI.FileExists(dst_filename) {
 		if self.Screen.CurPage() == self {
 			self.Img = image.Load(dst_filename)
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 		}
 	}
 	
@@ -190,8 +187,7 @@ func (self *ImageDownloadProcessPage) KeyDown(ev  *event.Event) {
 		self.SetDownloading(false)
 
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 		self.URL = ""
 	}
 }

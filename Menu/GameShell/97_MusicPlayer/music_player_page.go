@@ -9,8 +9,11 @@ import (
 	"github.com/cuu/gogame/event"
 	"github.com/cuu/gogame/rect"
 	"github.com/cuu/gogame/surface"
+//	"github.com/cuu/gogame/time"
+	gotime "time"
+	//"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
-
+	
 	"github.com/cuu/gogame/color"
 	"github.com/clockworkpi/LauncherGoDev/sysgo"
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
@@ -41,6 +44,10 @@ type MusicPlayerPage struct {
 
 	CurSongTime string
 	CurSongName string
+	
+	playing_ch chan bool
+
+	PlayerOn bool
 }
 
 func NewMusicPlayerPage() *MusicPlayerPage {
@@ -56,7 +63,7 @@ func NewMusicPlayerPage() *MusicPlayerPage {
 
 	p.URLColor = UI.MySkinManager.GiveColor("URL")
 	p.TextColor = UI.MySkinManager.GiveColor("Text")
-	p.ListFontObj = UI.MyLangManager.TrFont("notosanscjk15")
+	p.ListFontObj = UI.MyLangManager.TrFont("notosanscjk14")
 
 	p.Labels = make(map[string]UI.LabelInterface)
 
@@ -67,12 +74,16 @@ func NewMusicPlayerPage() *MusicPlayerPage {
 	
 	p.CurSongTime = "0:0"
 
+	p.playing_ch = make(chan bool,1)
 	
+	p.PlayerOn = false
+
 	return p
 }
 
 func (self *MusicPlayerPage) OnLoadCb() {
 	self.PosY = 0
+	self.PlayerOn = true
 
 	if self.MpdClient == nil {
 	        conn, err := mpd.Dial("unix", sysgo.MPD_socket)
@@ -83,8 +94,11 @@ func (self *MusicPlayerPage) OnLoadCb() {
 
 		fmt.Println("Start mpd client")
 	}
+	
 
 	self.SyncList()
+	self.SetPlaying(true)
+	go self.UpdatePlayingStatus(250)
 }
 
 func (self *MusicPlayerPage) OnPopUpCb() {
@@ -97,14 +111,6 @@ func (self *MusicPlayerPage) OnPopUpCb() {
 
 func (self *MusicPlayerPage) OnReturnBackCb() {
 	self.SyncList()
-}
-
-func (self *MusicPlayerPage) SetCoords() {
-
-}
-
-func (self *MusicPlayerPage) SetLabels() {
-
 }
 
 func (self *MusicPlayerPage) SyncList() {
@@ -150,24 +156,55 @@ func (self *MusicPlayerPage) SyncList() {
 	self.SyncPlaying()
 }
 
-func (self *MusicPlayerPage) SyncPlaying() {
+func (self *MusicPlayerPage) UpdatePlayingStatus(ms int) { 	
+        RefreshTicker := gotime.NewTicker(gotime.Duration(ms)*gotime.Millisecond)
+        defer RefreshTicker.Stop()
+L:
+        for {
+                select {
+                case <- RefreshTicker.C:
+			cur_pos_id := self.SyncPlaying()
+			if self.Screen.CurPage() == self && cur_pos_id >= 0  {
+                                self.Screen.Refresh()
+                        }
+                case v:= <- self.playing_ch:
+                        if v== false {
+                                break L
+                        }
+                }
+        }
+
+    fmt.Println("Quiting UpdatePlayingStatus")
+}
+
+func (self *MusicPlayerPage) SyncPlaying() int {
 	conn := self.MpdClient
+	cur_pos_id := -1
+	
+	if self.PlayerOn == false {
+		return cur_pos_id
+	}
 
 	for i,_ := range self.MyList {
 		self.MyList[i].(*MusicPlayPageListItem).Active = false
 		self.MyList[i].(*MusicPlayPageListItem).PlayingProcess = 0
+		self.MyList[i].(*MusicPlayPageListItem).State = ""
 	}
-	current_song,_ := conn.CurrentSong()
+	
+	current_song,_ := conn.Status()
 	if len(current_song) > 0 {
 		if val,ok := current_song["song"]; ok{
 			posid, _ := strconv.Atoi(val)
 			if posid < len(self.MyList) {
+				cur_pos_id = posid
 				if state,ok2 := current_song["state"]; ok2 {
-					if state == "stop" {
-						self.MyList[posid].(*MusicPlayPageListItem).Active = false
-					}else{
+					if state == "play" {
 						self.MyList[posid].(*MusicPlayPageListItem).Active = true
+					}else{
+						self.MyList[posid].(*MusicPlayPageListItem).Active = false
 					}
+
+					self.MyList[posid].(*MusicPlayPageListItem).State = state
 				}
 
 				if song_time,ok3 := current_song["time"]; ok3 {
@@ -183,6 +220,8 @@ func (self *MusicPlayerPage) SyncPlaying() {
 			}
 		}
 	}
+
+	return cur_pos_id
 }
 
 func (self *MusicPlayerPage) InPlayList(path string) bool {
@@ -199,6 +238,52 @@ func (self *MusicPlayerPage) InPlayList(path string) bool {
 	}
 
 	return false
+}
+
+func (self *MusicPlayerPage) SetPlaying( v bool) {
+        for len(self.playing_ch) > 0 {
+                <- self.playing_ch
+        }
+
+        self.playing_ch <- v
+}
+func (self *MusicPlayerPage) StopPlayer() {
+	self.SetPlaying(false)
+
+	conn := self.MpdClient
+	conn.Stop()
+	self.CurSongName = ""
+	self.CurSongTime = "0:0"
+
+}
+
+func (self *MusicPlayerPage) PlayOrPause() {
+	self.RefreshPsIndex()
+	if self.MyList == nil || len(self.MyList) == 0 {
+		return
+	}
+
+	conn := self.MpdClient
+	cur_song_posid := self.SyncPlaying()
+
+	if cur_song_posid == self.PsIndex {
+		cur_li := self.MyList[self.PsIndex].(*MusicPlayPageListItem)
+		//fmt.Println(cur_li.State)
+		if cur_li.State == "pause" {
+			conn.Pause(false)
+		}else if cur_li.State == "play" {
+			conn.Pause(true)
+		}else {
+			conn.Play(self.PsIndex)
+		}
+	}else{
+		conn.Play(self.PsIndex)
+	}
+	
+	self.SyncPlaying()
+	
+	self.Screen.Refresh()
+
 }
 
 func (self *MusicPlayerPage) Init() {
@@ -261,34 +346,36 @@ func (self *MusicPlayerPage) Init() {
 func (self *MusicPlayerPage) KeyDown(ev *event.Event) {
         if ev.Data["Key"] == UI.CurKeys["Right"] {
                	self.Screen.PushPage(self.MyMusicLibListPage) 
-                self.Screen.Draw()
-                self.Screen.SwapAndShow()
+                self.Screen.Refresh()
         }	
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
+		self.PlayerOn = false
+		self.StopPlayer()
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
         if ev.Data["Key"] == UI.CurKeys["Up"] {
 
                 self.ScrollUp()
-                self.Screen.Draw()
-                self.Screen.SwapAndShow()
+                self.Screen.Refresh()
         }
 
         if ev.Data["Key"] == UI.CurKeys["Down"] {
 
                 self.ScrollDown()
-                self.Screen.Draw()
-                self.Screen.SwapAndShow()
+                self.Screen.Refresh()
         }
 	if ev.Data["Key"] == UI.CurKeys["X"] {
 		self.MpdClient.Delete(self.PsIndex,-1)
 		self.SyncList()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
+
+	if ev.Data["Key"] == UI.CurKeys["B"] {
+		self.PlayOrPause()	
+	}
+
 	return
 }
 

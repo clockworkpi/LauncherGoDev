@@ -1,7 +1,7 @@
 package UI
 
 import (
-	//"fmt"
+	"fmt"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
 
@@ -112,7 +112,11 @@ func (self *Label) Draw() {
 	my_text := font.Render(self.FontObj, self.Text, true, self.Color, nil)
 
 	rect_ := rect.Rect(self.PosX, self.PosY, self.Width, self.Height)
-
-	surface.Blit(self.CanvasHWND, my_text, &rect_, nil)
-	my_text.Free()
+	
+	if my_text == nil || my_text.W <= 0 {
+		fmt.Println("%#v",my_text,self.FontObj)
+	}else{
+		surface.Blit(self.CanvasHWND, my_text, &rect_, nil)
+		my_text.Free()
+	}
 }

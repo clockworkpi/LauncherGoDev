@@ -224,25 +224,17 @@ func (self *GateWayPage) Click() {
 			self.MyList[i].(*PageListItem).Active = false
 		}
 		cur_li.Active = self.ApplyGateWay(cur_li.Value)
-		self.Screen.MsgBox.SetText("Applying")
-		self.Screen.MsgBox.Draw()
-		self.Screen.SwapAndShow()
-
-		time.BlockDelay(1000)
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.ShowMsg("Applying",1000)
+		self.Screen.Refresh()
 	} else {
-		self.Screen.MsgBox.SetText("Do it in GameShell")
-		self.Screen.MsgBox.Draw()
-		self.Screen.SwapAndShow()
+		
+		self.Screen.ShowMsg("Do it in GameShell",0)
 	}
 
 }
 
 func (self *GateWayPage) ClearAllGateways() {
-	self.Screen.MsgBox.SetText("Cleaning up")
-	self.Screen.MsgBox.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.ShowMsg("Cleaning up",0)
 
 	UI.System("sudo ip route del 0/0")
 	time.BlockDelay(800)
@@ -251,8 +243,7 @@ func (self *GateWayPage) ClearAllGateways() {
 		self.MyList[i].(*PageListItem).Active = false
 	}
 
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 
 }
 
@@ -332,8 +323,7 @@ func (self *GateWayPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["B"] {
@@ -347,15 +337,13 @@ func (self *GateWayPage) KeyDown(ev *event.Event) {
 	if ev.Data["Key"] == UI.CurKeys["Up"] {
 
 		self.ScrollUp()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Down"] {
 
 		self.ScrollDown()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 }

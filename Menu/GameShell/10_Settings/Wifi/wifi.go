@@ -50,23 +50,20 @@ func (self *WifiDisconnectConfirmPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["B"] {
 		fmt.Println("Disconnecting..")
 		self.SnapMsg("Disconnecting...")
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 
 		self.Parent.Parent.Disconnect()
 
 		time.BlockDelay(400)
 
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 		self.Parent.Parent.Rescan(false)
 	}
 }
@@ -242,8 +239,7 @@ func (self *WifiInfoPage) TryDisconnect() {
 
 	if len(ip) > 6 {
 		self.Screen.PushPage(self.DisconnectConfirmPage)
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	} else {
 		fmt.Println("WifiInfoPage TryDisconnect can not get IP,maybe you are offline")
 		return
@@ -263,8 +259,7 @@ func (self *WifiInfoPage) OnLoadCb() {
 func (self *WifiInfoPage) OnReturnBackCb() {
 
 	self.ReturnToUpLevelPage()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 
 }
 
@@ -272,20 +267,17 @@ func (self *WifiInfoPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Up"] {
 		self.ScrollUp()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Down"] {
 		self.ScrollDown()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Enter"] {
@@ -411,10 +403,7 @@ func NewWifiList() *WifiList {
 func (self *WifiList) ShowBox(msg string) {
 	self.MsgBox.Text = msg
 	self.ShowingMessageBox = true
-	self.Screen.Draw()
-	self.MsgBox.Draw()
-	self.Screen.SwapAndShow()
-
+	self.Screen.ShowMsg(msg,0)
 }
 
 func (self *WifiList) HideBox() {
@@ -688,8 +677,8 @@ func (self *WifiList) AbortedAndReturnToUpLevel() {
 	self.HideBox()
 	self.Screen.FootBar.ResetNavText()
 	self.ReturnToUpLevelPage()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+
+	self.Screen.Refresh()
 }
 
 func (self *WifiList) OnKbdReturnBackCb() {
@@ -718,14 +707,12 @@ func (self *WifiList) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["Up"] {
 		self.ScrollUp()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Down"] {
 		self.ScrollDown()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Enter"] { // enter to set password,enter is B on GM
@@ -745,8 +732,7 @@ func (self *WifiList) KeyDown(ev *event.Event) {
 			fmt.Println("APIOBJ.PasswordPage.SetPassword ", thepass, len(thepass))
 			APIOBJ.PasswordPage.SetPassword(thepass)
 
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 
 		}
 	}
@@ -762,8 +748,7 @@ func (self *WifiList) KeyDown(ev *event.Event) {
 		self.InfoPage.BSSID = self.MyList[self.PsIndex].Bssid
 		self.InfoPage.ESSID = self.MyList[self.PsIndex].Essid
 		self.Screen.PushPage(self.InfoPage)
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 }

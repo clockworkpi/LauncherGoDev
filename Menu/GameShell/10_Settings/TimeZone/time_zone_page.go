@@ -257,8 +257,7 @@ func (self *TimeZoneListPage) Click() {
 		fmt.Println("add ", cur_li.Path)
 	}
 
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 }
 
 func (self *TimeZoneListPage) Rescan() {
@@ -270,32 +269,27 @@ func (self *TimeZoneListPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["Menu"] || ev.Data["Key"] == UI.CurKeys["A"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Up"] {
 		self.ScrollUp()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Down"] {
 		self.ScrollDown()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Right"] {
 		self.FastScrollDown(5)
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Left"] {
 		self.FastScrollUp(5)
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Enter"] {

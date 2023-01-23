@@ -815,16 +815,14 @@ func (self *Page) KeyDown(ev *event.Event) {
 
 		if self.FootMsg[3] == "Back" {
 			self.ReturnToUpLevelPage()
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 			return
 		}
 	}
 
 	if ev.Data["Key"] == CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == CurKeys["Right"] {
@@ -836,8 +834,7 @@ func (self *Page) KeyDown(ev *event.Event) {
 			}
 
 			self.PsIndex = self.IconIndex
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 		}
 	}
 
@@ -849,15 +846,13 @@ func (self *Page) KeyDown(ev *event.Event) {
 				self.IconsEasingRight(IconWidth + self.PageIconMargin)
 			}
 			self.PsIndex = self.IconIndex
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 		}
 	}
 
 	if ev.Data["Key"] == CurKeys["Enter"] {
 		self.IconClick()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 }

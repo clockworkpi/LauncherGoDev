@@ -13,7 +13,7 @@ import (
 
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 	"github.com/cuu/gogame/color"
-	"github.com/cuu/gogame/time"
+	//"github.com/cuu/gogame/time"
 )
 
 type FavListPage struct {
@@ -378,8 +378,7 @@ func (self *FavListPage) Click() {
 			} else {
 				self.Screen.PushCurPage()
 				self.Screen.SetCurPage(self.RomSoConfirmDownloadPage)
-				self.Screen.Draw()
-				self.Screen.SwapAndShow()
+				self.Screen.Refresh()
 			}
 		}
 
@@ -387,8 +386,7 @@ func (self *FavListPage) Click() {
 
 	}
 
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 }
 
 func (self *FavListPage) ReScan() {
@@ -417,14 +415,12 @@ func (self *FavListPage) ReScan() {
 
 func (self *FavListPage) OnReturnBackCb() {
 	self.ReScan()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 }
 
 func (self *FavListPage) OnLoadCb() {
 	self.ReScan()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 }
 
 func (self *FavListPage) SpeedScroll(thekey string) {
@@ -447,22 +443,19 @@ func (self *FavListPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["Menu"] || ev.Data["Key"] == UI.CurKeys["Left"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Up"] {
 		self.SpeedScroll(ev.Data["Key"])
 		self.ScrollUp()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Down"] {
 		self.SpeedScroll(ev.Data["Key"])
 		self.ScrollDown()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Enter"] {
@@ -471,8 +464,7 @@ func (self *FavListPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["X"] { //Scan current
 		self.ReScan()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Y"] { // del
@@ -484,13 +476,9 @@ func (self *FavListPage) KeyDown(ev *event.Event) {
 		if cur_li.(*EmulatorListItem).IsFile() {
 			uid := UI.GetUid(cur_li.(*EmulatorListItem).Path)
 			os.Chown(cur_li.(*EmulatorListItem).Path, uid, uid)
-			self.Screen.MsgBox.SetText("Deleting")
-			self.Screen.MsgBox.Draw()
-			self.Screen.SwapAndShow()
-			time.BlockDelay(600)
+			self.Screen.ShowMsg("Deleting",600)
 			self.ReScan()
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 		}
 	}
 }

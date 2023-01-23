@@ -234,8 +234,7 @@ func (self *MusicLibListPage) Click() {
 
 	}
 
-        self.Screen.Draw()
-        self.Screen.SwapAndShow()	
+        self.Screen.Refresh()
 
 }
 
@@ -243,22 +242,19 @@ func (self *MusicLibListPage) KeyDown(ev *event.Event) {
 	
         if UI.IsKeyMenuOrA(ev.Data["Key"]) || ev.Data["Key"] == UI.CurKeys["Left"] {
                 self.ReturnToUpLevelPage()
-                self.Screen.Draw()
-                self.Screen.SwapAndShow()
+                self.Screen.Refresh()
         }
 
         if ev.Data["Key"] == UI.CurKeys["Up"] {
 
                 self.ScrollUp()
-                self.Screen.Draw()
-                self.Screen.SwapAndShow()
+                self.Screen.Refresh()
         }
 
         if ev.Data["Key"] == UI.CurKeys["Down"] {
 
                 self.ScrollDown()
-                self.Screen.Draw()
-                self.Screen.SwapAndShow()
+                self.Screen.Refresh()
         }
 
 	if ev.Data["Key"] == UI.CurKeys["B"] {

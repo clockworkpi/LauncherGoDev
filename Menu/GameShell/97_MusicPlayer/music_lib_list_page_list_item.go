@@ -41,6 +41,14 @@ func NewMusicLibListPageListItem() *MusicLibListPageListItem {
         return p
 }
 
+func (self *MusicLibListPageListItem) Init(text string) {
+        l := UI.NewLabel()
+        l.PosX = 10
+        l.SetCanvasHWND(self.Parent.GetCanvasHWND())
+        l.Init(text, self.Fonts["normal"], nil)
+        self.Labels["Text"] = l	
+}
+
 func (self *MusicLibListPageListItem) Draw() {
 
         x, _ := self.Labels["Text"].Coord()

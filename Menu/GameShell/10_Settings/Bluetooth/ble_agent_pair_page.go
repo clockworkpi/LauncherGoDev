@@ -17,7 +17,7 @@ import (
 	  "github.com/cuu/gogame/font"
 	*/
 	"github.com/cuu/gogame/event"
-	"github.com/cuu/gogame/time"
+	//"github.com/cuu/gogame/time"
 	//"github.com/godbus/dbus"
 	//"github.com/muka/go-bluetooth/api"
 	//"github.com/muka/go-bluetooth/bluez"
@@ -62,8 +62,7 @@ func (self *BleAgentPairPage) ShowPinCode(device string, pincode string) {
 	if self.Screen.CurPage() != self {
 		self.Screen.PushPage(self)
 		self.ClearCanvas()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	self.Pin = pincode
@@ -82,8 +81,7 @@ func (self *BleAgentPairPage) ShowPassKey(device string, passkey uint32, entered
 	if self.Screen.CurPage() != self {
 		self.Screen.PushPage(self)
 		self.ClearCanvas()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	self.Pass = fmt.Sprintf("%06d", passkey)
@@ -100,36 +98,24 @@ func (self *BleAgentPairPage) ShowPassKey(device string, passkey uint32, entered
 
 func (self *BleAgentPairPage) PairOKCb() {
 	self.ClearCanvas()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 
-	self.Screen.MsgBox.SetText("Device paired")
-	self.Screen.MsgBox.Draw()
-	self.Screen.SwapAndShow()
-
-	time.BlockDelay(1500)
+	self.Screen.ShowMsg("Device paired",1500)
 
 	self.ReturnToUpLevelPage()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 	self.Screen.FootBar.ResetNavText()
 
 }
 
 func (self *BleAgentPairPage) PairErrorCb(err_msg string) {
 	self.ClearCanvas()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 
-	self.Screen.MsgBox.SetText(err_msg)
-	self.Screen.MsgBox.Draw()
-	self.Screen.SwapAndShow()
-
-	time.BlockDelay(1500)
+	self.Screen.ShowMsg(err_msg,1500)
 
 	self.ReturnToUpLevelPage()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 	self.Screen.FootBar.ResetNavText()
 
 }
@@ -145,8 +131,7 @@ func (self *BleAgentPairPage) KeyDown(ev *event.Event) {
 			}
 		}
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 }
 

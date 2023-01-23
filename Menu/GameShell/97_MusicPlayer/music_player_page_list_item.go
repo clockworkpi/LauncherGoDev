@@ -27,7 +27,7 @@ type MusicPlayPageListItem struct {
 	Value  string
 	MyType int
 	Path  string
-
+	State string
 	PlayingProcess int
 }
 
@@ -41,6 +41,14 @@ func NewMusicPlayPageListItem() *MusicPlayPageListItem {
         p.Fonts = make(map[string]*ttf.Font)
 	p.MyType = UI.ICON_TYPES["EXE"]
         return p
+}
+
+func (self *MusicPlayPageListItem) Init(text string) {
+        l := UI.NewLabel()
+        l.PosX = 10
+        l.SetCanvasHWND(self.Parent.GetCanvasHWND())
+        l.Init(text, self.Fonts["normal"], nil)
+        self.Labels["Text"] = l
 }
 
 func (self *MusicPlayPageListItem) Draw() {

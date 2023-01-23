@@ -110,8 +110,7 @@ func (self *UpdateConfirmPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["B"] {
@@ -153,8 +152,7 @@ func (self *UpdateConfirmPage) KeyDown(ev *event.Event) {
 
 func (self *UpdateConfirmPage) OnReturnBackCb() {
 	self.ReturnToUpLevelPage()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 }
 
 func (self *UpdateConfirmPage) Draw() {
@@ -287,8 +285,7 @@ func (self *ButtonsLayoutPage) ToggleMode() {
 		}
 
 		self.dialog_index = 1
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 
 	} else {
 		d := []byte("xbox")
@@ -298,8 +295,7 @@ func (self *ButtonsLayoutPage) ToggleMode() {
 		}
 
 		self.dialog_index = 0
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 
 	}
 }
@@ -320,8 +316,7 @@ func (self *ButtonsLayoutPage) OnLoadCb() {
 func (self *ButtonsLayoutPage) OnReturnBackCb() {
 
 	self.ReturnToUpLevelPage()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 
 }
 
@@ -329,8 +324,7 @@ func (self *ButtonsLayoutPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["B"] {
@@ -340,8 +334,7 @@ func (self *ButtonsLayoutPage) KeyDown(ev *event.Event) {
 	if ev.Data["Key"] == UI.CurKeys["X"] {
 		self.ConfirmPage.LayoutMode = self.GetButtonsLayoutMode()
 		self.Screen.PushPage(self.ConfirmPage)
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 }

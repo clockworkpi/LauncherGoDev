@@ -1,7 +1,7 @@
 package MusicPlayer
 
 import (
-        "fmt"
+        //"fmt"
 //        "path/filepath"
 
 //        "github.com/cuu/gogame/event"
@@ -37,7 +37,6 @@ func (self *ListPageSelector) Draw() {
 
         idx := self.Parent.GetPsIndex()
         mylist := self.Parent.GetMyList()
-	fmt.Println(idx)
         if idx < len(mylist) {
                 x, y := mylist[idx].Coord()
                 _, h := mylist[idx].Size()

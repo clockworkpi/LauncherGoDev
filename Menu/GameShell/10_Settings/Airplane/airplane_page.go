@@ -137,8 +137,7 @@ func (self *AirplanePage) ToggleModeAni() {
 			self.airwire_y -= v
 			self.dialog_index = 2
 			time.BlockDelay(40)
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 		}
 
 		UI.System("sudo rfkill unblock all")
@@ -153,8 +152,7 @@ func (self *AirplanePage) ToggleModeAni() {
 			self.airwire_y += v
 			self.dialog_index = 3
 			time.BlockDelay(40)
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 		}
 		UI.System("sudo rfkill block all")
 		self.Screen.TitleBar.InAirPlaneMode = true
@@ -195,8 +193,7 @@ func (self *AirplanePage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["B"] {
@@ -207,8 +204,7 @@ func (self *AirplanePage) KeyDown(ev *event.Event) {
 		self.UnBlockAll()
 		self.Screen.SwapAndShow()
 		time.BlockDelay(1000)
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 }
 

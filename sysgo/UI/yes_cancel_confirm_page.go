@@ -37,8 +37,7 @@ func (self *YesCancelConfirmPage) KeyDown(ev *event.Event) {
 
 	if IsKeyMenuOrB(ev.Data["Key"]) {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if IsKeyStartOrA(ev.Data["Key"]) {

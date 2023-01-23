@@ -134,8 +134,7 @@ L:
 			}
 
 			if self.Screen.CurPage() == self && dirty == true {
-				self.Screen.Draw()
-				self.Screen.SwapAndShow()
+				self.Screen.Refresh()
 			}
 			dirty = false
 		case v:= <- self.Downloading:
@@ -467,8 +466,7 @@ func (self *WareHouse) LoadHouse() {
 	if cur_li.Value["type"] == "source" || cur_li.Value["type"] == "dir" {
 		self.LoadHousePage.URL = cur_li.Value["file"]
 		self.Screen.PushPage(self.LoadHousePage)
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 	
 }
@@ -488,8 +486,7 @@ func (self *WareHouse) PreviewGame() {
 			fmt.Println(cur_li.Value["shots"])
 			self.PreviewPage.URL = cur_li.Value["shots"]
 			self.Screen.PushPage(self.PreviewPage)
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 		}
 	}
 }
@@ -599,8 +596,7 @@ func (self *WareHouse) Click() {
 				self.MyStack.Push(result.List)
 				
 				self.SyncList()
-				self.Screen.Draw()
-				self.Screen.SwapAndShow()
+				self.Screen.Refresh()
 			}
 
 			
@@ -672,8 +668,7 @@ func (self *WareHouse) Click() {
 func (self *WareHouse) OnAria2CompleteCb(gid string) {
 	fmt.Println("OnAria2CompleteCb", gid)
 	self.SyncList()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 	
 	if gid == self.Aria2DownloadingGid {
 		self.Aria2DownloadingGid = ""
@@ -763,8 +758,7 @@ func (self *WareHouse)  OnKbdReturnBackCb() {
 				}
 
 				self.SyncList()
-				self.Screen.Draw()
-				self.Screen.SwapAndShow()
+				self.Screen.Refresh()
 			}
 		}
 	}	
@@ -805,8 +799,7 @@ func (self *WareHouse)  OnReturnBackCb() {
 	self.SyncList()
 	self.RestoreScrolled()
 	
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 	
 }
 
@@ -886,12 +879,10 @@ func (self *WareHouse) KeyDown(ev *event.Event) {
 			}
 
 			self.SyncList()
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 		}else if self.MyStack.Length() == 1 {
 			self.ReturnToUpLevelPage()
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 			self.SetDownloading(false)//shutdown UpdateProcessInterval
 		}
 	}
@@ -910,8 +901,7 @@ func (self *WareHouse) KeyDown(ev *event.Event) {
 			}
 		}
 
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["X"] {
@@ -923,15 +913,13 @@ func (self *WareHouse) KeyDown(ev *event.Event) {
 				}else {
 					self.Screen.PushPage(self.RemovePage)
 					self.RemovePage.StartOrAEvent = self.RemoveGame
-					self.Screen.Draw()
-					self.Screen.SwapAndShow()
+					self.Screen.Refresh()
 				}
 			}
 			return
 		}
 		self.SyncList()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Y"] {
@@ -944,14 +932,12 @@ func (self *WareHouse) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["Up"] {
 		self.ScrollUp()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Down"] {
 		self.ScrollDown()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}	
 	
 }

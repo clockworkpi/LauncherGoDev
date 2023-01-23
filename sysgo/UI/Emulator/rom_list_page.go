@@ -9,7 +9,7 @@ import (
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 	"github.com/cuu/gogame/color"
 	"github.com/cuu/gogame/event"
-	"github.com/cuu/gogame/time"
+	//"github.com/cuu/gogame/time"
 	"github.com/veandco/go-sdl2/ttf"
 	"os/exec"
 	"path/filepath"
@@ -406,8 +406,7 @@ func (self *RomListPage) Click() {
 			} else {
 				self.Screen.PushCurPage()
 				self.Screen.SetCurPage(self.RomSoConfirmDownloadPage)
-				self.Screen.Draw()
-				self.Screen.SwapAndShow()
+				self.Screen.Refresh()
 			}
 		}
 
@@ -415,8 +414,7 @@ func (self *RomListPage) Click() {
 
 	}
 
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 }
 
 func (self *RomListPage) ReScan() {
@@ -435,8 +433,7 @@ func (self *RomListPage) ReScan() {
 
 func (self *RomListPage) OnReturnBackCb() {
 	self.ReScan()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 }
 
 func (self *RomListPage) SpeedScroll(thekey string) {
@@ -459,29 +456,25 @@ func (self *RomListPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Right"] {
 		self.Screen.PushCurPage()
 		self.Screen.SetCurPage(self.Leader.FavPage)
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Up"] {
 		self.SpeedScroll(ev.Data["Key"])
 		self.ScrollUp()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Down"] {
 		self.SpeedScroll(ev.Data["Key"])
 		self.ScrollDown()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Enter"] {
@@ -502,21 +495,15 @@ func (self *RomListPage) KeyDown(ev *event.Event) {
 				fmt.Println(err)
 			}
 
-			self.Screen.MsgBox.SetText("Add to favourite list")
-			self.Screen.MsgBox.Draw()
-			self.Screen.SwapAndShow()
-			time.BlockDelay(600)
+			self.Screen.ShowMsg("Add to favourite list",600)
 			self.ReScan()
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
-
+			self.Screen.Refresh()
 		}
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["X"] { //Scan current
 		self.ReScan()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Y"] { // del
@@ -531,9 +518,8 @@ func (self *RomListPage) KeyDown(ev *event.Event) {
 
 			self.Screen.PushCurPage()
 			self.Screen.SetCurPage(self.Leader.DeleteConfirmPage)
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
 
+			self.Screen.Refresh()
 		}
 	}
 }

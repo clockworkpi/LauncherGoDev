@@ -497,13 +497,14 @@ func run() int {
 func main() {
 
 	var exitcode int
-	defer sdl.Quit()
+	defer gogame.Quit()
 
 	//runtime.GOMAXPROCS(1)
 
 	os.Setenv("SDL_VIDEO_CENTERED", "1")
-
-	exitcode = run()
+	gogame.AsyncStart(func() {
+		exitcode = run()
+	})
 
 	os.Exit(exitcode)
 }

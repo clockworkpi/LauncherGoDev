@@ -126,8 +126,7 @@ func (self *DownloadProcessPage) UpdateProcessInterval() {
 
 		self.FileNameLabel.SetText(filepath.Base(self.resp.Filename))
 
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 
 		if self.resp.Progress() >= 1.0 {
 			// download is complete
@@ -187,8 +186,7 @@ func (self *DownloadProcessPage) DownloadErr() {
 
 func (self *DownloadProcessPage) DoneAndReturnUpLevel() {
 	self.ReturnToUpLevelPage()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 }
 
 func (self *DownloadProcessPage) StartDownload(_url, dst_dir string) {
@@ -229,8 +227,7 @@ func (self *DownloadProcessPage) KeyDown(ev *event.Event) {
 		self.StopDownload()
 
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 }

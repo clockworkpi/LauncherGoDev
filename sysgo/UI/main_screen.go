@@ -45,6 +45,7 @@ type ScreenInterface interface {
 	SetCurPage(pg PageInterface)
 	SwapAndShow()
 	IsWifiConnectedNow()
+	Refresh()
 }
 
 type PluginConfig struct {
@@ -185,7 +186,8 @@ type MainScreen struct {
 
 	LastKey     string
 	LastKeyDown gotime.Time
-
+	
+	updateScreen chan bool
 }
 
 func NewMainScreen() *MainScreen {
@@ -199,6 +201,9 @@ func NewMainScreen() *MainScreen {
 	m.MsgBoxFont = Fonts["veramono20"]
 	m.IconFont = Fonts["varela15"]
 	m.Closed = false
+	
+	m.updateScreen = make(chan bool,1)
+
 	return m
 }
 
@@ -217,7 +222,11 @@ func (self *MainScreen) Init() {
 	self.CounterScreen.Init()
 
 	//self.GenList() // load predefined plugin list,ready to be injected ,or ,as a .so for dynamic loading
-
+	go func() {
+		sdl.Do(func() {
+			self.RefreshLoop()
+		}) 
+	}()
 }
 
 func (self *MainScreen) FartherPages() { // right after ReadTheDirIntoPages
@@ -271,6 +280,7 @@ func (self *MainScreen) SwapAndShow() {
 		rect_ := rect.Rect(self.PosX, self.PosY, self.Width, self.Height)
 		surface.Blit(self.HWND, self.CanvasHWND, &rect_, nil)
 	}
+
 
 	display.Flip()
 }
@@ -441,5 +451,25 @@ func (self *MainScreen) Draw() {
 	if self.FootBar != nil {
 		self.FootBar.SetLabelTexts(self.CurrentPage.GetFootMsg())
 		self.FootBar.Draw()
+	}
+}
+
+func (self *MainScreen) Refresh() {
+	self.updateScreen <- true	
+}
+
+func (self *MainScreen) RefreshLoop() {
+L:
+	for {
+		select {
+	                case v:= <- self.updateScreen:
+			if v == true {
+				self.Draw()
+				self.SwapAndShow()
+			}
+                        if v== false {
+                                break L
+                        }
+		}
 	}
 }

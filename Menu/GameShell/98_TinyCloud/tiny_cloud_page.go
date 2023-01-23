@@ -168,8 +168,7 @@ func (self *TinyCloudPage) Init() {
 func (self *TinyCloudPage) KeyDown(ev *event.Event) {
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 	return
 }

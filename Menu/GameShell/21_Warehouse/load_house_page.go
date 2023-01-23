@@ -16,7 +16,7 @@ import (
 	//"github.com/cuu/gogame/draw"
 	"github.com/cuu/gogame/color"
 	"github.com/cuu/gogame/event"
-	"github.com/cuu/gogame/time"
+	//"github.com/cuu/gogame/time"
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
 	"github.com/cuu/grab"
 )
@@ -84,8 +84,7 @@ func (self *LoadHousePage) OnLoadCb() {
 		return
 	}
 	self.ClearCanvas()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 
 	//parts := strings.Split(self.URL,"/")
 	//filename := strings.TrimSpace(parts[len(parts)-1])
@@ -198,10 +197,7 @@ L:
 		
 	} else {
 		fmt.Println(err)
-		self.Screen.MsgBox.SetText("Fetch house failed")
-		self.Screen.MsgBox.Draw()
-		self.Screen.SwapAndShow()
-		time.BlockDelay(500)
+		self.Screen.ShowMsg("Fetch house failed",500)
 	}
 	
 }
@@ -211,8 +207,7 @@ func (self *LoadHousePage) Leave() {
 	self.SetDownloading(false)
 	
 	self.ReturnToUpLevelPage()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 	self.URL = ""
 	
 }

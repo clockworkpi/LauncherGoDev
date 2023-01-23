@@ -38,8 +38,7 @@ func (self *DeleteConfirmPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == CurKeys["A"] || ev.Data["Key"] == CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == CurKeys["B"] {
@@ -51,21 +50,17 @@ func (self *DeleteConfirmPage) KeyDown(ev *event.Event) {
 		err = os.Rename(filepath.Base(self.FileName), filepath.Join(self.TrashDir, filepath.Base(self.FileName)))
 		if err != nil {
 			if strings.Contains(err.Error(), "exists") {
-				self.Screen.MsgBox.SetText("Already Existed")
+				self.Screen.ShowMsg("Already Existed",0)
 			} else {
-				self.Screen.MsgBox.SetText("Error")
+				self.Screen.ShowMsg("Error",0)
 			}
-			self.Screen.MsgBox.Draw()
-			self.Screen.SwapAndShow()
 		} else {
 			self.SnapMsg("Deleting")
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 			self.Reset()
 			time.BlockDelay(300)
 			self.ReturnToUpLevelPage()
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 		}
 
 		fmt.Println(self.FileName)

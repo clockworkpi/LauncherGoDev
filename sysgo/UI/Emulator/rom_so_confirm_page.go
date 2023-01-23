@@ -59,23 +59,20 @@ func (self *RomSoConfirmPage) Init() {
 
 func (self *RomSoConfirmPage) SnapMsg(msg string) {
 	self.MyList[0].SetText(msg)
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 	self.MyList[0].SetText(self.ConfirmText)
 }
 
 func (self *RomSoConfirmPage) OnReturnBackCb() {
 	self.ReturnToUpLevelPage()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 }
 
 func (self *RomSoConfirmPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["Menu"] || ev.Data["Key"] == UI.CurKeys["A"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["B"] {
@@ -91,8 +88,7 @@ func (self *RomSoConfirmPage) KeyDown(ev *event.Event) {
 			}
 
 			self.Screen.PushPage(self.DownloadPage)
-			self.Screen.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.Refresh()
 			ec := self.Parent.GetEmulatorConfig()
 			if sysgo.CurKeySet == "PC" {
 

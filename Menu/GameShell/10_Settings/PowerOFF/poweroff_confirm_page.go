@@ -28,8 +28,7 @@ func (self *PowerOFFConfirmPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["Menu"] || ev.Data["Key"] == UI.CurKeys["A"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 
 	}
 

@@ -293,22 +293,19 @@ func (self *InfoPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Up"] {
 
 		self.ScrollUp()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Down"] {
 
 		self.ScrollDown()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 }
 
@@ -494,8 +491,7 @@ func (self *PowerOptionsPage) Click() {
 
 	time.BlockDelay(1000)
 
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 }
 
 func (self *PowerOptionsPage) OnLoadCb() {
@@ -513,8 +509,7 @@ func (self *PowerOptionsPage) OnLoadCb() {
 func (self *PowerOptionsPage) KeyDown(ev *event.Event) {
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["B"] {
@@ -524,15 +519,13 @@ func (self *PowerOptionsPage) KeyDown(ev *event.Event) {
 	if ev.Data["Key"] == UI.CurKeys["Up"] {
 
 		self.ScrollUp()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Down"] {
 
 		self.ScrollDown()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Y"] {
@@ -547,8 +540,7 @@ func (self *PowerOptionsPage) KeyDown(ev *event.Event) {
 		self.InfoPage.Time3 = time3
 
 		self.Screen.PushPage(self.InfoPage)
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 }
 

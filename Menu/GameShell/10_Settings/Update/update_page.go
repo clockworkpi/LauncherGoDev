@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/cuu/gogame/time"
+	//"github.com/cuu/gogame/time"
 	"github.com/veandco/go-sdl2/ttf"
 	"net/http"
 	"os/exec"
@@ -47,8 +47,7 @@ func (self *UpdateConfirmPage) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["B"] {
@@ -64,8 +63,7 @@ func (self *UpdateConfirmPage) KeyDown(ev *event.Event) {
 
 func (self *UpdateConfirmPage) OnReturnBackCb() {
 	self.ReturnToUpLevelPage()
-	self.Screen.Draw()
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 }
 
 func (self *UpdateConfirmPage) Draw() {
@@ -208,11 +206,7 @@ func (self *UpdatePage) CheckUpdate() bool {
 		self.Screen.SwapAndShow()
 
 	} else {
-		self.Screen.Draw()
-		self.Screen.MsgBox.SetText("Launchergo is up to date")
-		self.Screen.MsgBox.Draw()
-		self.Screen.SwapAndShow()
-		time.BlockDelay(765)
+		self.Screen.ShowMsg("Launchergo is up to date",765)
 	}
 
 	defer resp.Body.Close()
@@ -224,26 +218,18 @@ func (self *UpdatePage) CheckUpdate() bool {
 func (self *UpdatePage) KeyDown(ev *event.Event) {
 	if ev.Data["Key"] == UI.CurKeys["A"] || ev.Data["Key"] == UI.CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["X"] {
 		if self.Screen.IsWifiConnectedNow() == true {
 			if self.CheckUpdate() == true {
-				self.Screen.Draw()
-				self.Screen.SwapAndShow()
+				self.Screen.Refresh()
 			} else {
-				self.Screen.Draw()
-				self.Screen.MsgBox.SetText("Check Update Failed")
-				self.Screen.MsgBox.Draw()
-				self.Screen.SwapAndShow()
+				self.Screen.ShowMsg("Check Update Failed",0)
 			}
 		} else {
-			self.Screen.Draw()
-			self.Screen.MsgBox.SetText("Please Check your Wi-Fi connection")
-			self.Screen.MsgBox.Draw()
-			self.Screen.SwapAndShow()
+			self.Screen.ShowMsg("Please Check your Wi-Fi connection",0)
 		}
 	}
 }

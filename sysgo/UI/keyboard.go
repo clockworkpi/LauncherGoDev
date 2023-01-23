@@ -449,15 +449,14 @@ func (self *Keyboard) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == CurKeys["Menu"] {
 		self.ReturnToUpLevelPage()
-		self.Screen.Draw()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 
 	}
 
 	if ev.Data["Key"] == CurKeys["Y"] { // done
 		fmt.Println(strings.Join(self.Textarea.MyWords, ""))
 		self.ReturnToUpLevelPage()
-		self.Screen.SwapAndShow()
+		self.Screen.Refresh()
 		if self.Caller != nil {
 			self.Caller.OnKbdReturnBackCb()
 		}
