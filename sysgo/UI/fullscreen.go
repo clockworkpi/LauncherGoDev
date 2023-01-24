@@ -26,7 +26,7 @@ func (self *FullScreen) SwapAndShow() {
 	if self.HWND != nil {
 		rect_ := rect.Rect(self.PosX, self.PosY, self.Width, self.Height)
 		surface.Blit(self.HWND, self.CanvasHWND, &rect_, nil)
-		DisplayFlip()
+		SwapAndShow()
 	}
 
 }

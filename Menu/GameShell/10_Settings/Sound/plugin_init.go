@@ -34,7 +34,8 @@ func (self *SoundPlugin) Run(main_screen *UI.MainScreen) {
 	if main_screen != nil {
 		main_screen.PushCurPage()
 		main_screen.SetCurPage(self.SoundPage)
-		main_screen.Refresh()
+		main_screen.Draw()
+		main_screen.SwapAndShow()
 	}
 }
 

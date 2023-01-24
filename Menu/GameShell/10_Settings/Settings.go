@@ -307,7 +307,8 @@ func (self *SettingsPlugin) Init(main_screen *UI.MainScreen) {
 func (self *SettingsPlugin) Run(main_screen *UI.MainScreen) {
 	if main_screen != nil {
 		main_screen.PushPage(self.Page)
-		main_screen.Refresh()
+		main_screen.Draw()
+		main_screen.SwapAndShow()
 	}
 }
 

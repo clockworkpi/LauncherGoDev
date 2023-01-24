@@ -128,15 +128,10 @@ func ReplaceSuffix(orig_file_str string, new_ext string) string {
 	return orig_file_str // failed just return back where it came
 }
 
-func DisplayFlip() {
+func SwapAndShow() {
 	display.Flip()
 }
 
-func AsyncDisplayFlip() {
-        display.ASync(func() {
-                display.Flip()
-        })
-}
 func ReadLines(path string) (lines []string, err error) {
 	var (
 		file   *os.File

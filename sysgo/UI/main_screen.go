@@ -281,6 +281,7 @@ func (self *MainScreen) SwapAndShow() {
 		surface.Blit(self.HWND, self.CanvasHWND, &rect_, nil)
 	}
 
+
 	display.Flip()
 }
 
@@ -427,7 +428,8 @@ func (self *MainScreen) ShowMsg(content string, blocktime int) {
 
 	if blocktime > 0 {
 		time.BlockDelay(blocktime)
-		self.Refresh()
+		self.CurrentPage.Draw()
+		self.SwapAndShow()
 	}
 
 }

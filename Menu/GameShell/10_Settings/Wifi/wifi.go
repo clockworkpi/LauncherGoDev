@@ -372,6 +372,7 @@ type WifiList struct {
 	Connecting   bool
 	Scanning     bool
 
+	ShowingMessageBox bool
 	MsgBox            *WifiListMessageBox
 	ConnectTry        int
 
@@ -401,7 +402,14 @@ func NewWifiList() *WifiList {
 
 func (self *WifiList) ShowBox(msg string) {
 	self.MsgBox.Text = msg
-	self.Screen.ShowMsg(msg,1)
+	self.ShowingMessageBox = true
+	self.Screen.ShowMsg(msg,0)
+}
+
+func (self *WifiList) HideBox() {
+	self.Draw()
+	self.ShowingMessageBox = false
+	self.Screen.SwapAndShow()
 }
 
 func (self *WifiList) GenNetworkList() {
@@ -444,7 +452,7 @@ func (self *WifiList) GenNetworkList() {
 			li_idx++
 		}
 	}
-	
+
 	self.WifiScanFinished()
 
 	self.PsIndex = 0
@@ -487,7 +495,9 @@ func (self *WifiList) WifiScanFinished() {
 	self.ResetPageSelector()
 
 	self.Scanning = false
+	self.HideBox()
 
+	self.BlockingUI = false
 	fmt.Println("dbus says scan finished")
 
 }
@@ -498,7 +508,8 @@ func (self *WifiList) WifiScanStarted() {
 	}
 
 	self.Scanning = true
-	self.ShowBox("Wifi scanning")
+	self.ShowBox("Wifi scanning...")
+	self.BlockingUI = true
 	fmt.Println("dbus says start scan")
 }
 
@@ -591,7 +602,7 @@ func (self *WifiList) ConfigWireless(password string) {
 	ssid := self.MyList[self.PsIndex].Essid
 	fmt.Println(ssid)
 	fmt.Println(password)
-	self.ShowBox("Connecting")
+	self.ShowBox("Connecting...")
 
 	self.Connecting = true
 	cli := fmt.Sprintf("sudo nmcli dev wifi connect %s password \"%s\"", ssid, password)
@@ -663,6 +674,7 @@ func (self *WifiList) ScrollDown() {
 }
 
 func (self *WifiList) AbortedAndReturnToUpLevel() {
+	self.HideBox()
 	self.Screen.FootBar.ResetNavText()
 	self.ReturnToUpLevelPage()
 
@@ -727,7 +739,6 @@ func (self *WifiList) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["X"] {
 		self.Rescan(false)
-		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Y"] {

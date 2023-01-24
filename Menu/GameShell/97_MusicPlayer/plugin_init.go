@@ -35,7 +35,8 @@ func (self *MusicPlayerPlugin) Run(main_screen *UI.MainScreen) {
 	if main_screen != nil {
 		main_screen.PushCurPage()
 		main_screen.SetCurPage(self.MusicPlayerPage)
-		main_screen.Refresh()
+		main_screen.Draw()
+		main_screen.SwapAndShow()
 	}
 }
 
