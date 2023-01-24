@@ -223,9 +223,7 @@ func (self *MainScreen) Init() {
 
 	//self.GenList() // load predefined plugin list,ready to be injected ,or ,as a .so for dynamic loading
 	go func() {
-		sdl.Do(func() {
-			self.RefreshLoop()
-		}) 
+		self.RefreshLoop() 
 	}()
 }
 

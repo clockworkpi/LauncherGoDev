@@ -20,7 +20,7 @@ import (
 	"github.com/cuu/gogame/event"
 	//	"github.com/cuu/gogame/color"
 	"github.com/cuu/gogame/font"
-	//"github.com/cuu/gogame/time"
+	"github.com/cuu/gogame/time"
 	
 	"github.com/clockworkpi/LauncherGoDev/sysgo"
 	"github.com/clockworkpi/LauncherGoDev/sysgo/UI"
@@ -487,8 +487,8 @@ func run() int {
 			main_screen.KeyDown(ev)
 			main_screen.LastKeyDown = everytime_keydown
 		}
-
-		gotime.Sleep(50 * gotime.Millisecond)
+		//gotime.Sleep(50 * gotime.Millisecond)
+		time.SDL_Delay(20)
 	}
 
 	return 0
@@ -502,9 +502,7 @@ func main() {
 	//runtime.GOMAXPROCS(1)
 
 	os.Setenv("SDL_VIDEO_CENTERED", "1")
-	gogame.AsyncStart(func() {
-		exitcode = run()
-	})
+	exitcode = run()
 
 	os.Exit(exitcode)
 }

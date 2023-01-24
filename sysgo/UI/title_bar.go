@@ -101,6 +101,8 @@ type TitleBar struct {
 
 	InLowBackLight int
 	InAirPlaneMode bool
+	
+	WifiStrength int
 
 	SkinManager *SkinManager //set by MainScreen
 
@@ -136,6 +138,7 @@ func NewTitleBar() *TitleBar {
 	t.TimeFont = Fonts["varela12"]
 
 	t.InLowBackLight = -1
+	t.WifiStrength = 0 
 	return t
 
 }
@@ -212,23 +215,22 @@ func (self *TitleBar) IsWifiConnectedNow() bool {
 }
 
 func (self *TitleBar) UpdateWifiStrength() {
+	self.GetWifiStrength()
 	self.Draw(self.Title)
 }
 
-func (t *TitleBar) GetWifiStrength() int {
+func (self *TitleBar) GetWifiStrength() int {
 	qua := 0
-	cli := fmt.Sprintf("sudo iwconfig %s | grep Signal | /usr/bin/awk '{print $4}' | /usr/bin/cut -d'=' -f2", sysgo.WifiDev)
+
+	cli := fmt.Sprintf("sudo iwgetid %s -r",sysgo.WifiDev)
 	out := System(cli)
-	if len(out) > 2 {
-		if strings.Contains(out, "No") == false {
-			out = strings.TrimSuffix(out, "\n")
-			stren, err := strconv.ParseInt(out, 10, 0)
-			if err == nil {
-				qua = 2 * (int(stren) + 100)
-			} else {
-				fmt.Println(err)
-			}
-		}
+	if len(out) > 2{
+		out = strings.TrimSuffix(out, "\n")
+		cli = fmt.Sprintf("sudo nmcli -t -f SSID,SIGNAL dev wifi list | grep \"^%s:\" | cut -d : -f 2",out)
+		out = System(cli)
+
+		out = strings.TrimSuffix(out, "\n")
+		qua,_ = strconv.Atoi(out)
 	}
 
 	segs := [][]int{[]int{-2, -1}, []int{0, 25}, []int{25, 50}, []int{50, 75}, []int{75, 100}}
@@ -244,7 +246,7 @@ func (t *TitleBar) GetWifiStrength() int {
 			break
 		}
 	}
-
+	self.WifiStrength = ge
 	return ge
 }
 
@@ -522,7 +524,7 @@ func (self *TitleBar) Draw(title string) {
 	self.Icons["battery"].NewCoord(start_x+self.IconWidth+self.IconWidth+8, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2)
 
 	if self.IsWifiConnectedNow() == true {
-		ge := self.GetWifiStrength()
+		ge := self.WifiStrength
 		//fmt.Println("wifi ge: ",ge)
 		if ge > 0 {
 			self.Icons["wifistatus"].SetIconIndex(ge)

@@ -507,9 +507,8 @@ func (self *BluetoothPage) ShowBox(msg string) {
 }
 
 func (self *BluetoothPage) HideBox() {
-	self.Draw()
 	self.ShowingMessageBox = false
-	self.Screen.SwapAndShow()
+	self.Screen.Refresh()
 }
 
 func (self *BluetoothPage) Init() {
