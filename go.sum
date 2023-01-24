@@ -1,9 +1,3 @@
-github.com/cuu/gogame v0.0.0-20211011085728-70b3e040be73 h1:fmTvicP5+vCLftniyG8yjf9TKMesgq1phni5My+4YVo=
-github.com/cuu/gogame v0.0.0-20211011085728-70b3e040be73/go.mod h1:1ZGiLH+shrG0St33RrS7HWw8aTUezakhQcM/uzvjUiA=
-github.com/cuu/gogame v0.0.0-20230123095320-c80490dde012 h1:JM3b7ukEBEJVSExaLgmbZLTP6DJA8JInkOwZKxRydQY=
-github.com/cuu/gogame v0.0.0-20230123095320-c80490dde012/go.mod h1:1ZGiLH+shrG0St33RrS7HWw8aTUezakhQcM/uzvjUiA=
-github.com/cuu/gogame v0.0.0-20230123135016-435fff5f39a9 h1:DfHSAlgeKqyxhmJdXegkfjOobh7VEH7GSZfAIbbOJYA=
-github.com/cuu/gogame v0.0.0-20230123135016-435fff5f39a9/go.mod h1:1ZGiLH+shrG0St33RrS7HWw8aTUezakhQcM/uzvjUiA=
 github.com/cuu/gogame v0.0.0-20230123135735-e5581171f193 h1:S7c9jkrxHHF+0XeeWY9PcbMjO2jL7t5cp1Lsl0ba4gs=
 github.com/cuu/gogame v0.0.0-20230123135735-e5581171f193/go.mod h1:1ZGiLH+shrG0St33RrS7HWw8aTUezakhQcM/uzvjUiA=
 github.com/cuu/grab v2.0.0+incompatible h1:iXzIujTt9fYkjw63Tlxyxw1ohvabE59jWgkzI4LUY6E=
@@ -72,8 +66,6 @@ github.com/suapapa/go_eddystone v1.3.1/go.mod h1:bXC11TfJOS+3g3q/Uzd7FKd5g62STQE
 github.com/veandco/go-sdl2 v0.4.10/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
 github.com/veandco/go-sdl2 v0.4.28 h1:kLXyC0MNbQp6aQcow27Nozaos6XT9j1db7hMm2PPPas=
 github.com/veandco/go-sdl2 v0.4.28/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
-github.com/veandco/go-sdl2 v0.4.30 h1:ZES8cWfk512B1OETAfw8BFbV5k6K4XE6rUlzfgj3KZA=
-github.com/veandco/go-sdl2 v0.4.30/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
 github.com/vjeantet/jodaTime v1.0.0 h1:Fq2K9UCsbTFtKbHpe/L7C57XnSgbZ5z+gyGpn7cTE3s=
 github.com/vjeantet/jodaTime v1.0.0/go.mod h1:gA+i8InPfZxL1ToHaDpzi6QT/npjl3uPlcV4cxDNerI=
 github.com/yookoala/realpath v1.0.0 h1:7OA9pj4FZd+oZDsyvXWQvjn5oBdcHRTV44PpdMSuImQ=
