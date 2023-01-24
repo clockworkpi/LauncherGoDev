@@ -414,8 +414,7 @@ func (self *AboutPlugin) Init(main_screen *UI.MainScreen) {
 func (self *AboutPlugin) Run(main_screen *UI.MainScreen) {
 	if main_screen != nil {
 		main_screen.PushPage(self.Page)
-		main_screen.Draw()
-		main_screen.SwapAndShow()
+		main_screen.Refresh()
 	}
 }
 

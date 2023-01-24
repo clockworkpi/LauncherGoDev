@@ -110,6 +110,8 @@ type TitleBar struct {
 
 	TitleFont *ttf.Font
 	TimeFont  *ttf.Font
+
+	updateScreen chan bool
 }
 
 func NewTitleBar() *TitleBar {
@@ -136,13 +138,16 @@ func NewTitleBar() *TitleBar {
 	t.TimeFont = Fonts["varela12"]
 
 	t.InLowBackLight = -1
+
+	t.updateScreen = make(chan bool,1)
+
 	return t
 
 }
 
 func (self *TitleBar) Redraw() {
 	self.UpdateDownloadStatus()
-	SwapAndShow()
+	DisplayFlip()
 }
 
 func (self *TitleBar) UpdateDownloadStatus() {
@@ -176,7 +181,7 @@ func (self *TitleBar) RoundRobinCheck() {
 			self.CheckBluetooth()
 			self.UpdateWifiStrength()
 			self.UpdateDownloadStatus()
-			SwapAndShow()
+			self.Refresh()
 
 		} else if self.InLowBackLight >= 0 {
 			self.InLowBackLight += 1
@@ -187,6 +192,7 @@ func (self *TitleBar) RoundRobinCheck() {
 				self.UpdateWifiStrength()
 				self.UpdateDownloadStatus()
 				self.InLowBackLight = 0 // reset
+				self.Refresh()
 			}
 
 		}
@@ -293,8 +299,6 @@ func (self *TitleBar) SetSoundVolume(vol int) {
 func (self *TitleBar) CheckBatteryStat() {
 	bat_segs := [][]int{[]int{0, 6}, []int{7, 15}, []int{16, 20}, []int{21, 30}, []int{31, 50}, []int{51, 60}, []int{61, 80}, []int{81, 90}, []int{91, 100}}
 
-	self.Icons["battery"] = self.Icons["battery_unknown"]
-
 	if FileExists(sysgo.Battery) == false {
 		return
 	}
@@ -337,14 +341,11 @@ func (self *TitleBar) CheckBatteryStat() {
 			break
 		}
 	}
-
 	if val, ok := bat_uevent["POWER_SUPPLY_STATUS"]; ok {
 		if val == "Charging" {
-			self.Icons["battery_charging"].SetIconIndex(cap_ge)
-			self.Icons["battery"] = self.Icons["battery_charging"]
+			self.Icons["battery"].SetIconIndex(1+cap_ge)
 		} else {
-			self.Icons["battery_discharging"].SetIconIndex(cap_ge)
-			self.Icons["battery"] = self.Icons["battery_discharging"]
+			self.Icons["battery"].SetIconIndex(1+9+cap_ge)
 		}
 	}
 
@@ -392,29 +393,13 @@ func (self *TitleBar) Init(main_screen *MainScreen) {
 
 	self.Icons["wifistatus"] = icon_wifi_status
 
-	battery_charging := NewTitleBarIconItem()
-	battery_charging.MyType = ICON_TYPES["STAT"]
-	battery_charging.Parent = self
-	battery_charging.ImageName = self.icon_base_path + "withcharging.png"
-	battery_charging.Adjust(start_x+self.IconWidth+self.IconWidth+8, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2, self.IconWidth, self.IconHeight, 0)
-
-	self.Icons["battery_charging"] = battery_charging
-
-	battery_discharging := NewTitleBarIconItem()
-	battery_discharging.MyType = ICON_TYPES["STAT"]
-	battery_discharging.Parent = self
-	battery_discharging.ImageName = self.icon_base_path + "without_charging.png"
-	battery_discharging.Adjust(start_x+self.IconWidth+self.IconWidth+8, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2, self.IconWidth, self.IconHeight, 0)
-
-	self.Icons["battery_discharging"] = battery_discharging
-
 	battery_unknown := NewTitleBarIconItem()
 	battery_unknown.MyType = ICON_TYPES["STAT"]
 	battery_unknown.Parent = self
-	battery_unknown.ImageName = self.icon_base_path + "battery_unknown.png"
+	battery_unknown.ImageName = self.icon_base_path + "battery.png"
 	battery_unknown.Adjust(start_x+self.IconWidth+self.IconWidth+8, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2, self.IconWidth, self.IconHeight, 0)
 
-	self.Icons["battery_unknown"] = battery_unknown
+	self.Icons["battery"] = battery_unknown
 
 	self.CheckBatteryStat()
 
@@ -492,6 +477,12 @@ func (self *TitleBar) ClearCanvas() {
 	self.Icons["round_corners"].NewCoord(self.Width-5, 5)
 	self.Icons["round_corners"].SetIconIndex(1)
 	self.Icons["round_corners"].Draw()
+
+        go func() {
+                sdl.Do(func() {
+                        self.RefreshLoop()
+                })
+        }()	
 
 }
 
@@ -575,4 +566,23 @@ func (self *TitleBar) Draw(title string) {
 
 	title_text_surf.Free()
 	time_text_surf.Free()
+}
+
+func (self *TitleBar) Refresh() {
+        self.updateScreen <- true
+}
+
+func (self *TitleBar) RefreshLoop() {
+L:
+        for {
+                select {
+                        case v:= <- self.updateScreen:
+                        if v == true {
+                                DisplayFlip()
+                        }
+                        if v== false {
+                                break L
+                        }
+                }
+        }
 }

@@ -122,8 +122,7 @@ func RestoreLastBackLightBrightness(main_screen *UI.MainScreen) bool {
 
 	if main_screen.CounterScreen.Counting == true {
 		main_screen.CounterScreen.StopCounter()
-		main_screen.Draw()
-		main_screen.SwapAndShow()
+		main_screen.Refresh()
 		return false
 	}
 
@@ -221,7 +220,7 @@ func AutoRedraw(main_screen *UI.MainScreen) {
 
 	for {
 		if main_screen.TitleBar.InLowBackLight < 0 {
-			UI.SwapAndShow()
+			UI.DisplayFlip()
 		}
 		gotime.Sleep(650 * gotime.Millisecond)
 	}
@@ -324,10 +323,7 @@ func run() int {
 	sound_patch.Parent = main_screen
 	sound_patch.Init()
 
-	main_screen.Draw()
-	main_screen.SwapAndShow()
-
-	UI.SwapAndShow()
+	main_screen.Refresh()
 
 	//fmt.Println(main_screen)
 	event.AllocEvents(5)

@@ -68,24 +68,24 @@ func Init() {
 
 	for i := 10; i < 41; i++ {
 		keyname := fmt.Sprintf("varela%d", i)
-		Fonts[keyname] = font.Font(fonts_path["varela"], i)
+		Fonts[keyname] = font.FontRW(fonts_path["varela"], i)
 	}
 
-	Fonts["varela120"] = font.Font(fonts_path["varela"], 120)
+	Fonts["varela120"] = font.FontRW(fonts_path["varela"], 120)
 
 	for i := 10; i < 26; i++ {
 		keyname := fmt.Sprintf("veramono%d", i)
-		Fonts[keyname] = font.Font(fonts_path["veramono"], i)
+		Fonts[keyname] = font.FontRW(fonts_path["veramono"], i)
 	}
 
 	for i := 10; i < 28; i++ {
 		keyname := fmt.Sprintf("notosansmono%d", i)
-		Fonts[keyname] = font.Font(fonts_path["noto"], i)
+		Fonts[keyname] = font.FontRW(fonts_path["noto"], i)
 	}
 
 	for i := 10; i < 28; i++ {
 		keyname := fmt.Sprintf("notosanscjk%d", i)
-		Fonts[keyname] = font.Font(fonts_path["notocjk"], i)
+		Fonts[keyname] = font.FontRW(fonts_path["notocjk"], i)
 	}
 
 	//

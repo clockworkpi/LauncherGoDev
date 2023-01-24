@@ -49,10 +49,8 @@ func (self *WifiPlugin) Init(main_screen *UI.MainScreen) {
 
 func (self *WifiPlugin) Run(main_screen *UI.MainScreen) {
 	if main_screen != nil {
-		main_screen.PushCurPage()
-		main_screen.SetCurPage(self.ScanPage)
-		main_screen.Draw()
-		main_screen.SwapAndShow()
+		main_screen.PushPage(self.ScanPage)
+		main_screen.Refresh()
 	}
 }
 
