@@ -175,6 +175,7 @@ func (self *TitleBar) UpdateDownloadStatus() {
 
 func (self *TitleBar) RoundRobinCheck() {
 	for {
+		gotime.Sleep(3000 * gotime.Millisecond)
 
 		if self.InLowBackLight < 0 {
 			self.CheckBatteryStat()
@@ -197,8 +198,6 @@ func (self *TitleBar) RoundRobinCheck() {
 
 		}
 
-		gotime.Sleep(3000 * gotime.Millisecond)
-
 	}
 }
 
@@ -218,7 +217,6 @@ func (self *TitleBar) IsWifiConnectedNow() bool {
 }
 
 func (self *TitleBar) UpdateWifiStrength() {
-	self.Draw(self.Title)
 }
 
 func (t *TitleBar) GetWifiStrength() int {
@@ -533,7 +531,7 @@ func (self *TitleBar) Draw(title string) {
 
 	if self.IsWifiConnectedNow() == true {
 		ge := self.GetWifiStrength()
-		//fmt.Println("wifi ge: ",ge)
+		fmt.Println("wifi ge: ",ge)
 		if ge > 0 {
 			self.Icons["wifistatus"].SetIconIndex(ge)
 			self.Icons["wifistatus"].NewCoord(start_x+self.IconWidth+5, self.IconHeight/2+(self.BarHeight-self.IconHeight)/2)
@@ -578,6 +576,7 @@ L:
                 select {
                         case v:= <- self.updateScreen:
                         if v == true {
+				self.Draw(self.Title)
                                 DisplayFlip()
                         }
                         if v== false {
