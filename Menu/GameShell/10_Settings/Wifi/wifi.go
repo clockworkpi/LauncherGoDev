@@ -407,9 +407,6 @@ func (self *WifiList) ShowBox(msg string) {
 }
 
 func (self *WifiList) HideBox() {
-	self.Draw()
-	self.ShowingMessageBox = false
-	self.Screen.SwapAndShow()
 }
 
 func (self *WifiList) GenNetworkList() {
@@ -739,6 +736,7 @@ func (self *WifiList) KeyDown(ev *event.Event) {
 
 	if ev.Data["Key"] == UI.CurKeys["X"] {
 		self.Rescan(false)
+		self.Screen.Refresh()
 	}
 
 	if ev.Data["Key"] == UI.CurKeys["Y"] {
