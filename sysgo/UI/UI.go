@@ -98,31 +98,37 @@ func Init() {
 	fonts_data["notocjk"] = FontData{d,s}
 	d,s = sdl.LoadFile(fonts_path["veramono"])
 	fonts_data["veramono"] = FontData{d,s}
-	d,s = sdl.LoadFile(fonts_path["noto"])
-	fonts_data["noto"] = FontData{d,s}
 
-	for i := 10; i < 41; i++ {
-		keyname := fmt.Sprintf("varela%d", i)
-		Fonts[keyname] = FontRW(fonts_data["varela"].Data, i)
-	}
+	//d,s = sdl.LoadFile(fonts_path["noto"])
+	//fonts_data["noto"] = FontData{d,s}
 
+	Fonts["varela11"] = FontRW(fonts_data["varela"].Data, 11)
+	Fonts["varela12"] = FontRW(fonts_data["varela"].Data, 12)
+	Fonts["varela13"] = FontRW(fonts_data["varela"].Data, 13)
+	Fonts["varela15"] = FontRW(fonts_data["varela"].Data, 15)
+	Fonts["varela16"] = FontRW(fonts_data["varela"].Data, 16)
+	Fonts["varela18"] = FontRW(fonts_data["varela"].Data, 18)
+
+	Fonts["varela22"] = FontRW(fonts_data["varela"].Data, 22)
+	Fonts["varela25"] = FontRW(fonts_data["varela"].Data, 25)
+	Fonts["varela40"] = FontRW(fonts_data["varela"].Data, 40)
 	Fonts["varela120"] = FontRW(fonts_data["varela"].Data, 120)
 
-	for i := 10; i < 26; i++ {
-		keyname := fmt.Sprintf("veramono%d", i)
-		Fonts[keyname] = FontRW(fonts_data["veramono"].Data, i)
-	}
-
+	Fonts["veramono10"] = FontRW(fonts_data["veramono"].Data, 10)
+	Fonts["veramono12"] = FontRW(fonts_data["veramono"].Data, 12)
+	Fonts["veramono15"] = FontRW(fonts_data["veramono"].Data, 15)
+	Fonts["veramono18"] = FontRW(fonts_data["veramono"].Data, 18)
+	Fonts["veramono20"] = FontRW(fonts_data["veramono"].Data, 20)
+	Fonts["veramono24"] = FontRW(fonts_data["veramono"].Data, 24)
+	/*
 	for i := 10; i < 28; i++ {
 		keyname := fmt.Sprintf("notosansmono%d", i)
 		Fonts[keyname] = FontRW(fonts_data["noto"].Data, i)
 	}
-
-	for i := 10; i < 28; i++ {
-		keyname := fmt.Sprintf("notosanscjk%d", i)
-		Fonts[keyname] = FontRW(fonts_data["notocjk"].Data, i)
-	}
-
+	*/
+	Fonts["notosanscjk12"] = FontRW(fonts_data["notocjk"].Data, 12)
+	Fonts["notosanscjk14"] = FontRW(fonts_data["notocjk"].Data, 14)
+	Fonts["notosanscjk15"] = FontRW(fonts_data["notocjk"].Data, 15)
 	//
 	keys_def_init()
 
