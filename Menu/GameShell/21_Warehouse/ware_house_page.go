@@ -653,7 +653,7 @@ func (self *WareHouse) Click() {
 			}
 			if cur_li.Value["type"] == "pico8" &&  cur_li.ReadOnly == false {
 				if UI.FileExists("/home/cpi/games/PICO-8/pico-8/pico8") {
-					game_sh := "/home/cpi/launcher/Menu/GameShell/50_PICO-8/PICO-8.sh"
+					game_sh := "/home/cpi/launchergo/Menu/GameShell/50_PICO-8/PICO-8.sh"
 					self.Screen.RunEXE(game_sh) //pico8 manages its games self
 				}
 			}

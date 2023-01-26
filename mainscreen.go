@@ -21,6 +21,7 @@ import (
 	
 	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/10_Settings"
 	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/21_Warehouse"
+	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/50_Pico8"
 	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/97_MusicPlayer"
 	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/98_TinyCloud"
 	"github.com/clockworkpi/LauncherGoDev/Menu/GameShell/99_PowerOFF"
@@ -32,6 +33,7 @@ var (
 	UIPluginList = []*UI.UIPlugin{
 		&UI.UIPlugin{1, "", "Menu/GameShell/10_Settings", "Settings", &Settings.APIOBJ},
 		&UI.UIPlugin{1, "", "Menu/GameShell/21_Warehouse", "Warehouse", &Warehouse.APIOBJ},
+		&UI.UIPlugin{1, "", "Menf/GameShell/50_Pico8", "Pico8", &Pico8.APIOBJ},
 		&UI.UIPlugin{1, "", "Menu/GameShell/97_MusicPlayer", "Music Player", &MusicPlayer.APIOBJ},
 		&UI.UIPlugin{1, "", "Menu/GameShell/98_TinyCloud", "TinyCloud", &TinyCloud.APIOBJ},
 		&UI.UIPlugin{1, "", "Menu/GameShell/99_PowerOFF", "PowerOFF", &PowerOFF.APIOBJ},

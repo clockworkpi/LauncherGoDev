@@ -55,7 +55,9 @@ type PluginConfig struct {
 
 type MessageBox struct {
 	Label
-	Parent *MainScreen
+	Parent *sdl.Surface
+	ParentWidth int
+	ParentHeight int
 	HWND   *sdl.Surface
 }
 
@@ -66,7 +68,7 @@ func NewMessageBox() *MessageBox {
 	return m
 }
 
-func (self *MessageBox) Init(text string, font_obj *ttf.Font, col *color.Color) {
+func (self *MessageBox) Init(text string, font_obj *ttf.Font, col *color.Color,w int, h int) {
 	if col != nil {
 		self.Color = col
 	}
@@ -76,9 +78,17 @@ func (self *MessageBox) Init(text string, font_obj *ttf.Font, col *color.Color) 
 
 	self.Width = 0
 	self.Height = 0
-
-	self.CanvasHWND = surface.Surface(self.Parent.Width, self.Parent.Height)
-	self.HWND = self.Parent.CanvasHWND
+	
+	if w == 0 || h == 0 {
+		self.CanvasHWND = surface.Surface(Width,Height)
+		self.ParentWidth = Width
+		self.ParentHeight = Height
+	}else{
+		self.CanvasHWND = surface.Surface(w,h)
+		self.ParentWidth = w
+		self.ParentHeight = h
+	}
+	self.HWND = self.Parent
 
 }
 
@@ -94,7 +104,7 @@ func (self *MessageBox) Draw() {
 	words := strings.Split(self.Text, " ")
 	space, _ := font.Size(self.FontObj, " ")
 
-	max_width := self.Parent.Width - 40
+	max_width := self.ParentWidth - 40
 	x := 0
 	y := 0
 
@@ -130,7 +140,7 @@ func (self *MessageBox) Draw() {
 			self.Width = x
 		}
 
-		if lines >= self.Parent.Height-40 {
+		if lines >= self.ParentHeight-40 {
 			break
 		}
 	}
@@ -138,8 +148,8 @@ func (self *MessageBox) Draw() {
 	self.Height = lines
 
 	padding := 5
-	x = (self.Parent.Width - self.Width) / 2
-	y = (self.Parent.Height - self.Height) / 2
+	x = (self.ParentWidth - self.Width) / 2
+	y = (self.ParentHeight - self.Height) / 2
 
 	rect_ := rect.Rect(x-padding, y-padding, self.Width+padding*2, self.Height+padding*2)
 
@@ -147,7 +157,7 @@ func (self *MessageBox) Draw() {
 
 		draw.Rect(self.HWND, &color.Color{255, 255, 255, 255}, &rect_, 0)
 
-		rect__ := draw.MidRect(self.Parent.Width/2, self.Parent.Height/2, self.Width, self.Height, Width, Height)
+		rect__ := draw.MidRect(self.ParentWidth/2, self.ParentHeight/2, self.Width, self.Height, Width, Height)
 
 		dest_rect := rect.Rect(0, 0, self.Width, self.Height)
 
@@ -211,8 +221,8 @@ func (self *MainScreen) Init() {
 	self.CanvasHWND = surface.Surface(self.Width, self.Height)
 
 	self.MsgBox = NewMessageBox()
-	self.MsgBox.Parent = self
-	self.MsgBox.Init(" ", self.MsgBoxFont, &color.Color{83, 83, 83, 255})
+	self.MsgBox.Parent = self.CanvasHWND
+	self.MsgBox.Init(" ", self.MsgBoxFont, &color.Color{83, 83, 83, 255},self.Width,self.Height)
 
 	self.SkinManager = NewSkinManager()
 	self.SkinManager.Init()

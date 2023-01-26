@@ -126,9 +126,9 @@ func Init() {
 		Fonts[keyname] = FontRW(fonts_data["noto"].Data, i)
 	}
 	*/
-	Fonts["notosanscjk12"] = FontRW(fonts_data["notocjk"].Data, 12)
-	Fonts["notosanscjk14"] = FontRW(fonts_data["notocjk"].Data, 14)
-	Fonts["notosanscjk15"] = FontRW(fonts_data["notocjk"].Data, 15)
+	Fonts["notosanscjk12"] = font.Font(fonts_path["notocjk"], 12)
+	Fonts["notosanscjk14"] = font.Font(fonts_path["notocjk"], 14)
+	Fonts["notosanscjk15"] = font.Font(fonts_path["notocjk"], 15)
 	//
 	keys_def_init()
 
