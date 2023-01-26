@@ -94,13 +94,15 @@ func Init() {
 	fonts_data := make(map[string]FontData)
 	d,s := sdl.LoadFile(fonts_path["varela"])	
 	fonts_data["varela"] = FontData{d,s}
-	d,s = sdl.LoadFile(fonts_path["notocjk"])
-	fonts_data["notocjk"] = FontData{d,s}
+
 	d,s = sdl.LoadFile(fonts_path["veramono"])
 	fonts_data["veramono"] = FontData{d,s}
 
-	//d,s = sdl.LoadFile(fonts_path["noto"])
-	//fonts_data["noto"] = FontData{d,s}
+        d,s = sdl.LoadFile(fonts_path["notocjk"])
+        fonts_data["notocjk"] = FontData{d,s}
+
+	d,s = sdl.LoadFile(fonts_path["noto"])
+	fonts_data["noto"] = FontData{d,s}
 
 	Fonts["varela11"] = FontRW(fonts_data["varela"].Data, 11)
 	Fonts["varela12"] = FontRW(fonts_data["varela"].Data, 12)
@@ -126,9 +128,9 @@ func Init() {
 		Fonts[keyname] = FontRW(fonts_data["noto"].Data, i)
 	}
 	*/
-	Fonts["notosanscjk12"] = font.Font(fonts_path["notocjk"], 12)
-	Fonts["notosanscjk14"] = font.Font(fonts_path["notocjk"], 14)
-	Fonts["notosanscjk15"] = font.Font(fonts_path["notocjk"], 15)
+	Fonts["notosanscjk12"] = FontRW(fonts_data["notocjk"].Data, 12)
+	Fonts["notosanscjk14"] = FontRW(fonts_data["notocjk"].Data, 14)
+	Fonts["notosanscjk15"] = FontRW(fonts_data["notocjk"].Data, 15)
 	//
 	keys_def_init()
 
