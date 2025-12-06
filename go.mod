@@ -15,7 +15,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/muka/go-bluetooth v0.0.0-20221213043340-85dc80edc4e1
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.1
 	github.com/veandco/go-sdl2 v0.4.28
 	github.com/vjeantet/jodaTime v1.0.0
 	github.com/yookoala/realpath v1.0.0
